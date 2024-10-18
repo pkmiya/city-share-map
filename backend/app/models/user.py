@@ -1,0 +1,54 @@
+from sqlalchemy import Column, String, Integer, Boolean, ForeignKey, DateTime, UUID, TIMESTAMP, func, text
+from sqlalchemy.orm import relationship
+import uuid
+
+from app.db.base import Base
+from app.models.item import Item
+
+
+
+class CommonColumns:
+    created_at = Column(
+        DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False
+    )
+    updated_at = Column(DateTime, server_onupdate=text("CURRENT_TIMESTAMP"))
+    deleted_at = Column(DateTime)
+    created_by = Column(String(30))
+    updated_by = Column(String(30))
+
+
+class User(Base, CommonColumns):
+    id = Column(Integer, primary_key=True, index=True)
+    full_name = Column(String, index=True)
+    email = Column(String, unique=True, index=True)
+    # cognito_id = Column(String, unique=True, index=True)
+    hashed_password = Column(String)  # cognitoの場合は不要
+    is_active = Column(Boolean(), default=True)
+    is_superuser = Column(Boolean(), default=False)
+
+    items = relationship("Item", back_populates="owner")
+
+
+# CitizenUsers Table
+class CitizenUser(Base, CommonColumns):
+    __tablename__ = 'citizen_users'
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = Column(String)  # ユーザ名
+    liff_id = Column(UUID(as_uuid=True))  # LIFF連携用のID
+
+    posts = relationship('PostBase', back_populates='user')
+    post_likes = relationship('PostLikeBase', back_populates='user')
+
+
+# PostLikes Table
+class PostLikeBase(Base, CommonColumns):
+    __tablename__ = 'post_likes'
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    post_id = Column(UUID(as_uuid=True), ForeignKey('posts.id'), nullable=False)  # FK to posts
+    user_id = Column(UUID, ForeignKey('citizen_users.id'), nullable=False)  # FK to citizen_users
+
+    post = relationship('PostBase', back_populates='post_likes')
+    user = relationship('CitizenUser', back_populates='post_likes')
+
