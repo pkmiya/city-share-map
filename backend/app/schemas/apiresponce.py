@@ -17,7 +17,7 @@ class ResponseBase(ABC):
 
 
 class ApiResponse(ResponseBase):
-    """レスポンスを返却するたのクラス
+    """レスポンスを返却するためのクラス
 
     Attributes:
         data (any): 返却データ

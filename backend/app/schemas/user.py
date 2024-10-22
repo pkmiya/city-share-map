@@ -37,3 +37,12 @@ class User(UserInDBBase):
 # Additional properties stored in DB
 class UserInDB(UserInDBBase):
     hashed_password: str
+
+
+class CitizenUserBase(BaseModel):
+    id: int = None
+    name: Optional[str] = None
+    liff_id: Optional[str] = None
+
+class CitizenUserCreate(CitizenUserBase):
+    pass

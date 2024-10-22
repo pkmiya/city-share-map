@@ -8,7 +8,7 @@ from app.core.config import settings
 
 from sqlmodel import Session, select
 
-from app.models.user import User
+from app.schemas.user import User
 
 
 
@@ -20,7 +20,7 @@ ALGORITHM = "HS256"
 
 def create_access_token(subject: str | Any, expires_delta: timedelta) -> str:
     expire = datetime.now(timezone.utc) + expires_delta
-    to_encode = {"exp": expire, "sub": str(subject)}
+    to_encode = {"exp": expire, "user_id": str(subject)}
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 

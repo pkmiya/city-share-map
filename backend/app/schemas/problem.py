@@ -1,0 +1,48 @@
+from typing import List, Optional
+from pydantic import BaseModel
+from uuid import UUID
+from datetime import datetime
+
+# ProblemItemの作成時のスキーマ
+class ProblemItemBase(BaseModel):
+    name: str  # 項目名
+    type_id: int  # 項目のデータ型のID
+
+class ProblemItemCreate(ProblemItemBase):
+    pass
+
+class ProblemItemUpdate(ProblemItemBase):
+    pass
+
+class ProblemItemInDBBase(ProblemItemBase):
+    id: int
+    problem_id: int
+
+    class Config:
+        orm_mode = True
+
+
+# Problemの作成時のスキーマ
+class ProblemBase(BaseModel):
+    name: str  # 課題の名前
+    is_open: bool = False  # 募集中かどうかのフラグ
+
+class ProblemCreate(ProblemBase):
+    items: List[ProblemItemCreate]  # 問題の項目リスト
+
+class ProblemUpdate(ProblemBase):
+    is_open: Optional[bool] = None  # オプションで現在募集中かの変更
+
+class ProblemInDBBase(ProblemBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+
+# 完成したProblemの出力スキーマ
+class Problem(ProblemInDBBase):
+    pass
+
+class ProblemInDB(ProblemInDBBase):
+    pass

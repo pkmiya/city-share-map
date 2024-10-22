@@ -69,4 +69,3 @@ class PostBase(Base, CommonColumns):
     post_likes = relationship('PostLikeBase', back_populates='post')
 
 
-

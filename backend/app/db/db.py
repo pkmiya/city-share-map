@@ -4,6 +4,11 @@ from app.crud.user import crud_user
 from app.core.config import settings
 from app.schemas.user import UserCreate
 from app.models.problems import Type
+import uuid
+
+from sqlalchemy.orm import Session
+from app.models.user import CitizenUser
+from app.schemas.user import CitizenUserCreate
 
 # make sure all SQL Alchemy models are imported before initializing DB
 # otherwise, SQL Alchemy might fail to initialize relationships properly
@@ -44,5 +49,3 @@ def init_db(db_session):
 
         # コミットしてデータを保存
         db_session.commit()
-
-
