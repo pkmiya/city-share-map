@@ -18,17 +18,20 @@
     "@emotion/styled": "^11.13.0",
     "@tanstack/react-query": "^5.52.0",
     "@tanstack/react-query-devtools": "^5.52.0",
+    "@types/mapbox-gl": "^3.4.0",
     "cross-env": "7.0.3",
     "fetch-intercept": "2.4.0",
     "framer-motion": "^11.3.8",
     "isomorphic-fetch": "3.0.0",
     "jotai": "^2.9.1",
+    "mapbox-gl": "^3.7.0",
     "next": "14.2.5",
     "npm-run-all": "^4.1.5",
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "7.42.1",
-    "react-icons": "^5.2.1"
+    "react-icons": "^5.2.1",
+    "react-map-gl": "^7.1.7"
   },
   "devDependencies": {
     "@tanstack/eslint-plugin-query": "^5.52.0",
