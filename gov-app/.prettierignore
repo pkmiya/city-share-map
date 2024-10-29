@@ -1,0 +1,6 @@
+node_modules
+.next
+*.md
+src/gen
+coverage
+out
