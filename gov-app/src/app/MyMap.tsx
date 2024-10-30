@@ -1,11 +1,16 @@
 'use client';
 
+import { Box, BoxProps } from '@chakra-ui/react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import Map from 'react-map-gl';
 
-export const MyMap = () => {
-  const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN ?? '';
+import { Env } from '@/config/env';
+
+type MyMapProps = BoxProps;
+
+export const MyMap = ({ ...props }: MyMapProps) => {
+  const accessToken = Env.accessToken;
 
   const lat = 33.58991071526741;
   const lon = 130.42066302703546;
@@ -17,14 +22,13 @@ export const MyMap = () => {
   };
 
   const viewStyle = {
-    bottom: 0,
+    height: props.h ?? '60vh',
     position: 'absolute' as 'absolute',
-    top: 0,
-    width: '100%',
-  };
+    width: props.w ?? '60vw',
+  } as React.CSSProperties;
 
   return (
-    <div>
+    <Box {...props}>
       <Map
         initialViewState={viewState}
         mapboxAccessToken={accessToken}
@@ -32,6 +36,6 @@ export const MyMap = () => {
         mapStyle="mapbox://styles/mapbox/streets-v12"
         style={viewStyle}
       ></Map>
-    </div>
+    </Box>
   );
 };
