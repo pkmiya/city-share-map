@@ -1,5 +1,4 @@
 services:
-
   db:
     restart: "no"
     ports:
@@ -28,4 +27,3 @@ services:
         - path: ./backend/pyproject.toml
           action: rebuild
     # TODO: remove once coverage is done locally
-
