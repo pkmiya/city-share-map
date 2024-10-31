@@ -25,6 +25,7 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { IconType } from 'react-icons';
+import { FaList } from 'react-icons/fa';
 import {
   FiBell,
   FiChevronDown,
@@ -65,7 +66,7 @@ interface SidebarWithHeaderProps {
 const LinkItems: Array<LinkItemProps> = [
   { href: '/', icon: FiHome, name: 'ホーム' },
   { href: '/map/', icon: FiMap, name: 'マップ' },
-  { href: '/post/', icon: FiHome, name: '投稿一覧' },
+  { href: '/post/', icon: FaList, name: '投稿一覧' },
   { href: '/problem/new/', icon: FiPlusSquare, name: '新規募集' },
   { href: '/problem/', icon: GoMegaphone, name: '募集一覧' },
 ];
