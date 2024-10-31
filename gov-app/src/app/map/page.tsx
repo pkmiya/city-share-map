@@ -1,5 +1,5 @@
-import { MyMap } from '@/components/MyMap';
 import { SidebarWithHeader } from '@/components/SidebarWIthHeader';
+import { MyMap } from '@/features/map/MyMap';
 
 export default function Home() {
   return (
