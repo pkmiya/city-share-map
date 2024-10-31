@@ -1,0 +1,40 @@
+name: Gov App CI
+
+defaults:
+  run:
+    working-directory: gov-app
+
+on:
+  pull_request:
+    paths:
+      - "gov-app/**"
+  push:
+    paths:
+      - "gov-app/**"
+    branches-ignore:
+      - main
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        command:
+          - lint
+          - build
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 21
+        uses: actions/setup-node@v4
+        with:
+          node-version: "21"
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Run ${{ matrix.command }}
+        run: yarn ${{ matrix.command }}
