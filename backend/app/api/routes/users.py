@@ -154,3 +154,22 @@ def update_user(
         )
     user = crud_user.update(session, db_obj=user, obj_in=user_in)
     return user
+
+@router.delete("/{user_id}", response_model=User)
+def delete_user(
+    *,
+    session : SessionDep,
+    user_id: int,
+    current_user: DBUser = Depends(get_current_active_superuser),
+):
+    """
+    Delete a user.
+    """
+    user = crud_user.get(session, id=user_id)
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="The user with this username does not exist in the system",
+        )
+    user = crud_user.delete(session, id=user_id)
+    return user

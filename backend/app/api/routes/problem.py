@@ -1,15 +1,17 @@
 from typing import List
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.api.deps import CurrentUser, SessionDep
 from app.schemas.problem import Problem, ProblemCreate, ProblemUpdate
 from app.models.problems import Problem as DBProblem
+from app.models.user import User as DBUser
+from app.api.deps import get_current_active_superuser
 from app.crud.problem import crud_problem
 
 router = APIRouter()
 
 
-@router.post("/", response_model=str)
+@router.post("/", response_model=Problem)
 def create_problem(
     *,
     db: SessionDep,
@@ -22,7 +24,7 @@ def create_problem(
     problem = crud_problem.create_with_items(
         db_session=db, obj_in=problem_in
     )
-    return "success"
+    return problem
 
 
 @router.get("/", response_model=List[Problem])
@@ -40,51 +42,52 @@ def read_problems(
     return problems
 
 
-
-# @router.get("/{id}", response_model=Problem)
-# def read_problem(
-#     *,
-#     db: SessionDep,
-#     current_user: CurrentUser,
-#     id: int
-# ):
-#     """
-#     Get problem by ID.
-#     """
-#     problem = crud_problem.item_get(db_session=db, id=id)
-#     if not problem:
-#         raise HTTPException(status_code=404, detail="Problem not found")
-#     return problem
-
-
-# @router.get("posts/{id}", response_model=Problem)
-# def read_problem_posts(
-#     *,
-#     db: SessionDep,
-#     current_user: CurrentUser,
-#     id: int
-# ):
-#     """
-#     Get problem posts by ID.
-#     """
-#     problem = crud_problem.get(db_session=db, id=id)
-#     if not problem:
-#         raise HTTPException(status_code=404, detail="Problem not found")
-#     return problem
+@router.get("/{id}", response_model=Problem)
+def read_problem_by_id(
+    *,
+    db: SessionDep,
+    current_user: CurrentUser,
+    id: int
+):
+    """
+    Get problem by ID.
+    """
+    problem = crud_problem.get(db_session=db, id=id)
+    if not problem:
+        raise HTTPException(status_code=404, detail="課題が見つかりません")
+    return problem
 
 
-# @router.delete("/{id}", response_model=Problem)
-# def delete_problem(
-#     *,
-#     db: SessionDep,
-#     current_user: CurrentUser,
-#     id: int
-# ):
-#     """
-#     Delete a problem.
-#     """
-#     problem = crud_problem.get(db_session=db, id=id)
-#     if not problem:
-#         raise HTTPException(status_code=404, detail="Problem not found")
-#     problem = crud_problem.delete(db_session=db, id=id)
-#     return problem
+@router.put("/{id}", response_model=Problem)
+def update_problem(
+    *,
+    db: SessionDep,
+    current_user: CurrentUser,
+    id: int,
+    problem_in: ProblemUpdate
+):
+    """
+    Get problem posts by ID.
+    """
+    problem = crud_problem.get(db_session=db, id=id)
+    if not problem:
+        raise HTTPException(status_code=404, detail="課題が見つかりません")
+    problem = crud_problem.update(db_session=db, db_obj=problem, obj_in=problem_in)
+    return problem
+
+
+
+@router.delete("/{id}", response_model=Problem)
+def delete_problem(
+    *,
+    db: SessionDep,
+    current_user: DBUser = Depends(get_current_active_superuser),
+    id: int
+):
+    """
+    Delete a problem.
+    """
+    problem = crud_problem.delete_with_items(
+        db_session=db, problem_id=id
+    )
+    return problem
