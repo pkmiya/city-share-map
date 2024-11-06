@@ -26,14 +26,18 @@ export const ProblemList = () => {
       </Text>
       <Box>
         <TableContainer>
-          <Table variant="simple">
+          <Table maxW="40%" variant="simple">
             <Thead>
               <Tr>
-                <Th w="20px">操作</Th>
-                <Th>課題名</Th>
-                <Th>公開状態</Th>
-                <Th>更新日時</Th>
-                <Th isNumeric>投稿数</Th>
+                <Th w="1%">操作</Th>
+                <Th minW="10%" width="auto">
+                  課題名
+                </Th>
+                <Th w="1%">公開状態</Th>
+                <Th w="1%">更新日時</Th>
+                <Th isNumeric w="1%">
+                  投稿数
+                </Th>
               </Tr>
             </Thead>
             <Tbody>
