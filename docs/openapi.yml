@@ -1,0 +1,723 @@
+openapi: 3.1.0
+info:
+  title: fk-mitou-2024
+  version: 0.1.0
+
+tags:
+  - name: login
+    description: login周りの操作
+  - name: users
+    description: 自治体ユーザー操作
+  - name: problems
+    description: 自治体側の課題操作
+
+paths:
+  /api/v1/login/access-token:
+    post:
+      tags:
+        - login
+      summary: Login Access Token
+      description: OAuth2 compatible token login, get an access token for future requests
+      operationId: login_access_token
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Body_login_access_token'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+
+  /api/v1/login/test-token:
+    post:
+      tags:
+        - login
+      summary: Test Token
+      description: Test access token
+      operationId: test_token
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+      security:
+        - OAuth2PasswordBearer: []
+
+  /api/v1/login/password-recovery/{email}:
+    post:
+      tags:
+        - login
+      summary: Recover Password
+      description: Password Recovery
+      operationId: recover_password
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Email
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Msg'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+
+  /api/v1/login/reset-password/:
+    post:
+      tags:
+        - login
+      summary: Reset Password
+      description: Reset password
+      operationId: reset_password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewPassword'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Msg'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+
+  /api/v1/login/password-recovery-html-content/{email}:
+    post:
+      tags:
+        - login
+      summary: Recover Password Html Content
+      description: HTML Content for Password Recovery
+      operationId: recover_password_html_content
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Email
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            text/html:
+              schema:
+                type: string
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+
+  /api/v1/users/:
+    get:
+      tags:
+        - users
+      summary: Read Users
+      description: Retrieve users.
+      operationId: read_users
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: skip
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            title: Skip
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+            title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+                title: Response Read Users
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+
+    post:
+      tags:
+        - users
+      summary: Create User
+      description: Create new user.
+      operationId: create_user
+      security:
+        - OAuth2PasswordBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+
+  /api/v1/users/me:
+    get:
+      tags:
+        - users
+      summary: Read User Me
+      description: Get current user.
+      operationId: read_user_me
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+      security:
+        - OAuth2PasswordBearer: []
+
+    put:
+      tags:
+        - users
+      summary: Update User Me
+      description: Update own user.
+      operationId: update_user_me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Body_update_user_me'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - OAuth2PasswordBearer: []
+
+  /api/v1/users/{user_id}:
+    get:
+      tags:
+        - users
+      summary: Read User By Id
+      description: Get a specific user by id.
+      operationId: read_user_by_id
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: User Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+
+    put:
+      tags:
+        - users
+      summary: Update User
+      description: Update a user.
+      operationId: update_user
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: User Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+
+    delete:
+      tags:
+        - users
+      summary: Delete User
+      description: Delete a user.
+      operationId: delete_user
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: User Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/problems/:
+    get:
+      tags:
+        - problems
+      summary: Read Problems
+      description: Retrieve problems.
+      operationId: read_problems
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: skip
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            title: Skip
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+            title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Problem'
+                title: Response Read Problems
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+
+    post:
+      tags:
+        - problems
+      summary: Create Problem
+      description: Create new problem.
+      operationId: create_problem
+      security:
+        - OAuth2PasswordBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProblemCreate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+
+  /api/v1/problems/{problem_id}:
+    get:
+      tags:
+        - problems
+      summary: Read Problem By Id
+      description: Get a specific problem by id.
+      operationId: read_problem_by_id
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: problem_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Problem Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+
+    put:
+      tags:
+        - problems
+      summary: Update Problem
+      description: Update a problem.
+      operationId: update_problem
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: problem_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Problem Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProblemUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+
+    delete:
+      tags:
+        - problems
+      summary: Delete Problem
+      description: Delete a problem.
+      operationId: delete_problem
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: problem_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Problem Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+
+
+components:
+  schemas:
+    Body_login_access_token:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        grant_type:
+          type: string
+          title: Grant Type
+          pattern: password
+        username:
+          type: string
+          title: Username
+        password:
+          type: string
+          title: Password
+        scope:
+          type: string
+          title: Scope
+          default: ''
+        client_id:
+          type: string
+          title: Client Id
+        client_secret:
+          type: string
+          title: Client Secret
+
+    Body_update_user_me:
+      type: object
+      properties:
+        password:
+          type: string
+          title: Password
+        full_name:
+          type: string
+          title: Full Name
+        email:
+          type: string
+          format: email
+          title: Email
+
+    HTTPValidationError:
+      type: object
+      title: HTTPValidationError
+      properties:
+        detail:
+          type: array
+          title: Detail
+          items:
+            $ref: '#/components/schemas/ValidationError'
+
+    Msg:
+      type: object
+      required:
+        - msg
+      properties:
+        msg:
+          type: string
+          title: Msg
+
+    NewPassword:
+      type: object
+      required:
+        - password
+      properties:
+        password:
+          type: string
+          title: Password
+        token:
+          type: string
+          title: Token
+
+    Token:
+      type: object
+      required:
+        - access_token
+        - token_type
+      properties:
+        access_token:
+          type: string
+          title: Access Token
+        token_type:
+          type: string
+          title: Token Type
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          title: Id
+        email:
+          type: string
+          format: email
+          title: Email
+        is_active:
+          type: boolean
+          title: Is Active
+        is_superuser:
+          type: boolean
+          title: Is Superuser
+        full_name:
+          type: string
+          title: Full Name
+
+    UserCreate:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          title: Email
+        password:
+          type: string
+          title: Password
+        full_name:
+          type: string
+          title: Full Name
+        is_superuser:
+          type: boolean
+          title: Is Superuser
+
+    UserUpdate:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          title: Email
+        password:
+          type: string
+          title: Password
+        full_name:
+          type: string
+          title: Full Name
+        is_superuser:
+          type: boolean
+          title: Is Superuser
+
+    Problem:
+      type: object
+      properties:
+        id:
+          type: integer
+          title: Id
+        title:
+          type: string
+          title: Title
+        description:
+          type: string
+          title: Description
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+
+    ProblemCreate:
+      type: object
+      required:
+        - title
+        - description
+      properties:
+        title:
+          type: string
+          title: Title
+        description:
+          type: string
+          title: Description
+
+    ProblemUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          title: Title
+        description:
+          type: string
+          title: Description
+
+    ValidationError:
+      type: object
+      title: ValidationError
+      properties:
+        loc:
+          type: array
+          title: Location
+          items:
+            type: string
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+
+securitySchemes:
+  OAuth2PasswordBearer:
+    type: oauth2
+    flows:
+      password:
+        tokenUrl: /api/v1/login/access-token
