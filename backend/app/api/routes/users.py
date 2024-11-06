@@ -47,10 +47,6 @@ def create_user(
             detail="The user with this username already exists in the system.",
         )
     user = crud_user.create(session, obj_in=user_in)
-    # if settings.EMAILS_ENABLED and user_in.email:
-    #     send_new_account_email(
-    #         email_to=user_in.email, username=user_in.email, password=user_in.password
-    #     )
     return user
 
 
@@ -87,33 +83,6 @@ def read_user_me(
     Get current user.
     """
     return current_user
-
-
-# @router.post("/open", response_model=User)
-# def create_user_open(
-#     *,
-#     session : SessionDep,
-#     password: str = Body(...),
-#     email: EmailStr = Body(...),
-#     full_name: str = Body(None),
-# ):
-#     """
-#     Create new user without the need to be logged in.
-#     """
-#     if not settings.USERS_OPEN_REGISTRATION:
-#         raise HTTPException(
-#             status_code=403,
-#             detail="Open user registration is forbidden on this server",
-#         )
-#     user = crud_user.get_by_email(session, email=email)
-#     if user:
-#         raise HTTPException(
-#             status_code=400,
-#             detail="The user with this username already exists in the system",
-#         )
-#     user_in = UserCreate(password=password, email=email, full_name=full_name)
-#     user = crud_user.create(session, obj_in=user_in)
-#     return user
 
 
 @router.get("/{user_id}", response_model=User)
