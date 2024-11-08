@@ -1,12 +1,13 @@
 from typing import List
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
+from sqlalchemy.ext.automap import automap_base
 from app.models.problems import Problem, ProblemItem
-from app.schemas.problem import ProblemCreate, ProblemUpdate
+from app.schemas.problem import ProblemRead, ProblemCreate, ProblemUpdate
 from app.crud.base import CRUDBase
 from app.models.problems import PostBase
 from app.models.user import CitizenUser
-from sqlalchemy import text, DateTime, Table, Column, Integer, String, ForeignKey, UUID as UUID_Type
+from sqlalchemy import text, DateTime, Table, Column, Integer, String, Boolean, ForeignKey, UUID as UUID_Type
 import uuid
 from fastapi import HTTPException
 
@@ -76,10 +77,11 @@ class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):
             table_name, metadata,
             Column('id', UUID_Type(as_uuid=True), primary_key=True, default=uuid.uuid4),
             Column('problem_id', Integer, ForeignKey('problems.id')),
-            Column('user_id', UUID_Type(as_uuid=True), ForeignKey('citizen_users.id')),
+            # Column('user_id', UUID_Type(as_uuid=True), ForeignKey('citizen_users.id')),
+            Column('user_id', UUID_Type(as_uuid=True)),
             Column('latitude', String(100)),
             Column('longitude', String(100)),
-            Column('is_solved', Integer, default=False),
+            Column('is_solved', Boolean, default=False),
         )
 
         CommonColumns = [
@@ -99,6 +101,31 @@ class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):
 
         # データベースにテーブルを作成(flushと相性悪い)
         metadata.create_all(bind=db_session.get_bind())
+    
+    def get_multi_problem(
+        self, db_session: Session, *, skip: int = 0, limit: int = 100
+    ) -> List[ProblemRead]:
+        
+        problems = self.get_multi(db_session, skip=skip, limit=limit)
+
+        for problem in problems:
+            table_name = f"post_{problem.id}"
+            Base = automap_base()
+            Base.prepare(db_session.get_bind(), reflect=True)
+
+            try:
+                if table_name in Base.classes:
+                    dynamic_table = Base.classes[table_name]
+                    post_count = db_session.query(dynamic_table).count()
+                    setattr(problem, 'post_count', post_count)
+                else:
+                    setattr(problem, 'post_count', 0)
+                setattr(problem, 'created_at', problem.created_at)
+
+            except Exception as e:
+                raise HTTPException(status_code=404, detail=f"テーブル '{table_name}' が見つかりません")
+        
+        return problems
 
 
     def delete_with_items(
