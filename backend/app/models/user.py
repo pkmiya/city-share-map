@@ -37,7 +37,7 @@ class CitizenUser(Base, CommonColumns):
     name = Column(String)  # ユーザ名
     liff_id = Column(UUID(as_uuid=True))  # LIFF連携用のID
 
-    posts = relationship('PostBase', back_populates='user')
+    # posts = relationship('PostBase', back_populates='user')
     post_likes = relationship('PostLikeBase', back_populates='user')
 
 

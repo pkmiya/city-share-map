@@ -65,7 +65,7 @@ class PostBase(Base, CommonColumns):
     is_solved = Column(Boolean, default=False)  # 解決済みどうか
 
     problem = relationship('Problem', back_populates='posts')
-    user = relationship('CitizenUser', back_populates='posts')
+    # user = relationship('CitizenUser', back_populates='posts')
     post_likes = relationship('PostLikeBase', back_populates='post')
 
 
