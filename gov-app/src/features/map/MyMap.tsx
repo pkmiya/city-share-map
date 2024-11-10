@@ -21,17 +21,18 @@ import { marker } from '@/features/map/types';
 type MyMapProps = BoxProps;
 
 export const MyMap = ({ ...props }: MyMapProps) => {
-  const accessToken = Env.accessToken;
-  const [popupInfo, setPopupInfo] = useState<marker>();
-
   const lat = 33.58991071526741;
   const lon = 130.42066302703546;
   const zoom = 14.5;
-  const viewState = {
+  const initialViewState = {
     latitude: lat,
     longitude: lon,
     zoom: zoom,
   };
+
+  const accessToken = Env.accessToken;
+  const [popupInfo, setPopupInfo] = useState<marker>();
+  const [viewState, setViewState] = useState(initialViewState);
 
   const viewStyle = {
     height: props.h ?? '60vh',
@@ -51,6 +52,12 @@ export const MyMap = ({ ...props }: MyMapProps) => {
           onClick={(e) => {
             e.originalEvent.stopPropagation();
             setPopupInfo(data);
+            setViewState((prevState) => ({
+              ...prevState,
+              latitude: data.latitude,
+              longitude: data.longitude,
+              transitionDuration: 500,
+            }));
           }}
         ></Marker>
       )),
@@ -63,9 +70,10 @@ export const MyMap = ({ ...props }: MyMapProps) => {
         initialViewState={viewState}
         mapboxAccessToken={accessToken}
         mapLib={mapboxgl as any}
-        // mapStyle="mapbox://styles/mapbox/streets-v12"
         mapStyle="mapbox://styles/mapbox/light-v11"
         style={viewStyle}
+        {...viewState}
+        onMove={(evt) => setViewState(evt.viewState)}
       >
         {pins}
         {popupInfo && (
