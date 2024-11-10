@@ -143,7 +143,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
             if not problems:
                 raise HTTPException(status_code=404, detail="指定された課題が見つかりません")
 
-            open_problem = [problem.id for problem in problems]
+            open_problem = [problem.id for problem in problems]         
 
             res=[]
             for problem_id in open_problem:
@@ -156,8 +156,6 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                     query = query.filter(getattr(dynamic_table, 'user_id') == filters['user_id'])
             
                 posts = query.offset(skip).limit(limit).all()
-                if not posts:
-                    raise HTTPException(status_code=404, detail="指定された投稿が見つかりません")
                 res.extend([jsonable_encoder(post) for post in posts])
             
             return res

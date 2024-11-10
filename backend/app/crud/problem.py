@@ -133,19 +133,20 @@ class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):
     ) -> Problem:
         
         try:
-            problem = db_session.query(self.model).filter_by(id=problem_id).first()
-            if not problem:
-                raise HTTPException(status_code=404, detail="課題が見つかりません")
-
-            db_session.query(ProblemItem).filter_by(problem_id=problem_id).delete()
-            db_session.delete(problem)
-            db_session.commit()
-
             # 市民投稿用の動的テーブルを削除
             table_name = f"post_{problem_id}"
             metadata = PostBase.metadata
             dynamic_table = Table(table_name, metadata)
             dynamic_table.drop(bind=db_session.get_bind())
+
+            problem = db_session.query(self.model).filter_by(id=problem_id).first()
+            if not problem:
+                raise HTTPException(status_code=404, detail="課題が見つかりません")
+
+            db_session.query(ProblemItem).filter_by(problem_id=problem_id).delete()
+
+            db_session.delete(problem)
+            db_session.commit()
 
             return problem
         

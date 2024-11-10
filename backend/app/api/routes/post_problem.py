@@ -62,8 +62,6 @@ def get_posts_me(
     
     # filters["user_id"] = current_user.id
     filters["user_id"] = uuid.UUID("00000000-0000-0000-0000-000000000000")
-    print(filters)
-
 
     return crud_post.get(
         db_session=db,
