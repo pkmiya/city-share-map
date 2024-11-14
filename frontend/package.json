@@ -10,7 +10,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "oas:validate": "cd .. && make validate-api-client",
+    "oas:gen": "cd .. && make generate-api-client"
   },
   "dependencies": {
     "@chakra-ui/react": "^2.8.2",
