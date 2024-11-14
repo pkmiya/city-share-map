@@ -2,15 +2,15 @@ name: Gov App CI
 
 defaults:
   run:
-    working-directory: gov-app
+    working-directory: frontend
 
 on:
   pull_request:
     paths:
-      - "gov-app/**"
+      - "frontend/**"
   push:
     paths:
-      - "gov-app/**"
+      - "frontend/**"
     branches-ignore:
       - main
 
