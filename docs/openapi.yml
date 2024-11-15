@@ -24,20 +24,20 @@ paths:
         content:
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Body_login_access_token'
+              $ref: "#/components/schemas/Body_login_access_token"
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Token'
-        '422':
+                $ref: "#/components/schemas/Token"
+        "422":
           description: Validation Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HTTPValidationError'
+                $ref: "#/components/schemas/HTTPValidationError"
 
   /api/v1/login/test-token:
     post:
@@ -47,12 +47,12 @@ paths:
       description: Test access token
       operationId: test_token
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
       security:
         - OAuth2PasswordBearer: []
 
@@ -71,18 +71,18 @@ paths:
             type: string
             title: Email
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Msg'
-        '422':
+                $ref: "#/components/schemas/Msg"
+        "422":
           description: Validation Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HTTPValidationError'
+                $ref: "#/components/schemas/HTTPValidationError"
 
   /api/v1/login/reset-password/:
     post:
@@ -96,20 +96,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewPassword'
+              $ref: "#/components/schemas/NewPassword"
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Msg'
-        '422':
+                $ref: "#/components/schemas/Msg"
+        "422":
           description: Validation Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HTTPValidationError'
+                $ref: "#/components/schemas/HTTPValidationError"
 
   /api/v1/login/password-recovery-html-content/{email}:
     post:
@@ -128,18 +128,18 @@ paths:
             type: string
             title: Email
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             text/html:
               schema:
                 type: string
-        '422':
+        "422":
           description: Validation Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HTTPValidationError'
+                $ref: "#/components/schemas/HTTPValidationError"
 
   /api/v1/users/:
     get:
@@ -166,21 +166,21 @@ paths:
             default: 100
             title: Limit
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/User'
+                  $ref: "#/components/schemas/User"
                 title: Response Read Users
-        '422':
+        "422":
           description: Validation Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HTTPValidationError'
+                $ref: "#/components/schemas/HTTPValidationError"
 
     post:
       tags:
@@ -195,20 +195,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserCreate'
+              $ref: "#/components/schemas/UserCreate"
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '422':
+                $ref: "#/components/schemas/User"
+        "422":
           description: Validation Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HTTPValidationError'
+                $ref: "#/components/schemas/HTTPValidationError"
 
   /api/v1/users/me:
     get:
@@ -218,12 +218,12 @@ paths:
       description: Get current user.
       operationId: read_user_me
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: "#/components/schemas/User"
       security:
         - OAuth2PasswordBearer: []
 
@@ -237,20 +237,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Body_update_user_me'
+              $ref: "#/components/schemas/Body_update_user_me"
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '422':
+                $ref: "#/components/schemas/User"
+        "422":
           description: Validation Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HTTPValidationError'
+                $ref: "#/components/schemas/HTTPValidationError"
       security:
         - OAuth2PasswordBearer: []
 
@@ -271,18 +271,18 @@ paths:
             type: integer
             title: User Id
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '422':
+                $ref: "#/components/schemas/User"
+        "422":
           description: Validation Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HTTPValidationError'
+                $ref: "#/components/schemas/HTTPValidationError"
 
     put:
       tags:
@@ -304,20 +304,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserUpdate'
+              $ref: "#/components/schemas/UserUpdate"
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '422':
+                $ref: "#/components/schemas/User"
+        "422":
           description: Validation Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HTTPValidationError'
+                $ref: "#/components/schemas/HTTPValidationError"
 
     delete:
       tags:
@@ -335,18 +335,18 @@ paths:
             type: integer
             title: User Id
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '422':
+                $ref: "#/components/schemas/User"
+        "422":
           description: Validation Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HTTPValidationError'
+                $ref: "#/components/schemas/HTTPValidationError"
   /api/v1/problems/:
     get:
       tags:
@@ -372,21 +372,21 @@ paths:
             default: 100
             title: Limit
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Problem'
+                  $ref: "#/components/schemas/Problem"
                 title: Response Read Problems
-        '422':
+        "422":
           description: Validation Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HTTPValidationError'
+                $ref: "#/components/schemas/HTTPValidationError"
 
     post:
       tags:
@@ -401,20 +401,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProblemCreate'
+              $ref: "#/components/schemas/ProblemCreate"
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Problem'
-        '422':
+                $ref: "#/components/schemas/Problem"
+        "422":
           description: Validation Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HTTPValidationError'
+                $ref: "#/components/schemas/HTTPValidationError"
 
   /api/v1/problems/{problem_id}:
     get:
@@ -433,18 +433,18 @@ paths:
             type: integer
             title: Problem Id
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Problem'
-        '422':
+                $ref: "#/components/schemas/Problem"
+        "422":
           description: Validation Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HTTPValidationError'
+                $ref: "#/components/schemas/HTTPValidationError"
 
     put:
       tags:
@@ -466,20 +466,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProblemUpdate'
+              $ref: "#/components/schemas/ProblemUpdate"
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Problem'
-        '422':
+                $ref: "#/components/schemas/Problem"
+        "422":
           description: Validation Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HTTPValidationError'
+                $ref: "#/components/schemas/HTTPValidationError"
 
     delete:
       tags:
@@ -497,19 +497,18 @@ paths:
             type: integer
             title: Problem Id
       responses:
-        '200':
+        "200":
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Problem'
-        '422':
+                $ref: "#/components/schemas/Problem"
+        "422":
           description: Validation Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-
+                $ref: "#/components/schemas/HTTPValidationError"
 
 components:
   schemas:
@@ -532,7 +531,7 @@ components:
         scope:
           type: string
           title: Scope
-          default: ''
+          default: ""
         client_id:
           type: string
           title: Client Id
@@ -562,7 +561,7 @@ components:
           type: array
           title: Detail
           items:
-            $ref: '#/components/schemas/ValidationError'
+            $ref: "#/components/schemas/ValidationError"
 
     Msg:
       type: object
@@ -715,9 +714,9 @@ components:
           type: string
           title: Error Type
 
-securitySchemes:
-  OAuth2PasswordBearer:
-    type: oauth2
-    flows:
-      password:
-        tokenUrl: /api/v1/login/access-token
+    securitySchemes:
+      OAuth2PasswordBearer:
+        type: oauth2
+        flows:
+          password:
+            tokenUrl: /api/v1/login/access-token
