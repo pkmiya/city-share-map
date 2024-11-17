@@ -24,6 +24,7 @@ import {
 } from '@chakra-ui/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 import { IconType } from 'react-icons';
 import { FaList } from 'react-icons/fa';
 import {
@@ -37,6 +38,7 @@ import {
 import { GoMegaphone } from 'react-icons/go';
 
 import { appMetadata } from '@/config/metadata';
+import { useLiff } from '@/context/liffProvider';
 
 interface LinkItemProps {
   href?: string;
@@ -142,6 +144,22 @@ const NavItem = ({ icon, href, onClick, children, ...rest }: NavItemProps) => {
 };
 
 const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
+  // NOTE: テスト感覚として、ユーザ名を取得して表示している
+  const { liffObject } = useLiff();
+  const [userName, setUserName] = useState<string | null>(null);
+
+  if (liffObject) {
+    liffObject
+      .getProfile()
+      .then((profile) => {
+        console.log('LIFF profile:', profile);
+        setUserName(profile.displayName);
+      })
+      .catch((profileError) => {
+        console.log('Failed to get profile:', profileError);
+      });
+  }
+
   return (
     <Flex
       alignItems="center"
@@ -192,7 +210,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
                   ml="2"
                   spacing="1px"
                 >
-                  <Text fontSize="sm">サンプル管理者</Text>
+                  <Text fontSize="sm">{userName ?? 'サンプル管理者'}</Text>
                   <Text color="gray.600" fontSize="xs">
                     サンプル課
                   </Text>
@@ -206,6 +224,9 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
               bg={useColorModeValue('white', 'gray.900')}
               borderColor={useColorModeValue('gray.200', 'gray.700')}
             >
+              <Text fontSize="sm" fontWeight="bold" mx={3} my={2}>
+                {userName ?? 'サンプル管理者'}
+              </Text>
               <MenuItem>プロフィール</MenuItem>
               <MenuItem>設定</MenuItem>
               <MenuDivider />

@@ -9,6 +9,8 @@ import {
   useState,
 } from 'react';
 
+import { Env } from '@/config/env';
+
 import type { Liff } from '@line/liff';
 
 interface LiffContextProps {
@@ -33,7 +35,7 @@ export const LiffProvider = ({ children }: { children: ReactNode }) => {
       .then((liff) => {
         console.log('LIFF init...');
         liff
-          .init({ liffId: process.env.NEXT_PUBLIC_LIFF_ID! })
+          .init({ liffId: Env.envLiffId })
           .then(() => {
             console.log('LIFF init succeeded.');
             setLiffObject(liff);
