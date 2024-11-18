@@ -1,8 +1,8 @@
 services:
   # ONLY FOR PRODUCTIONs
-  gov-app:
-    build: ./gov-app
-    container_name: gov-app
+  frontend:
+    build: ./frontend
+    container_name: frontend
     ports:
       - "3000:3000"
     environment:
