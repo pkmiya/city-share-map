@@ -1,10 +1,7 @@
 from sqlalchemy import Column, String, Integer, Boolean, ForeignKey, DateTime, UUID, TIMESTAMP, func, text
 from sqlalchemy.orm import relationship
 import uuid
-
-from app.db.base import Base
-from app.models.item import Item
-
+from app.models.base import Base, CommonColumns
 
 
 class CommonColumns:
@@ -25,8 +22,6 @@ class User(Base, CommonColumns):
     hashed_password = Column(String)  # cognitoの場合は不要
     is_active = Column(Boolean(), default=True)
     is_superuser = Column(Boolean(), default=False)
-
-    items = relationship("Item", back_populates="owner")
 
 
 # CitizenUsers Table

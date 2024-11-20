@@ -3,10 +3,10 @@ from typing import List, Optional, Generic, TypeVar, Type
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-
-from app.db.base import Base
-
-from sqlmodel import Session, select
+from app.models.base import Base
+from sqlalchemy import event
+from sqlmodel import Session, select, orm
+from datetime import datetime
 
 
 

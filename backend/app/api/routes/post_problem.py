@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import CurrentUser, SessionDep
 from app.crud.post import crud_post
 from app.models.user import CitizenUser
-from app.schemas.problem import PostCreate,PostBase
+from app.schemas.problem import PostBase, PostCreate, PostUpdate
 import uuid
 from typing import Optional, List
 
@@ -19,7 +19,8 @@ def list_posts(
     skip: int = 0,
     limit: int = 100,
     is_solved: Optional[bool] = None,
-    is_open: Optional[bool] = None
+    is_open: Optional[bool] = None,
+    problem_id: Optional[int] = None
 ):
     """
     投稿の一覧を取得
@@ -31,6 +32,9 @@ def list_posts(
     
     if is_open is not None:
         filters["is_open"] = is_open
+    
+    if problem_id is not None:
+        filters["problem_id"] = problem_id
 
     return crud_post.get(
         db_session=db,
@@ -135,75 +139,90 @@ def get_post_by_id(
         post_id=post_id
     )
 
-# @router.put("/{problem_id}/posts/{post_id}", response_model=Dict[str, Any])
-# def update_post(
-#     problem_id: int,
-#     post_id: uuid.UUID,
-#     *,
-#     db: Session = Depends(get_db),
-#     current_user: CitizenUser = Depends(get_current_citizen_user),
-#     update_data: Dict[str, Any]
-# ):
-#     """
-#     投稿を更新
-#     """
-#     return crud_post.update(
-#         db_session=db,
-#         problem_id=problem_id,
-#         post_id=post_id,
-#         user_id=current_user.id,
-#         update_data=update_data
-#     )
+@router.put("/{problem_id}/{post_id}", response_model=Dict[str, Any])
+def update_post(
+    problem_id: int,
+    post_id: uuid.UUID,
+    *,
+    db: SessionDep,
+    # current_user: CitizenUser = Depends(get_current_citizen_user),
+    current_user: CurrentUser,
+    update_data: PostUpdate
+):
+    """
+    投稿を更新
+    """
 
-# @router.delete("/{problem_id}/posts/{post_id}")
-# def delete_post(
-#     problem_id: int,
-#     post_id: uuid.UUID,
-#     db: Session = Depends(get_db),
-#     current_user: CitizenUser = Depends(get_current_citizen_user)
-# ):
-#     """
-#     投稿を削除
-#     """
-#     return crud_post.delete(
-#         db_session=db,
-#         problem_id=problem_id,
-#         post_id=post_id,
-#         user_id=current_user.id
-#     )
+    mock_id = uuid.UUID("00000000-1111-0000-0000-000000000000")
 
-# @router.patch("/{problem_id}/posts/{post_id}/solve")
-# def mark_as_solved(
-#     problem_id: int,
-#     post_id: uuid.UUID,
-#     db: Session = Depends(get_db),
-#     current_user: CitizenUser = Depends(get_current_citizen_user)
-# ):
-#     """
-#     投稿を解決済みとしてマーク
-#     """
-#     return crud_post.update(
-#         db_session=db,
-#         problem_id=problem_id,
-#         post_id=post_id,
-#         user_id=current_user.id,
-#         update_data={"is_solved": True}
-#     )
+    return crud_post.update(
+        db_session=db,
+        problem_id=problem_id,
+        post_id=post_id,
+        user_id=mock_id,
+        update_data=update_data
+    )
 
-# @router.patch("/{problem_id}/posts/{post_id}/unsolve")
-# def mark_as_unsolved(
-#     problem_id: int,
-#     post_id: uuid.UUID,
-#     db: Session = Depends(get_db),
-#     current_user: CitizenUser = Depends(get_current_citizen_user)
-# ):
-#     """
-#     投稿を未解決としてマーク
-#     """
-#     return crud_post.update(
-#         db_session=db,
-#         problem_id=problem_id,
-#         post_id=post_id,
-#         user_id=current_user.id,
-#         update_data={"is_solved": False}
-#     )
+@router.delete("/{problem_id}/{post_id}")
+def delete_post(
+    problem_id: int,
+    post_id: uuid.UUID,
+    db: SessionDep,
+    # current_user: CitizenUser = Depends(get_current_citizen_user),
+    current_user: CurrentUser,
+):
+    """
+    投稿を削除
+    """
+
+    mock_id = uuid.UUID("00000000-1111-0000-0000-000000000000")
+
+    return crud_post.delete(
+        db_session=db,
+        problem_id=problem_id,
+        post_id=post_id,
+        user_id=mock_id
+    )
+
+@router.patch("/{problem_id}/{post_id}/solve")
+def mark_as_solved(
+    problem_id: int,
+    post_id: uuid.UUID,
+    db: SessionDep,
+    # current_user: CitizenUser = Depends(get_current_citizen_user),
+    current_user: CurrentUser,
+):
+    """
+    投稿を解決済みとしてマーク
+    """
+
+    mock_id = uuid.UUID("00000000-1111-0000-0000-000000000000")
+
+    return crud_post.update(
+        db_session=db,
+        problem_id=problem_id,
+        post_id=post_id,
+        user_id=mock_id,
+        update_data={"is_solved": True}
+    )
+
+@router.patch("/{problem_id}/{post_id}/unsolve")
+def mark_as_unsolved(
+    problem_id: int,
+    post_id: uuid.UUID,
+    db: SessionDep,
+    # current_user: CitizenUser = Depends(get_current_citizen_user),
+    current_user: CurrentUser,
+):
+    """
+    投稿を未解決としてマーク
+    """
+    mock_id = uuid.UUID("00000000-1111-0000-0000-000000000000")
+
+    return crud_post.update(
+        db_session=db,
+        problem_id=problem_id,
+        post_id=post_id,
+        user_id=mock_id,
+        update_data={"is_solved": False}
+    )

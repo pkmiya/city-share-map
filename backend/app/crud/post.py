@@ -139,11 +139,11 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                 problems = db_session.query(Problem).filter_by(is_open=filters["is_open"]).all()
             else:
                 problems = db_session.query(Problem).all()
-
-            if not problems:
-                raise HTTPException(status_code=404, detail="指定された課題が見つかりません")
-
-            open_problem = [problem.id for problem in problems]         
+            
+            if 'problem_id' in filters:
+                open_problem = [filters['problem_id']]
+            else:
+                open_problem = [problem.id for problem in problems]            
 
             res=[]
             for problem_id in open_problem:
@@ -199,108 +199,99 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                 )
 
 
-    # def update(
-    #     self,
-    #     db_session: Session,
-    #     *,
-    #     problem_id: int,
-    #     post_id: uuid.UUID,
-    #     user_id: uuid.UUID,
-    #     update_data: Dict[str, Any]
-    # ) -> Dict[str, Any]:
-    #     """
-    #     投稿を更新
-    #     """
-    #     try:
-    #         dynamic_table = self.get_dynamic_table(db_session, problem_id)
+    def update(
+        self,
+        db_session: Session,
+        *,
+        problem_id: int,
+        post_id: uuid.UUID,
+        user_id: uuid.UUID,
+        update_data: PostUpdate
+    ) -> Dict[str, Any]:
+        """
+        投稿を更新
+        """
+        try:
+            dynamic_table = self.get_dynamic_table(db_session, problem_id)
+            post = db_session.query(dynamic_table).filter_by(id=post_id).first()
+
+            if not post:
+                raise HTTPException(status_code=404, detail="指定された投稿が見つかりません")
             
-    #         # 投稿の存在確認と所有者チェック
-    #         existing_post = db_session.execute(
-    #             dynamic_table.select().where(dynamic_table.c.id == post_id)
-    #         ).first()
+            if post.user_id != user_id:
+                # TODO: is_solvedの場合は管理者権限のため修正が必要
+                raise HTTPException(status_code=403, detail="この投稿を更新する権限がありません")
 
-    #         if not existing_post:
-    #             raise HTTPException(status_code=404, detail="指定された投稿が見つかりません")
+            # 更新データの準備
+            obj_data = jsonable_encoder(post)
+            update_data = update_data.dict(exclude_unset=True)
+
+            if "items" in update_data:
+                items = update_data.pop("items")
+                for key, value in items.items():
+                    update_data[key] = value
             
-    #         if existing_post.user_id != user_id:
-    #             raise HTTPException(status_code=403, detail="この投稿を更新する権限がありません")
-
-    #         # 更新データの準備
-    #         update_data["updated_by"] = str(user_id)
-
-    #         # 投稿の更新
-    #         db_session.execute(
-    #             dynamic_table.update()
-    #             .where(dynamic_table.c.id == post_id)
-    #             .values(**update_data)
-    #         )
-    #         db_session.commit()
-
-    #         # 更新された投稿を取得
-    #         updated_post = db_session.execute(
-    #             dynamic_table.select().where(dynamic_table.c.id == post_id)
-    #         ).first()
-
-    #         return dict(updated_post)
-
-    #     except Exception as e:
-    #         db_session.rollback()
-    #         if isinstance(e, HTTPException):
-    #             raise e
-    #         else:
-    #             raise HTTPException(
-    #                 status_code=500,
-    #                 detail=f"投稿の更新中にエラーが発生しました: {str(e)}"
-    #             )
-
-    # def delete(
-    #     self,
-    #     db_session: Session,
-    #     *,
-    #     problem_id: int,
-    #     post_id: uuid.UUID,
-    #     user_id: uuid.UUID
-    # ) -> Dict[str, Any]:
-    #     """
-    #     投稿を削除（論理削除）
-    #     """
-    #     try:
-    #         dynamic_table = self.get_dynamic_table(db_session, problem_id)
+            update_data["updated_at"] = datetime.utcnow()
+            # update_data["updated_by"] = str(user_id)
+            update_data["updated_by"] = "00000000"
             
-    #         # 投稿の存在確認と所有者チェック
-    #         existing_post = db_session.execute(
-    #             dynamic_table.select().where(dynamic_table.c.id == post_id)
-    #         ).first()
+            for field in obj_data:
+                if field in update_data:
+                    setattr(post, field, update_data[field])
 
-    #         if not existing_post:
-    #             raise HTTPException(status_code=404, detail="指定された投稿が見つかりません")
+            # 投稿の更新
+            db_session.add(post)
+            db_session.commit()
+            db_session.refresh(post)
+
+            return jsonable_encoder(post)
+
+        except Exception as e:
+            db_session.rollback()
+            if isinstance(e, HTTPException):
+                raise e
+            else:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"投稿の更新中にエラーが発生しました: {str(e)}"
+                )
+
+    def delete(
+        self,
+        db_session: Session,
+        *,
+        problem_id: int,
+        post_id: uuid.UUID,
+        user_id: uuid.UUID
+    ) -> Dict[str, Any]:
+        """
+        投稿を削除
+        """
+        try:
+            dynamic_table = self.get_dynamic_table(db_session, problem_id)
+            post = db_session.query(dynamic_table).filter_by(id=post_id).first()
+
+            if not post:
+                raise HTTPException(status_code=404, detail="指定された投稿が見つかりません")
             
-    #         if existing_post.user_id != user_id:
-    #             raise HTTPException(status_code=403, detail="この投稿を削除する権限がありません")
+            if post.user_id != user_id:
+                raise HTTPException(status_code=403, detail="この投稿を更新する権限がありません")
 
-    #         # 論理削除の実行
-    #         from datetime import datetime
-    #         db_session.execute(
-    #             dynamic_table.update()
-    #             .where(dynamic_table.c.id == post_id)
-    #             .values(
-    #                 deleted_at=datetime.utcnow(),
-    #                 updated_by=str(user_id)
-    #             )
-    #         )
-    #         db_session.commit()
+            # 論理削除の実行
+            db_session.delete(post)
+            db_session.commit()
 
-    #         return {"message": "投稿が正常に削除されました"}
+            return {"message": "投稿が正常に削除されました"}
 
-    #     except Exception as e:
-    #         db_session.rollback()
-    #         if isinstance(e, HTTPException):
-    #             raise e
-    #         else:
-    #             raise HTTPException(
-    #                 status_code=500,
-    #                 detail=f"投稿の削除中にエラーが発生しました: {str(e)}"
-    #             )
+        except Exception as e:
+            db_session.rollback()
+            if isinstance(e, HTTPException):
+                raise e
+            else:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"投稿の削除中にエラーが発生しました: {str(e)}"
+                )
 
 
 crud_post = CRUDPost(PostBase)
