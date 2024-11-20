@@ -1,5 +1,6 @@
 // c.f. https://developers.line.biz/ja/docs/liff/cli-tool-create-liff-app/
 
+import { LiffMockPlugin } from '@line/liff-mock';
 import {
   createContext,
   ReactNode,
@@ -9,7 +10,7 @@ import {
   useState,
 } from 'react';
 
-import { Env } from '@/config/env';
+import { generateLiffConfig } from '@/liff/liff';
 
 import type { Liff } from '@line/liff';
 
@@ -34,8 +35,11 @@ export const LiffProvider = ({ children }: { children: ReactNode }) => {
       .then((liff) => liff.default)
       .then((liff) => {
         console.log('LIFF init...');
+
+        const { liffId, mock } = generateLiffConfig();
+        if (mock) liff.use(new LiffMockPlugin());
         liff
-          .init({ liffId: Env.envLiffId })
+          .init({ liffId, mock })
           .then(() => {
             console.log('LIFF init succeeded.');
             setLiffObject(liff);

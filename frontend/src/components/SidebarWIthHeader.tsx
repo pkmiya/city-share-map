@@ -24,7 +24,7 @@ import {
 } from '@chakra-ui/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { IconType } from 'react-icons';
 import { FaList } from 'react-icons/fa';
 import {
@@ -88,7 +88,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
       <Flex alignItems="center" h="20" justifyContent="space-between" mx="8">
         {/* TODO: ロゴを配置 */}
         {/* <Image alt="app_logo" height="36px" src="/app_logo.png" /> */}
-        <Link href="">
+        <Link href="/">
           <Text fontWeight="bold">{String(appMetadata.title)}</Text>
         </Link>
         <CloseButton display={{ base: 'flex', xl: 'none' }} onClick={onClose} />
@@ -148,17 +148,36 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
   const { liffObject } = useLiff();
   const [userName, setUserName] = useState<string | null>(null);
 
-  if (liffObject) {
-    liffObject
-      .getProfile()
-      .then((profile) => {
-        console.log('LIFF profile:', profile);
-        setUserName(profile.displayName);
-      })
-      .catch((profileError) => {
-        console.log('Failed to get profile:', profileError);
-      });
-  }
+  useEffect(() => {
+    const fetchProfile = () => {
+      liffObject &&
+        liffObject
+          .getProfile()
+          .then((profile) => {
+            console.log('LIFF profile:', profile);
+            setUserName(profile.displayName);
+          })
+          .catch((profileError) => {
+            console.log('Failed to get profile:', profileError);
+          });
+    };
+
+    if (liffObject) {
+      if (!liffObject.isLoggedIn()) {
+        (async () => {
+          try {
+            await liffObject.login();
+            console.log('LIFF login...');
+            fetchProfile();
+          } catch (error) {
+            console.error('Login failed:', error);
+          }
+        })();
+      } else {
+        fetchProfile();
+      }
+    }
+  }, [liffObject]);
 
   return (
     <Flex
@@ -183,7 +202,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
       <Box display={{ base: 'flex', xl: 'none' }}>
         {/* TODO: ロゴを配置 */}
         {/* <Image alt="app_logo" height="36px" src="/app_logo.png" /> */}
-        <Link href="">
+        <Link href="/">
           <Text fontWeight="bold">{String(appMetadata.title)}</Text>
         </Link>
       </Box>
@@ -203,7 +222,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
               transition="all 0.3s"
             >
               <HStack>
-                <Avatar size={'sm'} src={'/icon-192x192.png'} />
+                <Avatar size="sm" />
                 <VStack
                   alignItems="flex-start"
                   display={{ base: 'none', xl: 'flex' }}
