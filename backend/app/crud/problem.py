@@ -7,7 +7,7 @@ from app.schemas.problem import ProblemRead, ProblemCreate, ProblemUpdate
 from app.crud.base import CRUDBase
 from app.models.problems import PostBase
 from app.models.user import CitizenUser
-from sqlalchemy import text, DateTime, Table, Column, Integer, String, Boolean, ForeignKey, UUID as UUID_Type
+from sqlalchemy import text, DateTime, Table, Column, Integer, String, Boolean, ForeignKey, UUID, DECIMAL
 import uuid
 from fastapi import HTTPException
 
@@ -67,7 +67,7 @@ class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):
     def create_dynamic_post_table(self, db_session: Session, problem_id: int, items: List[ProblemItem]):
         """
         市民の投稿を格納するための動的テーブルを作成
-        TODO: append_columnのtype, response
+        TODO: append_columnのtype
         """
         table_name = f"post_{problem_id}"
         metadata = PostBase.metadata
@@ -75,12 +75,12 @@ class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):
         # 動的テーブルの定義
         dynamic_table = Table(
             table_name, metadata,
-            Column('id', UUID_Type(as_uuid=True), primary_key=True, default=uuid.uuid4),
+            Column('id', UUID(as_uuid=True), primary_key=True, default=uuid.uuid4),
             Column('problem_id', Integer, ForeignKey('problems.id')),
-            # Column('user_id', UUID_Type(as_uuid=True), ForeignKey('citizen_users.id')),
-            Column('user_id', UUID_Type(as_uuid=True)),
-            Column('latitude', String(100)),
-            Column('longitude', String(100)),
+            # Column('user_id', UUID(as_uuid=True), ForeignKey('citizen_users.id')),
+            Column('user_id', UUID(as_uuid=True)),
+            Column('latitude', DECIMAL(9, 6)),
+            Column('longitude', DECIMAL(9, 6)),
             Column('is_solved', Boolean, default=False),
         )
 

@@ -184,7 +184,7 @@ def delete_post(
         user_id=mock_id
     )
 
-@router.patch("/{problem_id}/{post_id}/solve")
+@router.patch("/{problem_id}/{post_id}/solve", response_model=Dict[str, Any])
 def mark_as_solved(
     problem_id: int,
     post_id: uuid.UUID,
@@ -196,17 +196,14 @@ def mark_as_solved(
     投稿を解決済みとしてマーク
     """
 
-    mock_id = uuid.UUID("00000000-1111-0000-0000-000000000000")
-
-    return crud_post.update(
+    return crud_post.patch(
         db_session=db,
         problem_id=problem_id,
         post_id=post_id,
-        user_id=mock_id,
         update_data={"is_solved": True}
     )
 
-@router.patch("/{problem_id}/{post_id}/unsolve")
+@router.patch("/{problem_id}/{post_id}/unsolve", response_model=Dict[str, Any])
 def mark_as_unsolved(
     problem_id: int,
     post_id: uuid.UUID,
@@ -217,12 +214,10 @@ def mark_as_unsolved(
     """
     投稿を未解決としてマーク
     """
-    mock_id = uuid.UUID("00000000-1111-0000-0000-000000000000")
 
-    return crud_post.update(
+    return crud_post.patch(
         db_session=db,
         problem_id=problem_id,
         post_id=post_id,
-        user_id=mock_id,
         update_data={"is_solved": False}
     )

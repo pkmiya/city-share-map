@@ -198,7 +198,6 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                     detail=f"投稿の取得中にエラーが発生しました: {str(e)}"
                 )
 
-
     def update(
         self,
         db_session: Session,
@@ -230,6 +229,52 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                 items = update_data.pop("items")
                 for key, value in items.items():
                     update_data[key] = value
+            
+            update_data["updated_at"] = datetime.utcnow()
+            # update_data["updated_by"] = str(user_id)
+            update_data["updated_by"] = "00000000"
+            
+            for field in obj_data:
+                if field in update_data:
+                    setattr(post, field, update_data[field])
+
+            # 投稿の更新
+            db_session.add(post)
+            db_session.commit()
+            db_session.refresh(post)
+
+            return jsonable_encoder(post)
+
+        except Exception as e:
+            db_session.rollback()
+            if isinstance(e, HTTPException):
+                raise e
+            else:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"投稿の更新中にエラーが発生しました: {str(e)}"
+                )
+    
+    def patch(
+        self,
+        db_session: Session,
+        *,
+        problem_id: int,
+        post_id: uuid.UUID,
+        update_data: Dict[str, bool]
+    ) -> Dict[str, Any]:
+        """
+        投稿を更新
+        """
+        try:
+            dynamic_table = self.get_dynamic_table(db_session, problem_id)
+            post = db_session.query(dynamic_table).filter_by(id=post_id).first()
+
+            if not post:
+                raise HTTPException(status_code=404, detail="指定された投稿が見つかりません")
+
+            # 更新データの準備
+            obj_data = jsonable_encoder(post)
             
             update_data["updated_at"] = datetime.utcnow()
             # update_data["updated_by"] = str(user_id)
