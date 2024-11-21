@@ -83,42 +83,6 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                     status_code=500,
                     detail=f"投稿の作成中にエラーが発生しました: {str(e)}"
                 )
-    
-    def get_multi(
-        self,
-        db_session: Session,
-        *,
-        problem_id: int,
-        skip: int = 0,
-        limit: int = 100,
-        filters: Dict[str, Any] = None
-    ) -> List[Dict[str, Any]]:
-        """
-        problemごとの投稿を取得
-        """
-        try:
-            problem = db_session.query(Problem).filter_by(id=problem_id).first()
-
-            if not problem:
-                raise HTTPException(status_code=404, detail="指定された課題が見つかりません")
-            
-            dynamic_table = self.get_dynamic_table(db_session, problem_id)
-
-            query = db_session.query(dynamic_table)
-            if 'is_solved' in filters:
-                query = query.filter(getattr(dynamic_table, 'is_solved') == filters['is_solved'])
-            posts = query.offset(skip).limit(limit).all()
-
-            return [jsonable_encoder(post) for post in posts]
-
-        except Exception as e:
-            if isinstance(e, HTTPException):
-                raise e
-            else:
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"投稿の取得中にエラーが発生しました: {str(e)}"
-                )
 
     def get(
         self,

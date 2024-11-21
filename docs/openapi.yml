@@ -657,55 +657,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-    
-    get:
-      tags:
-        - post_problem
-      summary:  Posts By Problem Id
-      description: Read posts by problem id. Support filtering and pagination.
-      operationId: list_posts_by_id
-      security:
-        - OAuth2PasswordBearer: []
-      parameters:
-        - name: problem_id
-          in: path
-          required: true
-          schema:
-            type: integer
-        - name: skip
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 0
-        - name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 100
-        - name: is_solved
-          in: query
-          required: false
-          schema:
-            anyOf:
-              - type: boolean
-              - type: "null"
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/HTTPValidationError"
 
   api/v1/post_problem/{problem_id}/{post_id}:
     get:

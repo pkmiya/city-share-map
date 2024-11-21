@@ -93,32 +93,6 @@ def create_post(
         post_in=post_in
     )
 
-@router.get("/{problem_id}", response_model=List[Dict[str, Any]])
-def list_posts_by_id(
-    problem_id: int,
-    db: SessionDep,
-    # current_user: CitizenUser = Depends(get_current_citizen_user),
-    skip: int = 0,
-    limit: int = 100,
-    is_solved: Optional[bool] = None
-):
-    """
-    各課題ごとの投稿の一覧を取得
-    フィルタリングとページネーションをサポート
-    memo: いらないかも！！
-    """
-    filters = {}
-    if is_solved is not None:
-        filters["is_solved"] = is_solved
-
-    return crud_post.get_multi(
-        db_session=db,
-        problem_id=problem_id,
-        skip=skip,
-        limit=limit,
-        filters=filters
-    )
-
 @router.get("/{problem_id}/{post_id}", response_model=Dict[str, Any])
 def get_post_by_id(
     problem_id: int,
