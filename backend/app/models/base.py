@@ -19,8 +19,8 @@ class CommonColumns:
     )
     updated_at = Column(DateTime, server_onupdate=text("CURRENT_TIMESTAMP"))
     deleted_at = Column(DateTime)
-    created_by = Column(String(30))
-    updated_by = Column(String(30))
+    created_by = Column(String(64))
+    updated_by = Column(String(64))
 
 # soft_delete用のコード(なぜか動作しない)
 # @event.listens_for(Session, "do_orm_execute")

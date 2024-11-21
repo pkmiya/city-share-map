@@ -10,10 +10,11 @@ from app.models.user import CitizenUser
 from sqlalchemy import text, DateTime, Table, Column, Integer, String, Boolean, ForeignKey, UUID, DECIMAL
 import uuid
 from fastapi import HTTPException
+from datetime import datetime
 
 class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):
     def create_with_items(
-        self, db_session: Session, *, obj_in: ProblemCreate
+        self, db_session: Session, *, obj_in: ProblemCreate, user_id: int
     ) -> Problem:
 
         try:
@@ -27,6 +28,7 @@ class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):
             problem_data = {
                 "name": obj_in.name,
                 "is_open": obj_in.is_open,
+                "created_by": user_id
             }
 
             db_obj = self.model(**problem_data)
@@ -42,7 +44,8 @@ class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):
                 problem_item = ProblemItem(
                     problem_id=db_obj.id,
                     name=item.name,
-                    type_id=item.type_id
+                    type_id=item.type_id,
+                    created_by=user_id
                 )
                 db_session.add(problem_item)
             
@@ -88,8 +91,8 @@ class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):
             Column('created_at', DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False),
             Column('updated_at', DateTime, server_onupdate=text("CURRENT_TIMESTAMP")),
             Column('deleted_at', DateTime),
-            Column('created_by', String(30)),
-            Column('updated_by', String(30)),
+            Column('created_by', String(64)),
+            Column('updated_by', String(64)),
         ]
         
         # ProblemItem のカラムを追加 (item.name と item.type_id を追加)

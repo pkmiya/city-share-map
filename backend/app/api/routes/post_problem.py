@@ -8,14 +8,15 @@ from app.schemas.problem import PostBase, PostCreate, PostUpdate
 import uuid
 from typing import Optional, List
 
+
 router = APIRouter()
+mock_id = uuid.UUID("00000000-0000-0000-0000-000000000000") # モック用のID
 
 
 @router.get("/", response_model=List[Dict[str, Any]])
 def list_posts(
     db: SessionDep,
     # current_user: CitizenUser = Depends(get_current_citizen_user),
-    current_user: CurrentUser,
     skip: int = 0,
     limit: int = 100,
     is_solved: Optional[bool] = None,
@@ -47,7 +48,6 @@ def list_posts(
 def get_posts_me(
     db: SessionDep,
     # current_user: CitizenUser = Depends(get_current_citizen_user),
-    current_user: CurrentUser,
     skip: int = 0,
     limit: int = 100,
     is_solved: Optional[bool] = None,
@@ -81,7 +81,6 @@ def create_post(
     db: SessionDep,
     problem_id: int,
     # current_user: CitizenUser = Depends(get_current_citizen_user),
-    current_user: CurrentUser,
     post_in: PostCreate
 ):
     """
@@ -90,7 +89,7 @@ def create_post(
     return crud_post.create(
         db_session=db,
         problem_id=problem_id,
-        user_id=current_user.id,
+        user_id=mock_id,
         post_in=post_in
     )
 
@@ -99,7 +98,6 @@ def list_posts_by_id(
     problem_id: int,
     db: SessionDep,
     # current_user: CitizenUser = Depends(get_current_citizen_user),
-    current_user: CurrentUser,
     skip: int = 0,
     limit: int = 100,
     is_solved: Optional[bool] = None
@@ -107,6 +105,7 @@ def list_posts_by_id(
     """
     各課題ごとの投稿の一覧を取得
     フィルタリングとページネーションをサポート
+    memo: いらないかも！！
     """
     filters = {}
     if is_solved is not None:
@@ -125,12 +124,10 @@ def get_post_by_id(
     problem_id: int,
     db: SessionDep,
     # current_user: CitizenUser = Depends(get_current_citizen_user),
-    current_user: CurrentUser,
     post_id: uuid.UUID
 ):
     """
     IDによる投稿の取得
-    フィルタリングとページネーションをサポート
     """
 
     return crud_post.get_by_id(
@@ -146,14 +143,11 @@ def update_post(
     *,
     db: SessionDep,
     # current_user: CitizenUser = Depends(get_current_citizen_user),
-    current_user: CurrentUser,
     update_data: PostUpdate
 ):
     """
     投稿を更新
     """
-
-    mock_id = uuid.UUID("00000000-1111-0000-0000-000000000000")
 
     return crud_post.update(
         db_session=db,
@@ -169,13 +163,10 @@ def delete_post(
     post_id: uuid.UUID,
     db: SessionDep,
     # current_user: CitizenUser = Depends(get_current_citizen_user),
-    current_user: CurrentUser,
 ):
     """
     投稿を削除
     """
-
-    mock_id = uuid.UUID("00000000-1111-0000-0000-000000000000")
 
     return crud_post.delete(
         db_session=db,
@@ -200,6 +191,7 @@ def mark_as_solved(
         db_session=db,
         problem_id=problem_id,
         post_id=post_id,
+        user_id=current_user.id,
         update_data={"is_solved": True}
     )
 
@@ -219,5 +211,6 @@ def mark_as_unsolved(
         db_session=db,
         problem_id=problem_id,
         post_id=post_id,
+        user_id=current_user.id,
         update_data={"is_solved": False}
     )

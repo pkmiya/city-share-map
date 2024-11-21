@@ -22,7 +22,7 @@ def create_problem(
     Create new problem with items.
     """
     problem = crud_problem.create_with_items(
-        db_session=db, obj_in=problem_in
+        db_session=db, obj_in=problem_in, user_id=current_user.id
     )
     return problem
 

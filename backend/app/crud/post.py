@@ -32,8 +32,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
         db_session: Session,
         *,
         problem_id: int,
-        # user_id: uuid.UUID,
-        user_id: User,
+        user_id: uuid.UUID,
         post_in: PostCreate,
     ) -> str:
         """
@@ -64,12 +63,10 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                 problem_id=problem_id,
                 latitude=post_in.latitude,
                 longitude=post_in.longitude,
-                # user_id=user_id,
-                user_id=uuid.UUID("00000000-1111-0000-0000-000000000000"),
+                user_id=user_id,
                 is_solved=post_in.is_solved,
-                created_at=datetime.utcnow(),
-                # created_by=str(user_id.id),
-                created_by="00000000",
+                created_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                created_by=str(user_id),
                 **item_values
             )
             db_session.add(post_data)
@@ -218,10 +215,8 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                 raise HTTPException(status_code=404, detail="指定された投稿が見つかりません")
             
             if post.user_id != user_id:
-                # TODO: is_solvedの場合は管理者権限のため修正が必要
                 raise HTTPException(status_code=403, detail="この投稿を更新する権限がありません")
 
-            # 更新データの準備
             obj_data = jsonable_encoder(post)
             update_data = update_data.dict(exclude_unset=True)
 
@@ -230,15 +225,13 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                 for key, value in items.items():
                     update_data[key] = value
             
-            update_data["updated_at"] = datetime.utcnow()
-            # update_data["updated_by"] = str(user_id)
-            update_data["updated_by"] = "00000000"
+            update_data["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            update_data["updated_by"] = str(user_id)
             
             for field in obj_data:
                 if field in update_data:
                     setattr(post, field, update_data[field])
 
-            # 投稿の更新
             db_session.add(post)
             db_session.commit()
             db_session.refresh(post)
@@ -261,10 +254,11 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
         *,
         problem_id: int,
         post_id: uuid.UUID,
+        user_id: int,
         update_data: Dict[str, bool]
     ) -> Dict[str, Any]:
         """
-        投稿を更新
+        is_solvedを更新(自治体User用)
         """
         try:
             dynamic_table = self.get_dynamic_table(db_session, problem_id)
@@ -273,18 +267,14 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
             if not post:
                 raise HTTPException(status_code=404, detail="指定された投稿が見つかりません")
 
-            # 更新データの準備
             obj_data = jsonable_encoder(post)
             
-            update_data["updated_at"] = datetime.utcnow()
-            # update_data["updated_by"] = str(user_id)
-            update_data["updated_by"] = "00000000"
-            
+            update_data["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            update_data["updated_by"] = str(user_id)            
             for field in obj_data:
                 if field in update_data:
                     setattr(post, field, update_data[field])
 
-            # 投稿の更新
             db_session.add(post)
             db_session.commit()
             db_session.refresh(post)
@@ -320,13 +310,12 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                 raise HTTPException(status_code=404, detail="指定された投稿が見つかりません")
             
             if post.user_id != user_id:
-                raise HTTPException(status_code=403, detail="この投稿を更新する権限がありません")
+                raise HTTPException(status_code=403, detail="この投稿を削除する権限がありません")
 
-            # 論理削除の実行
             db_session.delete(post)
             db_session.commit()
 
-            return {"message": "投稿が正常に削除されました"}
+            return jsonable_encoder(post)
 
         except Exception as e:
             db_session.rollback()

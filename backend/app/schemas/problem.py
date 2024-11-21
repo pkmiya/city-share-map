@@ -66,6 +66,6 @@ class PostBase(BaseModel):
 class PostCreate(PostBase):
     pass
 class PostUpdate(BaseModel):
-    latitude: Optional[Decimal]
-    longitude: Optional[Decimal]
-    items: Optional[Dict[str, Any]]
+    latitude: Optional[Decimal] = None
+    longitude: Optional[Decimal] = None
+    items: Optional[Dict[str, Any]] = None
