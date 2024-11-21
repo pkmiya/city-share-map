@@ -180,6 +180,9 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
             
             if post.user_id != user_id:
                 raise HTTPException(status_code=403, detail="この投稿を更新する権限がありません")
+            
+            if post.is_solved:
+                raise HTTPException(status_code=400, detail="この投稿は既に解決済みです")
 
             obj_data = jsonable_encoder(post)
             update_data = update_data.dict(exclude_unset=True)
