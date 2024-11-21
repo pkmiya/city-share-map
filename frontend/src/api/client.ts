@@ -3,7 +3,7 @@ import * as api from '@/gen/api';
 
 // TODO: use real access token
 const accessToken = 'hoge';
-const basePath = Env.accessToken;
+const basePath = Env.apiBaseUrl;
 const headers = {
   'Content-Type': 'application/json',
 };

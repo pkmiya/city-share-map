@@ -6,6 +6,7 @@ import { Provider as JotaiProvider } from 'jotai';
 import { MapProvider } from 'react-map-gl';
 
 import theme from '@/config/theme';
+import { LiffProvider } from '@/context/liffProvider';
 import queryClient from '@/lib/react-query';
 
 export const Providers = ({
@@ -15,7 +16,9 @@ export const Providers = ({
     <QueryClientProvider client={queryClient}>
       <ChakraProvider theme={theme}>
         <MapProvider>
-          <JotaiProvider>{children}</JotaiProvider>
+          <LiffProvider>
+            <JotaiProvider>{children}</JotaiProvider>
+          </LiffProvider>
         </MapProvider>
       </ChakraProvider>
     </QueryClientProvider>

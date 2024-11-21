@@ -30,7 +30,7 @@ export const MyMap = ({ ...props }: MyMapProps) => {
     zoom: zoom,
   };
 
-  const accessToken = Env.accessToken;
+  const accessToken = Env.mapboxAccessToken;
   const [popupInfo, setPopupInfo] = useState<marker>();
   const [viewState, setViewState] = useState(initialViewState);
 

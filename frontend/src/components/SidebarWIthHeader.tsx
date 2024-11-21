@@ -24,6 +24,7 @@ import {
 } from '@chakra-ui/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { IconType } from 'react-icons';
 import { FaList } from 'react-icons/fa';
 import {
@@ -37,6 +38,7 @@ import {
 import { GoMegaphone } from 'react-icons/go';
 
 import { appMetadata } from '@/config/metadata';
+import { useLiff } from '@/context/liffProvider';
 
 interface LinkItemProps {
   href?: string;
@@ -86,7 +88,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
       <Flex alignItems="center" h="20" justifyContent="space-between" mx="8">
         {/* TODO: ロゴを配置 */}
         {/* <Image alt="app_logo" height="36px" src="/app_logo.png" /> */}
-        <Link href="">
+        <Link href="/">
           <Text fontWeight="bold">{String(appMetadata.title)}</Text>
         </Link>
         <CloseButton display={{ base: 'flex', xl: 'none' }} onClick={onClose} />
@@ -142,6 +144,41 @@ const NavItem = ({ icon, href, onClick, children, ...rest }: NavItemProps) => {
 };
 
 const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
+  // NOTE: テスト感覚として、ユーザ名を取得して表示している
+  const { liffObject } = useLiff();
+  const [userName, setUserName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProfile = () => {
+      liffObject &&
+        liffObject
+          .getProfile()
+          .then((profile) => {
+            console.log('LIFF profile:', profile);
+            setUserName(profile.displayName);
+          })
+          .catch((profileError) => {
+            console.log('Failed to get profile:', profileError);
+          });
+    };
+
+    if (liffObject) {
+      if (!liffObject.isLoggedIn()) {
+        (async () => {
+          try {
+            await liffObject.login();
+            console.log('LIFF login...');
+            fetchProfile();
+          } catch (error) {
+            console.error('Login failed:', error);
+          }
+        })();
+      } else {
+        fetchProfile();
+      }
+    }
+  }, [liffObject]);
+
   return (
     <Flex
       alignItems="center"
@@ -165,7 +202,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
       <Box display={{ base: 'flex', xl: 'none' }}>
         {/* TODO: ロゴを配置 */}
         {/* <Image alt="app_logo" height="36px" src="/app_logo.png" /> */}
-        <Link href="">
+        <Link href="/">
           <Text fontWeight="bold">{String(appMetadata.title)}</Text>
         </Link>
       </Box>
@@ -185,14 +222,14 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
               transition="all 0.3s"
             >
               <HStack>
-                <Avatar size={'sm'} src={'/icon-192x192.png'} />
+                <Avatar size="sm" />
                 <VStack
                   alignItems="flex-start"
                   display={{ base: 'none', xl: 'flex' }}
                   ml="2"
                   spacing="1px"
                 >
-                  <Text fontSize="sm">サンプル管理者</Text>
+                  <Text fontSize="sm">{userName ?? 'サンプル管理者'}</Text>
                   <Text color="gray.600" fontSize="xs">
                     サンプル課
                   </Text>
@@ -206,6 +243,9 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
               bg={useColorModeValue('white', 'gray.900')}
               borderColor={useColorModeValue('gray.200', 'gray.700')}
             >
+              <Text fontSize="sm" fontWeight="bold" mx={3} my={2}>
+                {userName ?? 'サンプル管理者'}
+              </Text>
               <MenuItem>プロフィール</MenuItem>
               <MenuItem>設定</MenuItem>
               <MenuDivider />
