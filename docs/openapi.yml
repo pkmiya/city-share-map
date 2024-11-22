@@ -8,7 +8,7 @@ tags:
     description: login周りの操作
   - name: users
     description: 自治体ユーザー操作
-  - name: problems
+  - name: problem
     description: 自治体側の課題操作
   - name: post_problem
     description: 投稿操作
@@ -350,7 +350,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
 
-  /api/v1/problems/:
+  /api/v1/problem/:
     get:
       tags:
         - problem
