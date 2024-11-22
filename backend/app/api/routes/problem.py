@@ -2,7 +2,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.api.deps import CurrentUser, SessionDep
-from app.schemas.problem import Problem, ProblemCreate, ProblemUpdate
+from app.schemas.problem import Problem, ProblemRead, ProblemCreate, ProblemUpdate
 from app.models.problems import Problem as DBProblem
 from app.models.user import User as DBUser
 from app.api.deps import get_current_active_superuser
@@ -22,12 +22,12 @@ def create_problem(
     Create new problem with items.
     """
     problem = crud_problem.create_with_items(
-        db_session=db, obj_in=problem_in
+        db_session=db, obj_in=problem_in, user_id=current_user.id
     )
     return problem
 
 
-@router.get("/", response_model=List[Problem])
+@router.get("/", response_model=List[ProblemRead])
 def read_problems(
     *,
     db: SessionDep,
@@ -38,7 +38,9 @@ def read_problems(
     """
     Retrieve problems.
     """
-    problems = crud_problem.get_multi(db_session=db, skip=skip, limit=limit)
+    # problems = crud_problem.get_multi(db_session=db, skip=skip, limit=limit)
+    problems = crud_problem.get_multi_problem(db_session=db, skip=skip, limit=limit)
+
     return problems
 
 

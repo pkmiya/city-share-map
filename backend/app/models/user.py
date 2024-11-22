@@ -1,10 +1,7 @@
 from sqlalchemy import Column, String, Integer, Boolean, ForeignKey, DateTime, UUID, TIMESTAMP, func, text
 from sqlalchemy.orm import relationship
 import uuid
-
-from app.db.base import Base
-from app.models.item import Item
-
+from app.models.base import Base, CommonColumns
 
 
 class CommonColumns:
@@ -26,8 +23,6 @@ class User(Base, CommonColumns):
     is_active = Column(Boolean(), default=True)
     is_superuser = Column(Boolean(), default=False)
 
-    items = relationship("Item", back_populates="owner")
-
 
 # CitizenUsers Table
 class CitizenUser(Base, CommonColumns):
@@ -37,7 +32,7 @@ class CitizenUser(Base, CommonColumns):
     name = Column(String)  # ユーザ名
     liff_id = Column(UUID(as_uuid=True))  # LIFF連携用のID
 
-    posts = relationship('PostBase', back_populates='user')
+    # posts = relationship('PostBase', back_populates='user')
     post_likes = relationship('PostLikeBase', back_populates='user')
 
 

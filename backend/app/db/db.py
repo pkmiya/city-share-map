@@ -13,7 +13,7 @@ from app.schemas.user import CitizenUserCreate
 # make sure all SQL Alchemy models are imported before initializing DB
 # otherwise, SQL Alchemy might fail to initialize relationships properly
 # for more details: https://github.com/tiangolo/full-stack-fastapi-postgresql/issues/28
-from app.db.base import Base  # noqa: F401
+from app.models.base import Base  # noqa: F401
 
 
 engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))

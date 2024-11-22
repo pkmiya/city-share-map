@@ -1,19 +1,10 @@
-from sqlalchemy import Column, String, Integer, Boolean, ForeignKey, DateTime, UUID, text, DECIMAL
+from sqlalchemy import Column, String, Integer, Boolean, ForeignKey, UUID, DECIMAL
 from sqlalchemy.orm import relationship
 import uuid
-from app.db.base import Base
+from app.models.base import Base, CommonColumns
 from app.models.user import CitizenUser, PostLikeBase
 
 
-
-class CommonColumns:
-    created_at = Column(
-        DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False
-    )
-    updated_at = Column(DateTime, server_onupdate=text("CURRENT_TIMESTAMP"))
-    deleted_at = Column(DateTime)
-    created_by = Column(String(30))
-    updated_by = Column(String(30))
 
 
 # Problems Table
@@ -65,7 +56,6 @@ class PostBase(Base, CommonColumns):
     is_solved = Column(Boolean, default=False)  # 解決済みどうか
 
     problem = relationship('Problem', back_populates='posts')
-    user = relationship('CitizenUser', back_populates='posts')
+    # user = relationship('CitizenUser', back_populates='posts')
     post_likes = relationship('PostLikeBase', back_populates='post')
-
 

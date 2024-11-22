@@ -2,11 +2,13 @@ from typing import List, Optional
 from pydantic import BaseModel
 from uuid import UUID
 from datetime import datetime
+from decimal import Decimal
+from typing import Dict, Any
 
 # ProblemItemの作成時のスキーマ
 class ProblemItemBase(BaseModel):
     name: str  # 項目名
-    type_id: int  # 項目のデータ型のID
+    type_id: int = 1 # 項目のデータ型のID
 
 class ProblemItemCreate(ProblemItemBase):
     pass
@@ -31,6 +33,7 @@ class ProblemCreate(ProblemBase):
     items: List[ProblemItemCreate]  # 問題の項目リスト
 
 class ProblemUpdate(ProblemBase):
+    name: Optional[str] = None  # オプションで課題名の変更
     is_open: Optional[bool] = None  # オプションで現在募集中かの変更
 
 class ProblemInDBBase(ProblemBase):
@@ -44,5 +47,25 @@ class ProblemInDBBase(ProblemBase):
 class Problem(ProblemInDBBase):
     pass
 
+class ProblemRead(ProblemInDBBase):
+    post_count: Optional[int] = 0
+    created_at: Optional[datetime]
+
 class ProblemInDB(ProblemInDBBase):
     pass
+
+class PostBase(BaseModel):
+    latitude: Decimal
+    longitude: Decimal
+    is_solved: bool = False
+    items: Dict[str, Any]
+
+    class Config:
+        orm_mode = True
+
+class PostCreate(PostBase):
+    pass
+class PostUpdate(BaseModel):
+    latitude: Optional[Decimal] = None
+    longitude: Optional[Decimal] = None
+    items: Optional[Dict[str, Any]] = None

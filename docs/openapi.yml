@@ -10,6 +10,8 @@ tags:
     description: 自治体ユーザー操作
   - name: problems
     description: 自治体側の課題操作
+  - name: post_problem
+    description: 投稿操作
 
 paths:
   /api/v1/login/access-token:
@@ -510,6 +512,330 @@ paths:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
 
+  api/v1/post_problem/:
+    get:
+      tags:
+        - post_problem
+      summary: Read All Posts
+      description: Get all posts. Support filtering and pagination.
+      operationId: list_posts
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: skip
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+        - name: is_solved
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: boolean
+              - type: "null"
+        - name: is_open
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: boolean
+              - type: "null"
+        - name: problem_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: "null"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+
+  api/v1/post_problem/me:
+    get:
+      tags:
+        - post_problem
+      summary: Get Posts Me
+      description: Get posts created by the user. Support filtering and pagination.
+      operationId: get_posts_me
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: skip
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+        - name: is_solved
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: boolean
+              - type: "null"
+        - name: is_open
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: boolean
+              - type: "null"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+
+  api/v1/post_problem/{problem_id}:
+    post:
+      tags:
+        - post_problem
+      summary: Create Post
+      description: Create new post.
+      operationId: create_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: problem_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostCreate"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: string
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+
+  api/v1/post_problem/{problem_id}/{post_id}:
+    get:
+      tags:
+        - post_problem
+      summary: Get Post By Id
+      description: Get a specific post by id.
+      operationId: get_post_by_id
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: problem_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+    
+    put:
+      tags:
+        - post_problem
+      summary: Update Post
+      description: Update a post.
+      operationId: update_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: problem_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostUpdate"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+    
+    delete:
+      tags:
+        - post_problem
+      summary: Delete Post
+      description: Delete a post.
+      operationId: delete_post
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: problem_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+
+  api/v1/post_problem/{problem_id}/{post_id}/solve:
+    patch:
+      tags:
+        - post_problem
+      summary: Mark As Solved
+      description: Mark a post as solved.
+      operationId: mark_as_solved
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: problem_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+
+  api/v1/post_problem/{problem_id}/{post_id}/unsolve:
+    patch:
+      tags:
+        - post_problem
+      summary: Mark As Unsolved
+      description: Mark a post as unsolved.
+      operationId: mark_as_unsolved
+      security:
+        - OAuth2PasswordBearer: []
+      parameters:
+        - name: problem_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+
 components:
   schemas:
     Body_login_access_token:
@@ -697,6 +1023,49 @@ components:
         description:
           type: string
           title: Description
+
+    PostCreate:
+      type: object
+      required:
+        - latitude
+        - longitude
+        - items
+      properties:
+        latitude:
+          oneOf:
+            - type: number
+            - type: string
+        longitude:
+          oneOf:
+            - type: number
+            - type: string
+        is_solved:
+          type: boolean
+          default: false
+        items:
+          type: object
+
+    PostUpdate:
+      type: object
+      required:
+        - latitude
+        - longitude
+        - items
+      properties:
+        latitude:
+          oneOf:
+            - type: number
+            - type: string
+            - type: "null"
+        longitude:
+          oneOf:
+            - type: number
+            - type: string
+            - type: "null"
+        items:
+          oneOf:
+            - type: object
+            - type: "null"
 
     ValidationError:
       type: object
