@@ -38,10 +38,6 @@ class Type(Base):
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String)  # 項目の種類
-    type = Column(String)  # 実際のデータ型
-
-
-
 
 
 # Posts_<problem_id> Table

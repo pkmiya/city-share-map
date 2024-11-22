@@ -7,6 +7,7 @@ from app.schemas.problem import ProblemRead, ProblemCreate, ProblemUpdate
 from app.crud.base import CRUDBase
 from app.models.problems import PostBase
 from app.models.user import CitizenUser
+from app.db.db import type_mapping
 from sqlalchemy import text, DateTime, Table, Column, Integer, String, Boolean, ForeignKey, UUID, DECIMAL
 import uuid
 from fastapi import HTTPException
@@ -95,9 +96,9 @@ class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):
             Column('updated_by', String(64)),
         ]
         
-        # ProblemItem のカラムを追加 (item.name と item.type_id を追加)
         for item in items:
-            dynamic_table.append_column(Column(f'{item.name}', String(255)))
+            column_type = type_mapping.get(item.type_id, String(255))
+            dynamic_table.append_column(Column(f'{item.name}', column_type, nullable=True))
         
         for column in CommonColumns:
             dynamic_table.append_column(column)

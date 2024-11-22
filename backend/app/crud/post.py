@@ -2,15 +2,31 @@ from typing import Optional, Dict, Any, List, Type
 from sqlalchemy.ext.automap import automap_base
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
-from sqlalchemy import Table, MetaData
+from sqlalchemy import Integer, Boolean, DateTime, Text
 from app.crud.base import CRUDBase
 from app.models.problems import PostBase, Problem, ProblemItem
 from app.schemas.problem import PostCreate, PostUpdate
 from app.models.user import User
 from app.models.user import CitizenUser
+from app.db.db import type_mapping
 from fastapi import HTTPException
 from datetime import datetime
 import uuid
+import decimal
+
+
+def get_type_class(value: Any) -> type:
+    if isinstance(value, bool):
+        return Boolean
+    elif isinstance(value, int):
+        return Integer
+    elif isinstance(value, datetime):
+        return DateTime
+    elif isinstance(value, str):
+        return Text
+    else:
+        raise HTTPException(status_code=400, detail="サポートされていないデータ型です")
+
 
 class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
     def get_dynamic_table(self, db_session: Session, problem_id: int) -> Type[PostBase]:
@@ -55,6 +71,31 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                         status_code=400,
                         detail=f"必須項目 '{item_name}' が含まれていません"
                     )
+                if not item_values[item_name]:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"項目 '{item_name}' が空です"
+                    )
+                
+                problem_item = db_session.query(ProblemItem).filter_by(problem_id=problem_id, name=item_name).first()
+                expected_type = type_mapping[problem_item.type_id]
+                actual_type = get_type_class(item_values[item_name])
+                
+                if expected_type != actual_type:
+                    if expected_type == DateTime:
+                        try:
+                            item_values[item_name] = datetime.strptime(item_values[item_name], "%Y-%m-%d %H:%M:%S")
+                            print(item_values[item_name])
+                        except ValueError:
+                            raise HTTPException(
+                                status_code=400,
+                                detail=f"項目 '{item_name}' の型が一致しません"
+                            )
+                    else:
+                        raise HTTPException(
+                            status_code=400,
+                            detail=f"項目 '{item_name}' の型が一致しません"
+                        )
                 
             dynamic_table = self.get_dynamic_table(db_session, problem_id)
 

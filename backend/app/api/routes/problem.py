@@ -2,8 +2,8 @@ from typing import List
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.api.deps import CurrentUser, SessionDep
-from app.schemas.problem import Problem, ProblemRead, ProblemCreate, ProblemUpdate
-from app.models.problems import Problem as DBProblem
+from app.schemas.problem import Type, Problem, ProblemRead, ProblemCreate, ProblemUpdate
+from app.models.problems import Type as DBType, Problem as DBProblem
 from app.models.user import User as DBUser
 from app.api.deps import get_current_active_superuser
 from app.crud.problem import crud_problem
@@ -38,13 +38,26 @@ def read_problems(
     """
     Retrieve problems.
     """
-    # problems = crud_problem.get_multi(db_session=db, skip=skip, limit=limit)
     problems = crud_problem.get_multi_problem(db_session=db, skip=skip, limit=limit)
 
     return problems
 
+@router.get("/item_type", response_model=List[Type])
+def read_item_type(
+    *,
+    db: SessionDep,
+    current_user: CurrentUser,
+):
+    """
+    Retrieve problems.
+    """
 
-@router.get("/{id}", response_model=Problem)
+    item_type=db.query(DBType).all()
+
+    return item_type
+
+
+@router.get("/data/{id}", response_model=Problem)
 def read_problem_by_id(
     *,
     db: SessionDep,
@@ -60,7 +73,7 @@ def read_problem_by_id(
     return problem
 
 
-@router.put("/{id}", response_model=Problem)
+@router.put("/data/{id}", response_model=Problem)
 def update_problem(
     *,
     db: SessionDep,
@@ -79,7 +92,7 @@ def update_problem(
 
 
 
-@router.delete("/{id}", response_model=Problem)
+@router.delete("/data/{id}", response_model=Problem)
 def delete_problem(
     *,
     db: SessionDep,

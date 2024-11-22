@@ -14,9 +14,19 @@ from app.schemas.user import CitizenUserCreate
 # otherwise, SQL Alchemy might fail to initialize relationships properly
 # for more details: https://github.com/tiangolo/full-stack-fastapi-postgresql/issues/28
 from app.models.base import Base  # noqa: F401
+from sqlalchemy import Text, Integer, Boolean, DateTime
 
 
 engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
+
+type_mapping = {
+    1: Text,
+    2: Text,
+    3: DateTime,
+    4: Integer,
+    5: Boolean,
+    # 必要に応じて他の型も追加
+}
 
 def init_db(db_session):
     # Tables should be created with Alembic migrations
@@ -38,13 +48,14 @@ def init_db(db_session):
             )
             user = crud_user.create(db_session, obj_in=user_in)  # noqa: F841
         master_data = [
-                {"id": 1, "name": "文字列", "type": "TEXT"},
-                {"id": 2, "name": "日付", "type": "DATETIME"},
-                {"id": 3, "name": "画像", "type": "VARCHAR(255)"},
+                {"id": 1, "name": "テキスト"},
+                {"id": 2, "name": "写真"},
+                {"id": 3, "name": "日時"},
+                {"id": 4, "name": "数値"},
+                {"id": 5, "name": "真偽値"},
             ]
-
         for data in master_data:
-            type_entry = Type(id=data["id"], name=data["name"], type=data["type"])
+            type_entry = Type(id=data["id"], name=data["name"])
             db_session.add(type_entry)
 
         # コミットしてデータを保存

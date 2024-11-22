@@ -54,6 +54,10 @@ class ProblemRead(ProblemInDBBase):
 class ProblemInDB(ProblemInDBBase):
     pass
 
+class Type(BaseModel):
+    id: int
+    name: str
+
 class PostBase(BaseModel):
     latitude: Decimal
     longitude: Decimal
