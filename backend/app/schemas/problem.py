@@ -28,6 +28,7 @@ class ProblemItemInDBBase(ProblemItemBase):
 class ProblemBase(BaseModel):
     name: str  # 課題の名前
     is_open: bool = False  # 募集中かどうかのフラグ
+    description: Optional[str] = None  # 課題の説明
 
 class ProblemCreate(ProblemBase):
     items: List[ProblemItemCreate]  # 問題の項目リスト

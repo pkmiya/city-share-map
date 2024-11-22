@@ -349,10 +349,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
+
   /api/v1/problems/:
     get:
       tags:
-        - problems
+        - problem
       summary: Read Problems
       description: Retrieve problems.
       operationId: read_problems
@@ -365,152 +366,138 @@ paths:
           schema:
             type: integer
             default: 0
-            title: Skip
         - name: limit
           in: query
           required: false
           schema:
             type: integer
             default: 100
-            title: Limit
       responses:
-        "200":
+        200:
           description: Successful Response
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Problem"
-                title: Response Read Problems
-        "422":
+                  $ref: ”#/components/schemas/ProblemRead”
+        422:
           description: Validation Error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/HTTPValidationError"
+                $ref: ”#/components/schemas/HTTPValidationError”
 
-    post:
+  /api/v1/problem/item_type:
+    get:
       tags:
-        - problems
-      summary: Create Problem
-      description: Create new problem.
-      operationId: create_problem
+        - problem
+      summary: Read Item Type
+      description: Retrieve item types.
+      operationId: read_item_type
       security:
         - OAuth2PasswordBearer: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ProblemCreate"
       responses:
-        "200":
+        200:
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Problem"
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/HTTPValidationError"
+                type: array
+                items:
+                  $ref: ”#/components/schemas/Type”
 
-  /api/v1/problems/{problem_id}:
+  /api/v1/problem/data/{id}:
     get:
       tags:
-        - problems
+        - problem
       summary: Read Problem By Id
-      description: Get a specific problem by id.
+      description: Get problem by ID.
       operationId: read_problem_by_id
       security:
         - OAuth2PasswordBearer: []
       parameters:
-        - name: problem_id
+        - name: id
           in: path
           required: true
           schema:
             type: integer
-            title: Problem Id
       responses:
-        "200":
+        200:
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Problem"
-        "422":
+                $ref: ”#/components/schemas/ProblemReadByID”
+        422:
           description: Validation Error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/HTTPValidationError"
+                $ref: ”#/components/schemas/HTTPValidationError”
 
     put:
       tags:
-        - problems
+        - problem
       summary: Update Problem
-      description: Update a problem.
+      description: Update problem by ID.
       operationId: update_problem
       security:
         - OAuth2PasswordBearer: []
       parameters:
-        - name: problem_id
+        - name: id
           in: path
           required: true
           schema:
             type: integer
-            title: Problem Id
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProblemUpdate"
+              $ref: ”#/components/schemas/ProblemUpdate”
       responses:
-        "200":
+        200:
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Problem"
-        "422":
+                $ref: ”#/components/schemas/Problem”
+        422:
           description: Validation Error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/HTTPValidationError"
+                $ref: ”#/components/schemas/HTTPValidationError”
 
     delete:
       tags:
-        - problems
+        - problem
       summary: Delete Problem
       description: Delete a problem.
       operationId: delete_problem
       security:
         - OAuth2PasswordBearer: []
       parameters:
-        - name: problem_id
+        - name: id
           in: path
           required: true
           schema:
             type: integer
-            title: Problem Id
       responses:
-        "200":
+        200:
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Problem"
-        "422":
+                $ref: ”#/components/schemas/Problem”
+        422:
           description: Validation Error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/HTTPValidationError"
+                $ref: ”#/components/schemas/HTTPValidationError”
+
 
   api/v1/post_problem/:
     get:
@@ -1000,6 +987,80 @@ components:
           type: string
           format: date-time
           title: Updated At
+
+    ProblemRead:
+      type: object
+      title: ProblemRead
+      required:
+        - name
+        - id
+        - created_at
+      properties:
+        name:
+          type: string
+        is_open:
+          type: boolean
+          default: false
+        id:
+          type: integer
+        post_count:
+          type: integer
+          default: 0
+        created_at:
+          type: string
+          format: date-time
+
+    ProblemReadByID:
+      type: object
+      title: ProblemReadByID
+      required:
+        - name
+        - id
+        - created_at
+        - items
+      properties:
+        name:
+          type: string
+        is_open:
+          type: boolean
+          default: false
+        id:
+          type: integer
+        post_count:
+          type: integer
+          default: 0
+        created_at:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            $ref: ”#/components/schemas/ProblemItemBase”
+    
+    ProblemItemBase:
+      type: object
+      title: ProblemItemBase
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          default: 1
+        name:
+          type: string
+
+    Type:
+      type: object
+      title: Type
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
 
     ProblemCreate:
       type: object

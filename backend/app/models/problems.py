@@ -14,6 +14,7 @@ class Problem(Base, CommonColumns):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)  # 課題の名前
     is_open = Column(Boolean, default=False, nullable=False)  # 現在募集中か
+    description = Column(String, nullable=True)  # 課題の説明
 
     problem_items = relationship('ProblemItem', back_populates='problem')
     posts = relationship('PostBase', back_populates='problem')
