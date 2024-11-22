@@ -51,6 +51,10 @@ class ProblemRead(ProblemInDBBase):
     post_count: Optional[int] = 0
     created_at: Optional[datetime]
 
+class ProblemReadByID(ProblemRead):
+    items: List[ProblemItemBase]
+
+
 class ProblemInDB(ProblemInDBBase):
     pass
 

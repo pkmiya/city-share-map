@@ -2,7 +2,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.api.deps import CurrentUser, SessionDep
-from app.schemas.problem import Type, Problem, ProblemRead, ProblemCreate, ProblemUpdate
+from app.schemas.problem import Type, Problem, ProblemRead, ProblemCreate, ProblemUpdate, ProblemReadByID
 from app.models.problems import Type as DBType, Problem as DBProblem
 from app.models.user import User as DBUser
 from app.api.deps import get_current_active_superuser
@@ -57,7 +57,7 @@ def read_item_type(
     return item_type
 
 
-@router.get("/data/{id}", response_model=Problem)
+@router.get("/data/{id}", response_model=ProblemReadByID)
 def read_problem_by_id(
     *,
     db: SessionDep,
@@ -67,9 +67,8 @@ def read_problem_by_id(
     """
     Get problem by ID.
     """
-    problem = crud_problem.get(db_session=db, id=id)
-    if not problem:
-        raise HTTPException(status_code=404, detail="課題が見つかりません")
+    problem = crud_problem.get_problem_by_id(db_session=db, id=id)
+    
     return problem
 
 

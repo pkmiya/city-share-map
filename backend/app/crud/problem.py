@@ -3,7 +3,7 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from sqlalchemy.ext.automap import automap_base
 from app.models.problems import Problem, ProblemItem
-from app.schemas.problem import ProblemRead, ProblemCreate, ProblemUpdate
+from app.schemas.problem import ProblemRead, ProblemCreate, ProblemUpdate, ProblemReadByID
 from app.crud.base import CRUDBase
 from app.models.problems import PostBase
 from app.models.user import CitizenUser
@@ -14,6 +14,30 @@ from fastapi import HTTPException
 from datetime import datetime
 
 class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):
+    def get_dynamic_table(self, db_session: Session, problem_id: int):
+        """
+        動的テーブルを取得
+        """
+        table_name = f"post_{problem_id}"
+        Base = automap_base()
+        Base.prepare(db_session.get_bind(), reflect=True)
+
+        if table_name in Base.classes:
+            return Base.classes[table_name]
+        else:
+            raise HTTPException(status_code=404, detail=f"テーブル '{table_name}' が見つかりません")
+
+    def set_post_count(self, db_session: Session, problem):
+        """
+        問題に対応する投稿数を設定
+        """
+        try:
+            dynamic_table = self.get_dynamic_table(db_session, problem.id)
+            post_count = db_session.query(dynamic_table).count()
+            setattr(problem, 'post_count', post_count)
+        except HTTPException:
+            setattr(problem, 'post_count', 0)
+
     def create_with_items(
         self, db_session: Session, *, obj_in: ProblemCreate, user_id: int
     ) -> Problem:
@@ -109,28 +133,42 @@ class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):
     def get_multi_problem(
         self, db_session: Session, *, skip: int = 0, limit: int = 100
     ) -> List[ProblemRead]:
-        
         problems = self.get_multi(db_session, skip=skip, limit=limit)
 
         for problem in problems:
-            table_name = f"post_{problem.id}"
-            Base = automap_base()
-            Base.prepare(db_session.get_bind(), reflect=True)
+            self.set_post_count(db_session, problem)
+            setattr(problem, 'created_at', problem.created_at)
 
-            try:
-                if table_name in Base.classes:
-                    dynamic_table = Base.classes[table_name]
-                    post_count = db_session.query(dynamic_table).count()
-                    setattr(problem, 'post_count', post_count)
-                else:
-                    setattr(problem, 'post_count', 0)
-                setattr(problem, 'created_at', problem.created_at)
-
-            except Exception as e:
-                raise HTTPException(status_code=404, detail=f"テーブル '{table_name}' が見つかりません")
-        
         return problems
 
+    def get_problem_by_id(
+        self, db_session: Session, *, id: int
+    ) -> ProblemReadByID:
+        try:
+            problem = db_session.query(self.model).filter_by(id=id).first()
+            if not problem:
+                raise HTTPException(status_code=404, detail="課題が見つかりません")
+
+            self.set_post_count(db_session, problem)
+            setattr(problem, 'created_at', problem.created_at)
+
+            problem_data = db_session.query(ProblemItem).filter_by(problem_id=id).all()
+            if not problem_data:
+                raise HTTPException(status_code=404, detail="課題の項目が見つかりません")
+
+            setattr(problem, 'items', problem_data)
+
+            return problem
+
+        except Exception as e:
+            db_session.rollback()
+            if isinstance(e, HTTPException):
+                raise e
+            else:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"課題の取得中にエラーが発生しました: {str(e)}"
+                )
 
     def delete_with_items(
         self, db_session: Session, *, problem_id: int
