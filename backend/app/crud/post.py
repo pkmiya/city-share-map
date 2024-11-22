@@ -27,6 +27,11 @@ def get_type_class(value: Any) -> type:
     else:
         raise HTTPException(status_code=400, detail="サポートされていないデータ型です")
 
+def validate_datetime(value: str) -> datetime:
+    try:
+        return datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        return None
 
 class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
     def get_dynamic_table(self, db_session: Session, problem_id: int) -> Type[PostBase]:
@@ -42,6 +47,63 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
             return Base.classes[table_name]
         else:
             raise HTTPException(status_code=404, detail=f"テーブル '{table_name}' が見つかりません")
+        
+    def validate_post_items(
+        self,
+        db_session: Session,
+        problem_id: int,
+        items: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        投稿項目の検証と型変換を行う
+        """
+
+        problem = db_session.query(Problem).filter_by(id=problem_id).first()
+        if not problem:
+            raise HTTPException(status_code=404, detail="指定された課題が見つかりません")
+        if not problem.is_open:
+            raise HTTPException(status_code=400, detail="この課題は現在募集を行っていません")
+
+        problem_items = {
+            item.name: item for item in 
+            db_session.query(ProblemItem).filter_by(problem_id=problem_id).all()
+        }
+
+        validated_values = items.copy()
+        
+        for item_name, problem_item in problem_items.items():
+            if item_name not in validated_values:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"必須項目 '{item_name}' が含まれていません"
+                )
+            
+            value = validated_values[item_name]
+            if not value:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"項目 '{item_name}' が空です"
+                )
+            
+            expected_type = type_mapping[problem_item.type_id]
+            actual_type = get_type_class(value)
+
+            if expected_type != actual_type:
+                if expected_type == DateTime:
+                    converted_value = validate_datetime(value)
+                    if converted_value is None:
+                        raise HTTPException(
+                            status_code=400,
+                            detail=f"項目 '{item_name}' の日時形式が正しくありません"
+                        )
+                    validated_values[item_name] = converted_value
+                else:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"項目 '{item_name}' の型が一致しません"
+                    )
+
+        return validated_values
 
     def create(
         self,
@@ -55,47 +117,8 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
         動的テーブルに新しい投稿を作成
         """
         try:
-            problem = db_session.query(Problem).filter_by(id=problem_id).first()
-            if not problem:
-                raise HTTPException(status_code=404, detail="指定された課題が見つかりません")
-            if not problem.is_open:
-                raise HTTPException(status_code=400, detail="この課題は現在募集を行っていません")
-
-            problem_items = db_session.query(ProblemItem).filter_by(problem_id=problem_id).all()
-            item_names = {item.name for item in problem_items}
-            
-            item_values = jsonable_encoder(post_in.items)
-            for item_name in item_names:
-                if item_name not in item_values:
-                    raise HTTPException(
-                        status_code=400,
-                        detail=f"必須項目 '{item_name}' が含まれていません"
-                    )
-                if not item_values[item_name]:
-                    raise HTTPException(
-                        status_code=400,
-                        detail=f"項目 '{item_name}' が空です"
-                    )
-                
-                problem_item = db_session.query(ProblemItem).filter_by(problem_id=problem_id, name=item_name).first()
-                expected_type = type_mapping[problem_item.type_id]
-                actual_type = get_type_class(item_values[item_name])
-                
-                if expected_type != actual_type:
-                    if expected_type == DateTime:
-                        try:
-                            item_values[item_name] = datetime.strptime(item_values[item_name], "%Y-%m-%d %H:%M:%S")
-                            print(item_values[item_name])
-                        except ValueError:
-                            raise HTTPException(
-                                status_code=400,
-                                detail=f"項目 '{item_name}' の型が一致しません"
-                            )
-                    else:
-                        raise HTTPException(
-                            status_code=400,
-                            detail=f"項目 '{item_name}' の型が一致しません"
-                        )
+            items = jsonable_encoder(post_in.items)
+            item_values = self.validate_post_items(db_session, problem_id, items)
                 
             dynamic_table = self.get_dynamic_table(db_session, problem_id)
 
