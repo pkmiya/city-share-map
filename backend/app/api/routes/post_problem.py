@@ -14,7 +14,38 @@ mock_id = uuid.UUID("00000000-0000-0000-0000-000000000000") # モック用のID
 
 
 @router.get("/", response_model=List[Dict[str, Any]])
-def list_posts(
+def list_posts_by_citizen(
+    db: SessionDep,
+    # current_user: CitizenUser = Depends(get_current_citizen_user),
+    skip: int = 0,
+    limit: int = 100,
+    is_solved: Optional[bool] = None,
+    is_open: Optional[bool] = None,
+    problem_id: Optional[int] = None
+):
+    """
+    投稿の一覧を取得
+    フィルタリングとページネーションをサポート
+    """
+    filters = {}
+    if is_solved is not None:
+        filters["is_solved"] = is_solved
+    
+    if is_open is not None:
+        filters["is_open"] = is_open
+    
+    if problem_id is not None:
+        filters["problem_id"] = problem_id
+
+    return crud_post.get(
+        db_session=db,
+        skip=skip,
+        limit=limit,
+        filters=filters
+    )
+
+@router.get("/admin", response_model=List[Dict[str, Any]])
+def list_posts_by_admin(
     db: SessionDep,
     # current_user: CitizenUser = Depends(get_current_citizen_user),
     skip: int = 0,

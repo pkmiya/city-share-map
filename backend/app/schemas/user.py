@@ -43,6 +43,11 @@ class CitizenUserBase(BaseModel):
     id: int = None
     name: Optional[str] = None
     liff_id: Optional[str] = None
+    is_active: Optional[bool] = True
+
 
 class CitizenUserCreate(CitizenUserBase):
+    pass
+
+class CitizenUserUpdate(CitizenUserBase):
     pass

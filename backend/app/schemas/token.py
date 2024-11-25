@@ -5,6 +5,8 @@ class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
 
+class UserToken(Token):
+    id_token: str
 
 class TokenPayload(BaseModel):
     user_id: int = None

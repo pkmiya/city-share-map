@@ -10,7 +10,7 @@ from app.api.deps import CurrentUser, SessionDep, get_current_active_superuser
 from app.core import security
 from app.core.config import settings
 from app.core.security import get_password_hash
-from app.schemas.token import Token, NewPassword
+from app.schemas.token import UserToken, NewPassword
 from app.schemas.msg import Msg
 from app.schemas.user import User
 from app.utils import (
@@ -23,10 +23,10 @@ from app.utils import (
 router = APIRouter()
 
 
-@router.post("/access-token")
-def login_access_token(
+@router.post("/")
+def login(
     session: SessionDep, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
-) -> Token:
+) -> UserToken:
     """
     OAuth2 compatible token login, get an access token for future requests
     """
@@ -37,11 +37,13 @@ def login_access_token(
         raise HTTPException(status_code=400, detail="Incorrect email or password")
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
+    
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    return Token(
-        access_token=security.create_access_token(
-            user.id, expires_delta=access_token_expires
-        )
+    id_token_expires = timedelta(minutes=settings.ID_TOKEN_EXPIRE_MINUTES)
+
+    return UserToken(
+        access_token=security.create_access_token(user.id, expires_delta=access_token_expires),
+        id_token=security.create_id_token(user, expires_delta=id_token_expires)
     )
 
 
