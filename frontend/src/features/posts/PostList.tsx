@@ -25,7 +25,7 @@ export const PostList = () => {
   return (
     <Box w="full">
       <Text fontSize="x-large" fontWeight="bold">
-        課題一覧
+        投稿一覧
       </Text>
       <Box>
         <TableContainer>
