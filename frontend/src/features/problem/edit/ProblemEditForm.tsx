@@ -8,6 +8,7 @@ import {
   FormLabel,
   HStack,
   Input,
+  Select,
   Stack,
   Switch,
   Text,
@@ -93,15 +94,14 @@ export const EditProblemForm = ({ initialData }: { initialData: FormData }) => {
                 <HStack key={index}>
                   <Input
                     isReadOnly
-                    _hover={{ cursor: 'not-allowed' }}
                     placeholder="項目名"
                     value={field.name}
                     w="200px"
                   />
-                  <Input
+                  <Select
                     isReadOnly
-                    _hover={{ cursor: 'not-allowed' }}
-                    placeholder="データ種別"
+                    placeholder={field.type}
+                    pointerEvents="none"
                     value={field.type}
                     w="200px"
                   />
