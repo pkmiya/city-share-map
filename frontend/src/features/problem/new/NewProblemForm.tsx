@@ -51,10 +51,10 @@ export const NewProblemForm = () => {
   const router = useRouter();
   const toast = useToast();
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = async (data: FormData) => {
     // TODO: APIつなぎこみ
     console.log('Submitted Data:', data);
-    router.push('/problem');
+    await router.push('/problem');
     toast({
       duration: 2000,
       isClosable: true,
