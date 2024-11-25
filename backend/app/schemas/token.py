@@ -10,6 +10,7 @@ class UserToken(Token):
 
 class TokenPayload(BaseModel):
     user_id: int = None
+    user_type: str = None
 
 class NewPassword(BaseModel):
     token: str

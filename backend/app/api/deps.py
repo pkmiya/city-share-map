@@ -1,19 +1,18 @@
 from collections.abc import Generator
 from typing import Annotated
-
 import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from pydantic import ValidationError
 from sqlmodel import Session
-
 from app.core import security
 from app.core.config import settings
 from app.db.db import engine
 from app.crud.user import crud_user
+from app.crud.citizen_user import crud_citizen_user
 from app.schemas.token import TokenPayload
-from app.schemas.user import User
+from app.schemas.user import AllUser, User, CitizenUser
 
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/login/"
@@ -29,18 +28,25 @@ SessionDep = Annotated[Session, Depends(get_db)]
 TokenDep = Annotated[str, Depends(reusable_oauth2)]
 
 
-def get_current_user(session: SessionDep, token: TokenDep) -> User:
+def decode_token(token: str) -> TokenPayload:
     try:
         payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
         )
-        token_data = TokenPayload(**payload)
+        return TokenPayload(**payload)
     except (InvalidTokenError, ValidationError):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Could not validate credentials",
+            detail="validation error",
         )
-    user = crud_user.get(session, token_data.user_id)
+
+
+def get_user_by_token(session: Session, token_data: TokenPayload) -> User:
+    if token_data.user_type == "citizen":
+        user = crud_citizen_user.get(session, token_data.user_id)
+    else:
+        user = crud_user.get(session, token_data.user_id)
+
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     if not user.is_active:
@@ -48,13 +54,42 @@ def get_current_user(session: SessionDep, token: TokenDep) -> User:
     return user
 
 
-CurrentUser = Annotated[User, Depends(get_current_user)]
+def get_current_all_user(session: SessionDep, token: TokenDep) -> AllUser:
+    token_data = decode_token(token)
+    return get_user_by_token(session, token_data)
 
 
-def get_current_active_superuser(current_user: CurrentUser) -> User:
-    if not current_user.is_superuser:
+def get_current_admin_user(session: SessionDep, token: TokenDep) -> User:
+    token_data = decode_token(token)
+    if token_data.user_type == "citizen":
         raise HTTPException(
-            status_code=403, detail="The user doesn't have enough privileges"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="権限がありません",
         )
-    return current_user
+    return get_user_by_token(session, token_data)
+
+
+def get_current_citizen_user(session: SessionDep, token: TokenDep) -> CitizenUser:
+    token_data = decode_token(token)
+    if token_data.user_type != "citizen":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="権限がありません",
+        )
+    return get_user_by_token(session, token_data)
+
+
+def get_current_admin_superuser(session: SessionDep, token: TokenDep) -> User:
+    token_data = decode_token(token)
+    if token_data.user_type != "super_admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="権限がありません",
+        )
+
+
+CurrentAllUser = Annotated[User, Depends(get_current_all_user)]
+CurrentAdminUser = Annotated[User, Depends(get_current_admin_user)]
+CurrentCitizenUser = Annotated[User, Depends(get_current_citizen_user)]
+CurrentAdminSuperuser = Annotated[User, Depends(get_current_admin_superuser)]
 

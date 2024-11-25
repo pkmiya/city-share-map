@@ -43,9 +43,14 @@ class UserInDB(UserInDBBase):
 class CitizenUserBase(BaseModel):
     id: int = None
     name: Optional[str] = None
-    liff_id: Optional[str] = None
+    line_id: Optional[str] = None
     is_active: Optional[bool] = True
 
+class CitizenUser(CitizenUserBase):
+    pass
+
+class AllUser(User, CitizenUser):
+    id: Optional[int|str] = None
 
 class CitizenUserCreate(CitizenUserBase):
     pass

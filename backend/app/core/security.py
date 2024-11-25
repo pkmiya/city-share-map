@@ -10,11 +10,10 @@ import jwt
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-
 ALGORITHM = "HS256"
 
 
-def create_access_token(subject: str | Any, expires_delta: timedelta) -> str:
+def create_access_token(subject: str | Any, user_type , expires_delta: timedelta) -> str:
     """ 
     アクセストークンを発行する
     （自治体User,市民Userどちらも使用） 
@@ -22,7 +21,8 @@ def create_access_token(subject: str | Any, expires_delta: timedelta) -> str:
     expire = datetime.now(timezone.utc) + expires_delta
     to_encode = {
         "exp": expire, 
-        "user_id": str(subject)
+        "user_id": str(subject),
+        "user_type": user_type
     }
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt

@@ -4,11 +4,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.encoders import jsonable_encoder
 from pydantic.networks import EmailStr
 from app.crud.user import crud_user
-from app.api.deps import (
-    CurrentUser,
-    SessionDep,
-    get_current_active_superuser,
-)
+from app.api.deps import CurrentCitizenUser, CurrentAdminSuperuser, CurrentAdminUser, SessionDep
 from app.core.config import settings
 from app.models.user import User as DBUser
 from app.schemas.user import User, UserCreate, UserUpdate
@@ -19,9 +15,9 @@ router = APIRouter()
 @router.get("/", response_model=List[User])
 def read_users(
     session : SessionDep,
+    current_user: CurrentAdminUser,
     skip: int = 0,
     limit: int = 100,
-    current_user: DBUser = Depends(get_current_active_superuser)
 ):
     """
     Retrieve users.
@@ -35,7 +31,7 @@ def create_user(
     *,
     session : SessionDep,
     user_in: UserCreate,
-    current_user: DBUser = Depends(get_current_active_superuser)
+    current_user: CurrentAdminSuperuser
 ):
     """
     Create new user.
@@ -57,7 +53,7 @@ def update_user_me(
     password: str = Body(None),
     full_name: str = Body(None),
     email: EmailStr = Body(None),
-    current_user: CurrentUser,
+    current_user: CurrentAdminUser,
 ):
     """
     Update own user.
@@ -77,7 +73,7 @@ def update_user_me(
 @router.get("/me", response_model=User)
 def read_user_me(
     session : SessionDep,
-    current_user: CurrentUser,
+    current_user: CurrentAdminUser,
 ):
     """
     Get current user.
@@ -89,7 +85,7 @@ def read_user_me(
 def read_user_by_id(
     session : SessionDep,
     user_id: int,
-    current_user: DBUser = Depends(get_current_active_superuser),
+    current_user: CurrentAdminUser,
 ):
     """
     Get a specific user by id.
@@ -110,7 +106,7 @@ def update_user(
     session : SessionDep,
     user_id: int,
     user_in: UserUpdate,
-    current_user: DBUser = Depends(get_current_active_superuser),
+    current_user: CurrentAdminSuperuser,
 ):
     """
     Update a user.
@@ -129,7 +125,7 @@ def delete_user(
     *,
     session : SessionDep,
     user_id: int,
-    current_user: DBUser = Depends(get_current_active_superuser),
+    current_user: CurrentAdminSuperuser,
 ):
     """
     Delete a user.
