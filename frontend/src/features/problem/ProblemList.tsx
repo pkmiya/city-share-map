@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Box,
   Button,
@@ -12,6 +14,7 @@ import {
   Thead,
   Tr,
 } from '@chakra-ui/react';
+import { useRouter } from 'next/navigation';
 import { FaList } from 'react-icons/fa';
 import { FiMap } from 'react-icons/fi';
 import { MdEdit } from 'react-icons/md';
@@ -19,6 +22,8 @@ import { MdEdit } from 'react-icons/md';
 import { problems } from './data';
 
 export const ProblemList = () => {
+  const router = useRouter();
+
   return (
     <Box w="full">
       <Text fontSize="x-large" fontWeight="bold">
@@ -51,6 +56,9 @@ export const ProblemList = () => {
                           leftIcon={<MdEdit />}
                           size="sm"
                           variant="solid"
+                          onClick={() => {
+                            router.push('/problem/1/edit');
+                          }}
                         >
                           編集
                         </Button>
