@@ -100,6 +100,10 @@ export const NewProblemForm = () => {
             <Text fontWeight="bold" mb={2}>
               記入項目
             </Text>
+            <HStack color="gray.600" fontSize="sm" mb={2} spacing={4}>
+              <Text w="200px">項目名</Text>
+              <Text w="200px">データ種別</Text>
+            </HStack>
             <Stack spacing={4}>
               {fields.map((field, index) => (
                 <FormControl
