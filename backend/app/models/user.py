@@ -18,6 +18,7 @@ class User(Base, CommonColumns):
     id = Column(Integer, primary_key=True, index=True)
     full_name = Column(String, index=True)
     email = Column(String, unique=True, index=True)
+    department = Column(String, index=True)
     # cognito_id = Column(String, unique=True, index=True)
     hashed_password = Column(String)  # cognitoの場合は不要
     is_active = Column(Boolean(), default=True)

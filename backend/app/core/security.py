@@ -37,6 +37,7 @@ def create_id_token(user: User, expires_delta: timedelta) -> str:
         "sub": str(user.id),  # ユーザーの一意識別子
         "email": user.email,
         "name": user.full_name,
+        "department": user.department,
         "iat": datetime.now(timezone.utc),  # トークン発行時刻
         "exp": expire,  # 有効期限
     }
