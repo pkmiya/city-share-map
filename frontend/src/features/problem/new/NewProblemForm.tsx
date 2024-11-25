@@ -1,0 +1,161 @@
+'use client';
+
+import {
+  Box,
+  Button,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  HStack,
+  IconButton,
+  Input,
+  Select,
+  Stack,
+  Switch,
+  Text,
+  useToast,
+  VStack,
+} from '@chakra-ui/react';
+import { useRouter } from 'next/navigation';
+import { useFieldArray, useForm } from 'react-hook-form';
+import { FiTrash2 } from 'react-icons/fi';
+import { IoAddCircleOutline } from 'react-icons/io5';
+
+type FormData = {
+  fields: { name: string; type: string }[];
+  isOpen: boolean;
+  name: string;
+};
+
+export const NewProblemForm = () => {
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>({
+    defaultValues: {
+      fields: [{ name: '', type: 'text' }],
+      isOpen: false,
+      name: '',
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'fields',
+  });
+
+  const router = useRouter();
+  const toast = useToast();
+
+  const onSubmit = (data: FormData) => {
+    // TODO: APIつなぎこみ
+    console.log('Submitted Data:', data);
+    router.push('/problem');
+    toast({
+      duration: 2000,
+      isClosable: true,
+      position: 'bottom-right',
+      status: 'success',
+      title: '課題を作成しました',
+    });
+  };
+
+  return (
+    <VStack p={4} w="full">
+      <Text fontSize="x-large" fontWeight="bold" mb={4}>
+        課題の新規作成
+      </Text>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <VStack align="stretch" spacing={4}>
+          <FormControl isInvalid={!!errors.name}>
+            <FormLabel fontWeight="bold">課題の名前</FormLabel>
+            <Input
+              placeholder="例：ごみ"
+              {...register('name', { required: '課題の名前は必須です' })}
+            />
+            <FormErrorMessage>
+              {errors.name && errors.name.message}
+            </FormErrorMessage>
+          </FormControl>
+
+          <FormControl
+            alignItems="center"
+            display="flex"
+            isInvalid={!!errors.isOpen}
+          >
+            <FormLabel htmlFor="isOpen" mb="0">
+              募集中
+            </FormLabel>
+            <Switch id="isOpen" {...register('isOpen')} />
+            <FormErrorMessage>
+              {errors.isOpen && errors.isOpen.message}
+            </FormErrorMessage>
+          </FormControl>
+
+          <Box>
+            <Text fontWeight="bold" mb={2}>
+              記入項目
+            </Text>
+            <Stack spacing={4}>
+              {fields.map((field, index) => (
+                <FormControl
+                  key={field.id}
+                  isInvalid={!!errors.fields?.[index]}
+                >
+                  <HStack key={field.id}>
+                    <Input
+                      placeholder="項目名"
+                      {...register(`fields.${index}.name`, { required: true })}
+                      w="200px"
+                    />
+                    <Select
+                      {...register(`fields.${index}.type`, { required: true })}
+                      w="200px"
+                    >
+                      <option value="text">テキスト</option>
+                      <option value="number">数字</option>
+                      <option value="date">日付</option>
+                    </Select>
+                    {index > 0 && (
+                      <IconButton
+                        aria-label="削除"
+                        icon={<FiTrash2 />}
+                        onClick={() => remove(index)}
+                      />
+                    )}
+                  </HStack>
+                  <FormErrorMessage>
+                    {errors.fields?.[index]?.name && '項目名は必須です'}
+                    {errors.fields?.[index]?.type &&
+                      'データ種別を選択してください'}
+                  </FormErrorMessage>
+                </FormControl>
+              ))}
+
+              <Button
+                alignSelf="center"
+                leftIcon={<IoAddCircleOutline />}
+                w="fit-content"
+                onClick={() => append({ name: '', type: 'text' })}
+              >
+                項目を追加
+              </Button>
+            </Stack>
+          </Box>
+
+          <Button
+            alignSelf="center"
+            colorScheme="blue"
+            mt={8}
+            type="submit"
+            w="fit-content"
+          >
+            新規作成
+          </Button>
+        </VStack>
+      </form>
+    </VStack>
+  );
+};
