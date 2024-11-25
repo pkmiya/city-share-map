@@ -28,6 +28,7 @@ class ProblemItemInDBBase(ProblemItemBase):
 class ProblemBase(BaseModel):
     name: str  # 課題の名前
     is_open: bool = False  # 募集中かどうかのフラグ
+    description: Optional[str] = None  # 課題の説明
 
 class ProblemCreate(ProblemBase):
     items: List[ProblemItemCreate]  # 問題の項目リスト
@@ -51,8 +52,16 @@ class ProblemRead(ProblemInDBBase):
     post_count: Optional[int] = 0
     created_at: Optional[datetime]
 
+class ProblemReadByID(ProblemRead):
+    items: List[ProblemItemBase]
+
+
 class ProblemInDB(ProblemInDBBase):
     pass
+
+class Type(BaseModel):
+    id: int
+    name: str
 
 class PostBase(BaseModel):
     latitude: Decimal
