@@ -21,6 +21,8 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { FiTrash2 } from 'react-icons/fi';
 import { IoAddCircleOutline } from 'react-icons/io5';
 
+import { itemTypes } from './data';
+
 type FormData = {
   fields: { name: string; type: string }[];
   isOpen: boolean;
@@ -35,7 +37,7 @@ export const NewProblemForm = () => {
     formState: { errors },
   } = useForm<FormData>({
     defaultValues: {
-      fields: [{ name: '', type: 'text' }],
+      fields: [{ name: '', type: '' }],
       isOpen: false,
       name: '',
     },
@@ -114,9 +116,14 @@ export const NewProblemForm = () => {
                       {...register(`fields.${index}.type`, { required: true })}
                       w="200px"
                     >
-                      <option value="text">テキスト</option>
-                      <option value="number">数字</option>
-                      <option value="date">日付</option>
+                      <option disabled hidden selected value="">
+                        項目を選択
+                      </option>
+                      {itemTypes.map((item) => (
+                        <option key={item.id} value={item.name}>
+                          {item.name}
+                        </option>
+                      ))}
                     </Select>
                     {index > 0 && (
                       <IconButton
@@ -138,7 +145,7 @@ export const NewProblemForm = () => {
                 alignSelf="center"
                 leftIcon={<IoAddCircleOutline />}
                 w="fit-content"
-                onClick={() => append({ name: '', type: 'text' })}
+                onClick={() => append({ name: '', type: '' })}
               >
                 項目を追加
               </Button>
