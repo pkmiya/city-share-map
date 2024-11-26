@@ -1,10 +1,10 @@
 'use client';
-
 import {
   Avatar,
   Box,
   BoxProps,
   CloseButton,
+  Divider,
   Drawer,
   DrawerContent,
   Flex,
@@ -34,8 +34,10 @@ import {
   FiMap,
   FiMenu,
   FiPlusSquare,
+  FiUsers,
 } from 'react-icons/fi';
 import { GoMegaphone } from 'react-icons/go';
+import { GrUserAdmin } from 'react-icons/gr';
 
 import { appMetadata } from '@/config/metadata';
 import { useLiff } from '@/context/liffProvider';
@@ -71,6 +73,8 @@ const LinkItems: Array<LinkItemProps> = [
   { href: '/post/', icon: FaList, name: '投稿一覧' },
   { href: '/problem/new/', icon: FiPlusSquare, name: '新規募集' },
   { href: '/problem/', icon: GoMegaphone, name: '募集一覧' },
+  { href: '/user/', icon: FiUsers, name: '市民ユーザ一覧' },
+  { href: '/admin/', icon: GrUserAdmin, name: '管理者ユーザ一覧' },
 ];
 
 const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
@@ -93,7 +97,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
         </Link>
         <CloseButton display={{ base: 'flex', xl: 'none' }} onClick={onClose} />
       </Flex>
-      {LinkItems.map((link) => (
+      {LinkItems.slice(0, 5).map((link) => (
         <NavItem
           key={link.name}
           href={link.href ?? ''}
@@ -103,6 +107,23 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
           <Text>{link.name}</Text>
         </NavItem>
       ))}
+      <Divider my={6} />
+      <Text fontSize="sm" fontWeight="bold" mb={2} ml={4}>
+        ユーザ管理
+      </Text>
+      {
+        // NOTE: ここから下は管理者ユーザのみ表示
+        LinkItems.slice(5).map((link) => (
+          <NavItem
+            key={link.name}
+            href={link.href ?? ''}
+            icon={link.icon}
+            onClick={onClose}
+          >
+            <Text>{link.name}</Text>
+          </NavItem>
+        ))
+      }
     </Box>
   );
 };
