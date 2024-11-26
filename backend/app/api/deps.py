@@ -23,6 +23,8 @@ def get_db() -> Generator[Session, None, None]:
     with Session(engine) as session:
         yield session
 
+SessionDep = Annotated[Session, Depends(get_db)]
+TokenDep = Annotated[str, Depends(reusable_oauth2)]
 
 def decode_token(token: str) -> TokenPayload:
     try:
@@ -83,8 +85,6 @@ def get_current_admin_superuser(session: SessionDep, token: TokenDep) -> User:
             detail="権限がありません",
         )
 
-SessionDep = Annotated[Session, Depends(get_db)]
-TokenDep = Annotated[str, Depends(reusable_oauth2)]
 CurrentAllUser = Annotated[User, Depends(get_current_all_user)]
 CurrentAdminUser = Annotated[User, Depends(get_current_admin_user)]
 CurrentCitizenUser = Annotated[User, Depends(get_current_citizen_user)]
