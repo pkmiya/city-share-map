@@ -7,7 +7,7 @@ from app.crud.user import crud_user
 from app.api.deps import CurrentCitizenUser, CurrentAdminSuperuser, CurrentAdminUser, SessionDep
 from app.core.config import settings
 from app.models.user import User as DBUser
-from app.schemas.user import User, UserCreate, UserUpdate
+from app.schemas.user import User, UserCreate, UserUpdate, UserUpdateMe
 
 router = APIRouter()
 
@@ -50,23 +50,18 @@ def create_admin_user(
 def update_user_me(
     *,
     session : SessionDep,
-    password: str = Body(None),
-    full_name: str = Body(None),
-    email: EmailStr = Body(None),
     current_user: CurrentAdminUser,
+    user_in: UserUpdateMe,
 ):
     """
     Update own user.
     """
-    current_user_data = jsonable_encoder(current_user)
-    user_in = UserUpdate(**current_user_data)
-    if password is not None:
-        user_in.password = password
-    if full_name is not None:
-        user_in.full_name = full_name
-    if email is not None:
-        user_in.email = email
-    user = crud_user.update(session, db_obj=current_user, obj_in=user_in)
+    if user_in.email:
+        existing_user = crud_user.get_by_email(session, email=user_in.email)
+        if existing_user:
+            raise HTTPException(status_code=400, detail="そのメールアドレスは既に登録されています")
+
+    user = crud_user.update_me(session, db_obj=current_user, obj_in=user_in)
     return user
 
 
@@ -139,6 +134,11 @@ def delete_user(
         raise HTTPException(
             status_code=404,
             detail="対象のユーザーが存在しません",
+        )
+    if user.is_superuser:
+        raise HTTPException(
+            status_code=400,
+            detail="削除する権限がありません",
         )
     users = crud_user.get_multi(session)
     if len(users) == 1:

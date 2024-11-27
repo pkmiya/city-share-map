@@ -22,7 +22,14 @@ class UserCreate(UserBase):
 
 
 # Properties to receive via API on update
-class UserUpdate(UserBase):
+class UserUpdate(BaseModel):
+    is_active: Optional[bool] = True
+    is_superuser: Optional[bool] = False
+
+class UserUpdateMe(BaseModel):
+    email: Optional[EmailStr] = None
+    full_name: Optional[str] = None
+    department: Optional[str] = None
     password: Optional[str] = None
 
 
