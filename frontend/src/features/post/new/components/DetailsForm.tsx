@@ -111,7 +111,7 @@ export const DetailsForm = ({ onBack }: Props) => {
             </FormControl>
           );
         })}
-        <Center mt={4} gap={4}>
+        <Center gap={4} mt={4}>
           <Button mt="4" onClick={onBack}>
             戻る
           </Button>
