@@ -71,10 +71,11 @@ const LinkItems: Array<LinkItemProps> = [
   { href: '/', icon: FiHome, name: 'ホーム' },
   { href: '/map/', icon: FiMap, name: 'マップ' },
   { href: '/post/', icon: FaList, name: '投稿一覧' },
-  { href: '/problem/new/', icon: FiPlusSquare, name: '新規募集' },
-  { href: '/problem/', icon: GoMegaphone, name: '募集一覧' },
+  { href: '/problem/new/', icon: FiPlusSquare, name: '新規課題' },
+  { href: '/problem/', icon: GoMegaphone, name: '課題一覧' },
   { href: '/user/', icon: FiUsers, name: '市民ユーザ一覧' },
   { href: '/admin/', icon: GrUserAdmin, name: '管理者ユーザ一覧' },
+  { href: '/post/new/', icon: FiPlusSquare, name: '新規投稿' },
 ];
 
 const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
@@ -113,7 +114,24 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
       </Text>
       {
         // NOTE: ここから下は管理者ユーザのみ表示
-        LinkItems.slice(5).map((link) => (
+        LinkItems.slice(5, 7).map((link: LinkItemProps) => (
+          <NavItem
+            key={link.name}
+            href={link.href ?? ''}
+            icon={link.icon}
+            onClick={onClose}
+          >
+            <Text>{link.name}</Text>
+          </NavItem>
+        ))
+      }
+      <Divider my={6} />
+      <Text fontSize="sm" fontWeight="bold" mb={2} ml={4}>
+        市民ユーザ向け機能
+      </Text>
+      {
+        // NOTE: 自治体職員ユーザには表示しない
+        LinkItems.slice(7).map((link: LinkItemProps) => (
           <NavItem
             key={link.name}
             href={link.href ?? ''}

@@ -5,3 +5,11 @@ export const itemTypes = [
   { id: 4, name: '数値' },
   { id: 5, name: 'オン・オフ' },
 ];
+
+export enum ItemType {
+  Text = 'テキスト',
+  Photo = '写真',
+  DateTime = '日時',
+  Number = '数値',
+  OnOff = 'オン・オフ',
+}
