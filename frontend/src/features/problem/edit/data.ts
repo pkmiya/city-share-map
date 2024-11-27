@@ -1,26 +1,26 @@
-import { itemTypes } from '../new/data';
+import { ItemType } from '../new/data';
 
 export const problem = {
   fields: [
     {
       name: '詳細',
-      type: itemTypes[0].name,
+      type: ItemType.Text,
     },
     {
       name: '写真',
-      type: itemTypes[1].name,
+      type: ItemType.Photo,
     },
     {
       name: '発生日時',
-      type: itemTypes[2].name,
+      type: ItemType.DateTime,
     },
     {
       name: 'ごみの量',
-      type: itemTypes[3].name,
+      type: ItemType.Number,
     },
     {
-      name: 'におい',
-      type: itemTypes[4].name,
+      name: '生活への影響',
+      type: ItemType.OnOff,
     },
   ],
   id: 1,
