@@ -13,7 +13,7 @@ router = APIRouter()
 
 
 @router.get("/", response_model=List[User])
-def read_users(
+def read_admin_users(
     session : SessionDep,
     current_user: CurrentAdminUser,
     skip: int = 0,
@@ -27,7 +27,7 @@ def read_users(
 
 
 @router.post("/", response_model=User)
-def create_user(
+def create_admin_user(
     *,
     session : SessionDep,
     user_in: UserCreate,
@@ -40,7 +40,7 @@ def create_user(
     if user:
         raise HTTPException(
             status_code=400,
-            detail="The user with this username already exists in the system.",
+            detail="そのメールアドレスは既に登録されています",
         )
     user = crud_user.create(session, obj_in=user_in)
     return user
@@ -109,7 +109,12 @@ def update_user(
     if not user:
         raise HTTPException(
             status_code=404,
-            detail="The user with this username does not exist in the system",
+            detail="対象のユーザーが存在しません",
+        )
+    if user.is_superuser:
+        raise HTTPException(
+            status_code=400,
+            detail="更新する権限がありません",
         )
     user = crud_user.update(session, db_obj=user, obj_in=user_in)
     return user
@@ -128,7 +133,7 @@ def delete_user(
     if not user:
         raise HTTPException(
             status_code=404,
-            detail="The user with this username does not exist in the system",
+            detail="対象のユーザーが存在しません",
         )
     user = crud_user.delete(session, id=user_id)
     return user

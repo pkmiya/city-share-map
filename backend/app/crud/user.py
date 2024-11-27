@@ -1,7 +1,7 @@
 from typing import Optional
 
 from sqlalchemy.orm import Session
-
+from fastapi import HTTPException
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate, UserInDB
 from app.core.security import verify_password, get_password_hash
@@ -32,6 +32,11 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             del update_data["password"]
             update_data["hashed_password"] = hashed_password
             use_obj_in = UserInDB.parse_obj(update_data)
+        
+        existing_user = db_session.query(User).filter(User.email == obj_in.email).first()
+        if existing_user:
+            raise HTTPException(status_code=400, detail="そのメールアドレスは既に登録されています")
+        
         return super().update(db_session, db_obj=db_obj, obj_in=use_obj_in)
 
     def authenticate(

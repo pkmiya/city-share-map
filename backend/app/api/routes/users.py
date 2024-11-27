@@ -44,7 +44,7 @@ def login_line_user(
     )
 
 @router.get("/", response_model=List[CitizenUserRead])
-def read_users(
+def read_citizen_users(
     session : SessionDep,
     current_user: CurrentAdminUser,
     skip: int = 0,
@@ -58,7 +58,7 @@ def read_users(
     
 
 @router.put("/{user_id}", response_model=CitizenUser)
-def update_user(
+def update_citizen_user(
     session : SessionDep,
     current_user: CurrentAdminUser,
     user_id: uuid.UUID,
