@@ -49,55 +49,6 @@ def list_posts_by_citizen(
         filters=filters
     )
 
-@router.get("/admin", response_model=List[Dict[str, Any]])
-def list_posts_by_admin(
-    db: SessionDep,
-    current_user: CurrentAdminUser,
-    skip: int = 0,
-    limit: int = 100,
-    is_solved: Optional[bool] = None,
-    is_open: Optional[bool] = None,
-    problem_id: Optional[int] = None
-):
-    """
-    投稿の一覧を取得
-    フィルタリングとページネーションをサポート
-    """
-    filters = {}
-    if is_solved is not None:
-        filters["is_solved"] = is_solved
-    
-    if is_open is not None:
-        filters["is_open"] = is_open
-    
-    if problem_id is not None:
-        filters["problem_id"] = problem_id
-
-    return crud_post.get(
-        db_session=db,
-        skip=skip,
-        limit=limit,
-        filters=filters
-    )
-
-@router.get("/admin/{problem_id}/{post_id}", response_model=Dict[str, Any])
-def get_post_by_id(
-    problem_id: int,
-    db: SessionDep,
-    # current_user: CurrentCitizenUser,
-    current_user: CurrentAdminUser,
-    post_id: uuid.UUID
-):
-    """
-    IDによる投稿の取得
-    """
-
-    return crud_post.get_by_id(
-        db_session=db,
-        problem_id=problem_id,
-        post_id=post_id
-    )
-
 @router.get("/me", response_model=List[Dict[str, Any]])
 def get_posts_me(
     db: SessionDep,
