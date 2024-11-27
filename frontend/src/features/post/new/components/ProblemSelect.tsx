@@ -25,7 +25,7 @@ export const ProblemSelect = ({ onNext }: { onNext: () => void }) => {
   return (
     <Box>
       <FormControl>
-        <FormLabel>投稿のテーマを選択してください</FormLabel>
+        <FormLabel>どのテーマに対してレポートしますか？</FormLabel>
         <Select
           placeholder="テーマを選択"
           value={selectedProblem}
