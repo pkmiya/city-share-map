@@ -46,9 +46,9 @@ def get_user_by_token(session: Session, token_data: TokenPayload) -> User:
         user = crud_user.get(session, token_data.user_id)
 
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="ユーザーが見つかりません")
     if not user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise HTTPException(status_code=403, detail="ユーザーが無効です")
     return user
 
 
