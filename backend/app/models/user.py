@@ -18,6 +18,7 @@ class User(Base, CommonColumns):
     id = Column(Integer, primary_key=True, index=True)
     full_name = Column(String, index=True)
     email = Column(String, unique=True, index=True)
+    department = Column(String, index=True)
     # cognito_id = Column(String, unique=True, index=True)
     hashed_password = Column(String)  # cognitoの場合は不要
     is_active = Column(Boolean(), default=True)
@@ -30,7 +31,8 @@ class CitizenUser(Base, CommonColumns):
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String)  # ユーザ名
-    liff_id = Column(UUID(as_uuid=True))  # LIFF連携用のID
+    line_id = Column(String)  # LIFF連携用のID
+    is_active = Column(Boolean, default=True)  # 有効かどうか
 
     # posts = relationship('PostBase', back_populates='user')
     post_likes = relationship('PostLikeBase', back_populates='user')

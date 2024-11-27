@@ -42,8 +42,10 @@ def init_db(db_session):
         user = crud_user.get_by_email(db_session, email=settings.FIRST_SUPERUSER)
         if not user:
             user_in = UserCreate(
+                full_name="Admin",
                 email=settings.FIRST_SUPERUSER,
                 password=settings.FIRST_SUPERUSER_PASSWORD,
+                department="Admin",
                 is_superuser=True,
             )
             user = crud_user.create(db_session, obj_in=user_in)  # noqa: F841

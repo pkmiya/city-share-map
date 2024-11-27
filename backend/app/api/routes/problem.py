@@ -1,11 +1,10 @@
 from typing import List
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from app.api.deps import CurrentUser, SessionDep
+from app.api.deps import CurrentAdminSuperuser, CurrentAdminUser, SessionDep
 from app.schemas.problem import Type, Problem, ProblemRead, ProblemCreate, ProblemUpdate, ProblemReadByID
 from app.models.problems import Type as DBType, Problem as DBProblem
 from app.models.user import User as DBUser
-from app.api.deps import get_current_active_superuser
 from app.crud.problem import crud_problem
 
 router = APIRouter()
@@ -15,7 +14,7 @@ router = APIRouter()
 def create_problem(
     *,
     db: SessionDep,
-    current_user: CurrentUser,
+    current_user: CurrentAdminUser,
     problem_in: ProblemCreate
 ):
     """
@@ -31,7 +30,7 @@ def create_problem(
 def read_problems(
     *,
     db: SessionDep,
-    current_user: CurrentUser,
+    current_user: CurrentAdminUser,
     skip: int = 0,
     limit: int = 100
 ):
@@ -46,7 +45,7 @@ def read_problems(
 def read_item_type(
     *,
     db: SessionDep,
-    current_user: CurrentUser,
+    current_user: CurrentAdminUser,
 ):
     """
     Retrieve problems.
@@ -61,7 +60,7 @@ def read_item_type(
 def read_problem_by_id(
     *,
     db: SessionDep,
-    current_user: CurrentUser,
+    current_user: CurrentAdminUser,
     id: int
 ):
     """
@@ -76,7 +75,7 @@ def read_problem_by_id(
 def update_problem(
     *,
     db: SessionDep,
-    current_user: CurrentUser,
+    current_user: CurrentAdminUser,
     id: int,
     problem_in: ProblemUpdate
 ):
@@ -95,7 +94,7 @@ def update_problem(
 def delete_problem(
     *,
     db: SessionDep,
-    current_user: DBUser = Depends(get_current_active_superuser),
+    current_user: CurrentAdminSuperuser,
     id: int
 ):
     """

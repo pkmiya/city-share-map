@@ -1,144 +1,39 @@
 from typing import List
-
-from fastapi import APIRouter, Body, Depends, HTTPException
-from fastapi.encoders import jsonable_encoder
-from pydantic.networks import EmailStr
-from app.crud.user import crud_user
-from app.api.deps import (
-    CurrentUser,
-    SessionDep,
-    get_current_active_superuser,
-)
+from fastapi import APIRouter, HTTPException
 from app.core.config import settings
-from app.models.user import User as DBUser
-from app.schemas.user import User, UserCreate, UserUpdate
+from datetime import timedelta
+from app.crud.citizen_user import crud_citizen_user
+from app.api.deps import SessionDep
+from app.core import security
+from app.core.config import settings
+from app.schemas.token import Token
+
 
 router = APIRouter()
 
+@router.post("/access-token")
+def login_line_user(
+    session: SessionDep, id_token: str
+) -> Token:
+    """
+    Line login, get an access token for future requests
+    """
+    line_info = security.get_line_info(id_token)
+    line_id = line_info["line_id"]
+    name = line_info["name"]
 
-@router.get("/", response_model=List[User])
-def read_users(
-    session : SessionDep,
-    skip: int = 0,
-    limit: int = 100,
-    current_user: DBUser = Depends(get_current_active_superuser)
-):
-    """
-    Retrieve users.
-    """
-    users = crud_user.get_multi(session, skip=skip, limit=limit)
-    return users
-
-
-@router.post("/", response_model=User)
-def create_user(
-    *,
-    session : SessionDep,
-    user_in: UserCreate,
-    current_user: DBUser = Depends(get_current_active_superuser)
-):
-    """
-    Create new user.
-    """
-    user = crud_user.get_by_email(session, email=user_in.email)
-    if user:
-        raise HTTPException(
-            status_code=400,
-            detail="The user with this username already exists in the system.",
-        )
-    user = crud_user.create(session, obj_in=user_in)
-    return user
-
-
-@router.put("/me", response_model=User)
-def update_user_me(
-    *,
-    session : SessionDep,
-    password: str = Body(None),
-    full_name: str = Body(None),
-    email: EmailStr = Body(None),
-    current_user: CurrentUser,
-):
-    """
-    Update own user.
-    """
-    current_user_data = jsonable_encoder(current_user)
-    user_in = UserUpdate(**current_user_data)
-    if password is not None:
-        user_in.password = password
-    if full_name is not None:
-        user_in.full_name = full_name
-    if email is not None:
-        user_in.email = email
-    user = crud_user.update(session, db_obj=current_user, obj_in=user_in)
-    return user
-
-
-@router.get("/me", response_model=User)
-def read_user_me(
-    session : SessionDep,
-    current_user: CurrentUser,
-):
-    """
-    Get current user.
-    """
-    return current_user
-
-
-@router.get("/{user_id}", response_model=User)
-def read_user_by_id(
-    session : SessionDep,
-    user_id: int,
-    current_user: DBUser = Depends(get_current_active_superuser),
-):
-    """
-    Get a specific user by id.
-    """
-    user = crud_user.get(session, id=user_id)
-    if user == current_user:
-        return user
-    if not crud_user.is_superuser(current_user):
-        raise HTTPException(
-            status_code=400, detail="The user doesn't have enough privileges"
-        )
-    return user
-
-
-@router.put("/{user_id}", response_model=User)
-def update_user(
-    *,
-    session : SessionDep,
-    user_id: int,
-    user_in: UserUpdate,
-    current_user: DBUser = Depends(get_current_active_superuser),
-):
-    """
-    Update a user.
-    """
-    user = crud_user.get(session, id=user_id)
+    user = crud_citizen_user.authenticate(
+        db_session=session, line_id=line_id
+    )
     if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="The user with this username does not exist in the system",
+        obj_in = {"line_id": line_id, "name": name, "is_active": True}
+        user = crud_citizen_user.create(db_session=session, obj_in=obj_in)
+    elif not user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    return Token(
+        access_token=security.create_access_token(
+            user.id, expires_delta=access_token_expires, user_type="citizen"
         )
-    user = crud_user.update(session, db_obj=user, obj_in=user_in)
-    return user
+    )
 
-@router.delete("/{user_id}", response_model=User)
-def delete_user(
-    *,
-    session : SessionDep,
-    user_id: int,
-    current_user: DBUser = Depends(get_current_active_superuser),
-):
-    """
-    Delete a user.
-    """
-    user = crud_user.get(session, id=user_id)
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="The user with this username does not exist in the system",
-        )
-    user = crud_user.delete(session, id=user_id)
-    return user

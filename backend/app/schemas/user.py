@@ -6,6 +6,7 @@ from pydantic import BaseModel, EmailStr
 # Shared properties
 class UserBase(BaseModel):
     email: Optional[EmailStr] = None
+    department: Optional[str] = None
     is_active: Optional[bool] = True
     is_superuser: Optional[bool] = False
     full_name: Optional[str] = None
@@ -15,6 +16,8 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     email: EmailStr
     password: str
+    full_name: str
+    department: str
 
 
 # Properties to receive via API on update
@@ -42,7 +45,17 @@ class UserInDB(UserInDBBase):
 class CitizenUserBase(BaseModel):
     id: int = None
     name: Optional[str] = None
-    liff_id: Optional[str] = None
+    line_id: Optional[str] = None
+    is_active: Optional[bool] = True
+
+class CitizenUser(CitizenUserBase):
+    pass
+
+class AllUser(User, CitizenUser):
+    id: Optional[int|str] = None
 
 class CitizenUserCreate(CitizenUserBase):
+    pass
+
+class CitizenUserUpdate(CitizenUserBase):
     pass
