@@ -1,7 +1,8 @@
 from typing import Optional
 
 from pydantic import BaseModel, EmailStr
-
+from datetime import datetime
+import uuid
 
 # Shared properties
 class UserBase(BaseModel):
@@ -43,10 +44,12 @@ class UserInDB(UserInDBBase):
 
 
 class CitizenUserBase(BaseModel):
-    id: int = None
+    id: uuid.UUID = None
     name: Optional[str] = None
     line_id: Optional[str] = None
     is_active: Optional[bool] = True
+    class Config:
+        arbitrary_types_allowed = True
 
 class CitizenUser(CitizenUserBase):
     pass
@@ -57,5 +60,9 @@ class AllUser(User, CitizenUser):
 class CitizenUserCreate(CitizenUserBase):
     pass
 
-class CitizenUserUpdate(CitizenUserBase):
-    pass
+class CitizenUserUpdate(BaseModel):
+    is_active: Optional[bool] = True
+
+class CitizenUserRead(CitizenUserBase):
+    last_login: datetime
+    post_count: int 

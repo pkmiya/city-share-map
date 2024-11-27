@@ -14,19 +14,6 @@ from fastapi import HTTPException
 from datetime import datetime
 
 class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):
-    def get_dynamic_table(self, db_session: Session, problem_id: int):
-        """
-        動的テーブルを取得
-        """
-        table_name = f"post_{problem_id}"
-        Base = automap_base()
-        Base.prepare(db_session.get_bind(), reflect=True)
-
-        if table_name in Base.classes:
-            return Base.classes[table_name]
-        else:
-            raise HTTPException(status_code=404, detail=f"テーブル '{table_name}' が見つかりません")
-
     def set_post_count(self, db_session: Session, problem):
         """
         問題に対応する投稿数を設定
@@ -53,6 +40,7 @@ class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):
             problem_data = {
                 "name": obj_in.name,
                 "is_open": obj_in.is_open,
+                "description": obj_in.description,
                 "created_by": user_id
             }
 
