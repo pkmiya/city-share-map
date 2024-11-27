@@ -7,6 +7,7 @@ import {
   Input,
   Switch,
   Text,
+  useToast,
 } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 
@@ -17,6 +18,7 @@ import { Field } from '../types';
 
 export const DetailsForm = ({ onBack }: { onBack: () => void }) => {
   const router = useRouter();
+  const toast = useToast();
   const { formData, setFormData } = usePostContext();
 
   const problem = formData.problem || '';
@@ -48,7 +50,12 @@ export const DetailsForm = ({ onBack }: { onBack: () => void }) => {
     }
 
     // TODO: APIつなぎこみ
-    alert('投稿が完了しました！');
+    toast({
+      duration: 2000,
+      isClosable: true,
+      status: 'success',
+      title: 'レポートを投稿しました',
+    });
     console.log(formData);
     await router.push('/map');
   };
