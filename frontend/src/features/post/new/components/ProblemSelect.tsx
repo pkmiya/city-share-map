@@ -1,21 +1,25 @@
 import { Box, Button, FormControl, FormLabel, Select } from '@chakra-ui/react';
-import { useState } from 'react';
+
+import { usePostContext } from '@/context/postProvider';
 
 import { problems } from '../data';
 
-export const ProblemSelect = ({
-  onNext,
-}: {
-  onNext: (data: { problem: string }) => void;
-}) => {
-  const [problem, setProblem] = useState('');
+export const ProblemSelect = ({ onNext }: { onNext: () => void }) => {
+  const { formData, setFormData } = usePostContext();
+
+  const selectedProblem = formData.problem;
 
   const handleNext = () => {
-    if (!problem) {
+    if (selectedProblem === '') {
       alert('テーマを選択してください');
       return;
     }
-    onNext({ problem });
+
+    const fields =
+      problems.find((p) => p.name === selectedProblem)?.fields || [];
+
+    setFormData({ fields: fields, problem: selectedProblem });
+    onNext();
   };
 
   return (
@@ -24,8 +28,8 @@ export const ProblemSelect = ({
         <FormLabel>投稿のテーマを選択してください</FormLabel>
         <Select
           placeholder="テーマを選択"
-          value={problem}
-          onChange={(e) => setProblem(e.target.value)}
+          value={selectedProblem}
+          onChange={(e) => setFormData({ problem: e.target.value })}
         >
           {problems.map((p) => (
             <option key={p.id} value={p.name}>

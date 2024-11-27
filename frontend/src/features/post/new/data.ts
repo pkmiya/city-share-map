@@ -1,6 +1,8 @@
 import { ItemType } from '@/features/problem/new/data';
 
-export const problems = [
+import { DetailedProblem } from './types';
+
+export const problems: DetailedProblem[] = [
   {
     fields: [
       {
