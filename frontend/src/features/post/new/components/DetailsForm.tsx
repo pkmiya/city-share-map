@@ -75,6 +75,14 @@ export const DetailsForm = ({ onBack }: { onBack: () => void }) => {
                   type="datetime-local"
                   {...register(field.name, {
                     required: `${field.name}を選択してください`,
+                    validate: (value) => {
+                      const selectedDate = new Date(value);
+                      const currentDate = new Date();
+                      return (
+                        selectedDate < currentDate ||
+                        `${field.name}には過去の日付を選択してください`
+                      );
+                    },
                   })}
                 />
               )}
