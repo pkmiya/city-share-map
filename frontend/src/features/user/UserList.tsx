@@ -31,7 +31,7 @@ export const UserList = () => {
             <Thead>
               <Tr>
                 <Th w="1%">操作</Th>
-                <Th isNumeric minW="10%" width="auto">
+                <Th minW="10%" width="auto">
                   ID
                 </Th>
                 <Th w="1%">表示名</Th>

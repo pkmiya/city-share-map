@@ -1,6 +1,6 @@
 export type user = {
   displayName: string;
-  id: number;
+  id: string;
   lastLogin: Date;
   postCount: number;
 };
