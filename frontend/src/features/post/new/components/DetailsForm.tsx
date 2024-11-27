@@ -3,6 +3,7 @@ import {
   Button,
   Center,
   FormControl,
+  FormErrorMessage,
   FormLabel,
   Input,
   Switch,
@@ -10,6 +11,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
 
 import { usePostContext } from '@/context/postProvider';
 import { ItemType } from '@/features/problem/new/data';
@@ -19,36 +21,21 @@ import { Field } from '../types';
 export const DetailsForm = ({ onBack }: { onBack: () => void }) => {
   const router = useRouter();
   const toast = useToast();
-  const { formData, setFormData } = usePostContext();
+  const { formData } = usePostContext();
 
   const problem = formData.problem || '';
-  const location = formData.location || { lat: 0, lng: 0 };
   const address = formData.address || '';
   const fields = formData.fields || [];
 
-  const handleChange = (name: string, value: any) => {
-    setFormData({
-      fieldValues: {
-        ...formData.fieldValues,
-        [name]: value,
-      },
-    });
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<{ [key: string]: string }>({
+    defaultValues: formData.fieldValues,
+  });
 
-  const handleSubmit = async () => {
-    const hasEmptyFields = fields.some((field) => {
-      const value = formData.fieldValues[field.name];
-      return (
-        value === null || // initially null for photo
-        (field.type === ItemType.Text && (!value || value.trim() === '')) // empty string for text
-      );
-    });
-
-    if (hasEmptyFields) {
-      alert('すべての項目を入力してください');
-      return;
-    }
-
+  const onSubmit = async () => {
     // TODO: APIつなぎこみ
     toast({
       duration: 2000,
@@ -67,51 +54,60 @@ export const DetailsForm = ({ onBack }: { onBack: () => void }) => {
         <Text>住所: {address}</Text>
       </Box>
 
-      {fields.map((field: Field) => {
-        const value = formData.fieldValues[field.name];
-        return (
-          <FormControl key={field.name} mt="4">
-            <FormLabel>{field.name}</FormLabel>
-            {field.type === ItemType.Text && (
-              <Input
-                placeholder={field.name}
-                value={value}
-                onChange={(e) => handleChange(field.name, e.target.value)}
-              />
-            )}
-            {field.type === ItemType.DateTime && (
-              <Input
-                type="datetime-local"
-                value={value}
-                onChange={(e) => handleChange(field.name, e.target.value)}
-              />
-            )}
-            {field.type === ItemType.Photo && (
-              <Input
-                accept="image/*"
-                type="file"
-                onChange={(e) =>
-                  handleChange(field.name, e.target.files?.[0] || null)
-                }
-              />
-            )}
-            {field.type === ItemType.OnOff && (
-              <Switch
-                isChecked={!!value}
-                onChange={(e) => handleChange(field.name, e.target.checked)}
-              />
-            )}
-          </FormControl>
-        );
-      })}
-      <Center>
-        <Button mr="2" mt="4" onClick={onBack}>
-          戻る
-        </Button>
-        <Button colorScheme="teal" mt="4" onClick={handleSubmit}>
-          送信
-        </Button>
-      </Center>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        {fields.map((field: Field) => {
+          const value = formData.fieldValues[field.name];
+          const isInvalid = !!errors[field.name];
+          return (
+            <FormControl key={field.name} isInvalid={isInvalid} mt="4">
+              <FormLabel>{field.name}</FormLabel>
+              {field.type === ItemType.Text && (
+                <Input
+                  placeholder={field.name}
+                  value={value}
+                  {...register(field.name, {
+                    required: `${field.name}を入力してください`,
+                  })}
+                />
+              )}
+              {field.type === ItemType.DateTime && (
+                <Input
+                  type="datetime-local"
+                  {...register(field.name, {
+                    required: `${field.name}を選択してください`,
+                  })}
+                />
+              )}
+              {field.type === ItemType.Photo && (
+                <Input
+                  accept="image/*"
+                  type="file"
+                  {...register(field.name, {
+                    required: `${field.name}をアップロードしてください`,
+                  })}
+                />
+              )}
+              {field.type === ItemType.OnOff && (
+                <Switch
+                  defaultChecked={formData.fieldValues[field.name] || false}
+                  {...register(field.name)}
+                />
+              )}
+              <FormErrorMessage>
+                {errors[field.name] && errors[field.name]?.message}
+              </FormErrorMessage>
+            </FormControl>
+          );
+        })}
+        <Center>
+          <Button mr="2" mt="4" onClick={onBack}>
+            戻る
+          </Button>
+          <Button colorScheme="teal" mt="4" type="submit">
+            送信
+          </Button>
+        </Center>
+      </form>
     </Box>
   );
 };
