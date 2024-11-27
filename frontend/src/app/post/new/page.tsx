@@ -1,11 +1,11 @@
 import { SidebarWithHeader } from '@/components/SidebarWIthHeader';
-import { PostList } from '@/features/post/PostList';
+import { NewPostForm } from '@/features/post/new/NewPostForm';
 
 export default function Home() {
   return (
     <>
       <SidebarWithHeader>
-        <PostList />
+        <NewPostForm />
       </SidebarWithHeader>
     </>
   );

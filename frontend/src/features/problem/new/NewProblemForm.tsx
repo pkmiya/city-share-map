@@ -21,7 +21,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { FiTrash2 } from 'react-icons/fi';
 import { IoAddCircleOutline } from 'react-icons/io5';
 
-import { itemTypes } from './data';
+import { ItemType } from './data';
 
 type FormData = {
   fields: { name: string; type: string }[];
@@ -123,9 +123,9 @@ export const NewProblemForm = () => {
                       <option disabled hidden selected value="">
                         項目を選択
                       </option>
-                      {itemTypes.map((item) => (
-                        <option key={item.id} value={item.name}>
-                          {item.name}
+                      {Object.keys(ItemType).map((index, item) => (
+                        <option key={index} value={item}>
+                          {item}
                         </option>
                       ))}
                     </Select>
