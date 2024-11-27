@@ -1,5 +1,5 @@
 import { SidebarWithHeader } from '@/components/SidebarWIthHeader';
-import { PostList } from '@/features/posts/PostList';
+import { PostList } from '@/features/post/PostList';
 
 export default function Home() {
   return (
