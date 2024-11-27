@@ -16,43 +16,14 @@ mock_id = uuid.UUID("00000000-0000-0000-0000-000000000000") # モック用のID
 @router.get("/", response_model=List[Dict[str, Any]])
 def list_posts_by_citizen(
     db: SessionDep,
-    current_user: CurrentCitizenUser,
-    skip: int = 0,
-    limit: int = 100,
-    is_solved: Optional[bool] = None,
-    is_open: Optional[bool] = None,
-    problem_id: Optional[int] = None
-):
-    """
-    投稿の一覧を取得
-    フィルタリングとページネーションをサポート
-    """
-    filters = {}
-    if is_solved is not None:
-        filters["is_solved"] = is_solved
-    
-    if is_open is not None:
-        filters["is_open"] = is_open
-    
-    if problem_id is not None:
-        filters["problem_id"] = problem_id
-
-    return crud_post.get(
-        db_session=db,
-        skip=skip,
-        limit=limit,
-        filters=filters
-    )
-
-@router.get("/admin", response_model=List[Dict[str, Any]])
-def list_posts_by_admin(
-    db: SessionDep,
+    # current_user: CurrentCitizenUser,
     current_user: CurrentAdminUser,
     skip: int = 0,
     limit: int = 100,
     is_solved: Optional[bool] = None,
     is_open: Optional[bool] = None,
-    problem_id: Optional[int] = None
+    problem_id: Optional[int] = None,
+    user_id: Optional[uuid.UUID] = None
 ):
     """
     投稿の一覧を取得
@@ -67,6 +38,9 @@ def list_posts_by_admin(
     
     if problem_id is not None:
         filters["problem_id"] = problem_id
+    
+    if user_id is not None:
+        filters["user_id"] = user_id
 
     return crud_post.get(
         db_session=db,
@@ -75,27 +49,11 @@ def list_posts_by_admin(
         filters=filters
     )
 
-@router.get("/admin/{problem_id}/{post_id}", response_model=Dict[str, Any])
-def get_post_by_id(
-    problem_id: int,
-    db: SessionDep,
-    current_user: CurrentCitizenUser,
-    post_id: uuid.UUID
-):
-    """
-    IDによる投稿の取得
-    """
-
-    return crud_post.get_by_id(
-        db_session=db,
-        problem_id=problem_id,
-        post_id=post_id
-    )
-
 @router.get("/me", response_model=List[Dict[str, Any]])
 def get_posts_me(
     db: SessionDep,
-    current_user: CurrentCitizenUser,
+    # current_user: CurrentCitizenUser,
+    current_user: CurrentAdminUser,
     skip: int = 0,
     limit: int = 100,
     is_solved: Optional[bool] = None,
@@ -128,7 +86,8 @@ def create_post(
     *,
     db: SessionDep,
     problem_id: int,
-    current_user: CurrentCitizenUser,
+    # current_user: CurrentCitizenUser,
+    current_user: CurrentAdminUser,
     post_in: PostCreate
 ):
     """
@@ -145,7 +104,8 @@ def create_post(
 def get_post_by_id(
     problem_id: int,
     db: SessionDep,
-    current_user: CurrentCitizenUser,
+    # current_user: CurrentCitizenUser,
+    current_user: CurrentAdminUser,
     post_id: uuid.UUID
 ):
     """
@@ -164,7 +124,8 @@ def update_post(
     post_id: uuid.UUID,
     *,
     db: SessionDep,
-    current_user: CurrentCitizenUser,
+    # current_user: CurrentCitizenUser,
+    current_user: CurrentAdminUser,
     update_data: PostUpdate
 ):
     """
@@ -184,7 +145,8 @@ def delete_post(
     problem_id: int,
     post_id: uuid.UUID,
     db: SessionDep,
-    current_user: CurrentCitizenUser,
+    # current_user: CurrentCitizenUser,
+    current_user: CurrentAdminUser,
 ):
     """
     投稿を削除

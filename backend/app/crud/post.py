@@ -3,13 +3,13 @@ from sqlalchemy.ext.automap import automap_base
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from sqlalchemy import Integer, Boolean, DateTime, Text
+from fastapi import HTTPException
 from app.crud.base import CRUDBase
 from app.models.problems import PostBase, Problem, ProblemItem
 from app.schemas.problem import PostCreate, PostUpdate
 from app.models.user import User
 from app.models.user import CitizenUser
 from app.db.db import type_mapping
-from fastapi import HTTPException
 from datetime import datetime
 import uuid
 import decimal
@@ -33,21 +33,7 @@ def validate_datetime(value: str) -> datetime:
     except ValueError:
         return None
 
-class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
-    def get_dynamic_table(self, db_session: Session, problem_id: int) -> Type[PostBase]:
-        """
-        問題IDに対応する動的テーブルをORMモデルとして取得
-        """
-        
-        table_name = f"post_{problem_id}"
-        Base = automap_base()
-        Base.prepare(db_session.get_bind(), reflect=True)
-
-        if table_name in Base.classes:
-            return Base.classes[table_name]
-        else:
-            raise HTTPException(status_code=404, detail=f"テーブル '{table_name}' が見つかりません")
-        
+class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):        
     def validate_post_items(
         self,
         db_session: Session,

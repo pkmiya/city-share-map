@@ -33,6 +33,7 @@ class CitizenUser(Base, CommonColumns):
     name = Column(String)  # ユーザ名
     line_id = Column(String)  # LIFF連携用のID
     is_active = Column(Boolean, default=True)  # 有効かどうか
+    last_login = Column(DateTime)  # 最終ログイン日時
 
     # posts = relationship('PostBase', back_populates='user')
     post_likes = relationship('PostLikeBase', back_populates='user')

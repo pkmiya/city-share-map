@@ -7,7 +7,10 @@ from app.api.deps import SessionDep
 from app.core import security
 from app.core.config import settings
 from app.schemas.token import Token
-
+from app.schemas.user import CitizenUser, CitizenUserRead, CitizenUserUpdate
+from app.api.deps import CurrentAdminUser
+import uuid
+from datetime import datetime
 
 router = APIRouter()
 
@@ -30,6 +33,9 @@ def login_line_user(
         user = crud_citizen_user.create(db_session=session, obj_in=obj_in)
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
+    
+    user = crud_citizen_user.update(session, db_obj=user, obj_in={"last_login": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
+
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return Token(
         access_token=security.create_access_token(
@@ -37,3 +43,36 @@ def login_line_user(
         )
     )
 
+@router.get("/", response_model=List[CitizenUserRead])
+def read_users(
+    session : SessionDep,
+    current_user: CurrentAdminUser,
+    skip: int = 0,
+    limit: int = 100,
+):
+    """
+    Retrieve users.
+    """
+    users = crud_citizen_user.get_multi(session, skip=skip, limit=limit)
+    return users
+    
+
+@router.put("/{user_id}", response_model=CitizenUser)
+def update_user(
+    session : SessionDep,
+    current_user: CurrentAdminUser,
+    user_id: uuid.UUID,
+    is_active: bool
+):
+    """
+    Update a user.
+    """
+    user = crud_citizen_user.get(session, id=user_id)
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="そのユーザーは存在しません",
+        )
+    obj_in = CitizenUserUpdate(is_active=is_active)
+    user = crud_citizen_user.update(session, db_obj=user, obj_in=obj_in)
+    return user

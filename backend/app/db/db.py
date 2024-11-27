@@ -5,10 +5,9 @@ from app.core.config import settings
 from app.schemas.user import UserCreate
 from app.models.problems import Type
 import uuid
-
+from datetime import datetime
 from sqlalchemy.orm import Session
 from app.models.user import CitizenUser
-from app.schemas.user import CitizenUserCreate
 
 # make sure all SQL Alchemy models are imported before initializing DB
 # otherwise, SQL Alchemy might fail to initialize relationships properly
@@ -49,6 +48,22 @@ def init_db(db_session):
                 is_superuser=True,
             )
             user = crud_user.create(db_session, obj_in=user_in)  # noqa: F841
+        
+        citizen_user_data = [
+            {"id": uuid.UUID("00000000-0000-0000-0000-000000000000"), "name": "テストユーザ1", "line_id": "test_user_1", "is_active": True},
+            {"id": uuid.UUID("00000000-1111-0000-0000-000000000000"), "name": "テストユーザ2", "line_id": "test_user_2", "is_active": False},
+            {"id": uuid.UUID("00000000-2222-0000-0000-000000000000"), "name": "テストユーザ3", "line_id": "test_user_3", "is_active": True},
+        ]
+        for data in citizen_user_data:
+            citizen_user = CitizenUser(
+                id=data["id"],
+                name=data["name"],
+                line_id=data["line_id"],
+                is_active=data["is_active"],
+                last_login=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            )
+            db_session.add(citizen_user)
+
         master_data = [
                 {"id": 1, "name": "テキスト"},
                 {"id": 2, "name": "写真"},

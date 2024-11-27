@@ -1,5 +1,5 @@
 from typing import List, Optional, Generic, TypeVar, Type
-
+from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -7,6 +7,7 @@ from app.models.base import Base
 from sqlalchemy import event
 from sqlmodel import Session, select, orm
 from datetime import datetime
+from sqlalchemy.ext.automap import automap_base
 
 
 
@@ -26,6 +27,19 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         * `schema`: A Pydantic model (schema) class
         """
         self.model = model
+    
+    def get_dynamic_table(self, db_session: Session, problem_id: int):
+        """
+        動的テーブルを取得
+        """
+        table_name = f"post_{problem_id}"
+        Base = automap_base()
+        Base.prepare(db_session.get_bind(), reflect=True)
+
+        if table_name in Base.classes:
+            return Base.classes[table_name]
+        else:
+            raise HTTPException(status_code=404, detail=f"テーブル '{table_name}' が見つかりません")
 
     def get(self, db_session: Session, id: int) -> Optional[ModelType]:
         return db_session.query(self.model).filter(self.model.id == id).first()
