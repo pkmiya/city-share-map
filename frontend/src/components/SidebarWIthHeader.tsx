@@ -86,7 +86,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
       borderRightColor={useColorModeValue('gray.200', 'gray.700')}
       h="full"
       pos="fixed"
-      transition="3s ease"
+      transition="width 1s ease"
       w={{ base: 'full', xl: 60 }}
       {...rest}
     >
@@ -312,7 +312,7 @@ export const SidebarWithHeader: React.FC<SidebarWithHeaderProps> = ({
         isOpen={isOpen}
         placement="left"
         returnFocusOnClose={false}
-        size="xs"
+        size="full"
         onClose={onClose}
         onOverlayClick={onClose}
       >
