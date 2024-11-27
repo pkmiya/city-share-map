@@ -64,10 +64,6 @@ export const DetailsForm = ({ onBack }: { onBack: () => void }) => {
     <Box>
       <Box fontSize="sm" mt={4}>
         <Text>テーマ: {problem}</Text>
-        <Text>
-          座標: 緯度 {parseFloat(location.lat.toFixed(5))}, 経度{' '}
-          {parseFloat(location.lng.toFixed(5))}
-        </Text>
         <Text>住所: {address}</Text>
       </Box>
 

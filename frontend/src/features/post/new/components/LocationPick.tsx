@@ -72,12 +72,6 @@ export const LocationPick = ({
           )}
         </Map>
       </Box>
-      <Text mt="2">
-        座標:{' '}
-        {location
-          ? `緯度: ${parseFloat(location.lat.toFixed(5))}, 経度: ${parseFloat(location.lng.toFixed(5))}`
-          : ' 未選択'}
-      </Text>
       <Box mt="2">
         住所: {loading ? '読み込み中...' : address || error || '未選択'}
       </Box>
