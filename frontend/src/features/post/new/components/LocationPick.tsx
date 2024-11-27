@@ -18,13 +18,11 @@ export const LocationPick = ({
   const { formData, setFormData } = usePostContext();
 
   const location = formData.location;
+  const address = formData.address;
 
   const accessToken = Env.mapboxAccessToken;
 
-  const fetchAddress = useGetAddress({
-    lat: location?.lat || 0,
-    lon: location?.lng || 0,
-  });
+  const { error, isLoading: loading, fetchAddress } = useGetAddress();
 
   const initialViewState = {
     latitude: 35.6895,
@@ -32,10 +30,11 @@ export const LocationPick = ({
     zoom: 14,
   };
 
-  const handleMapClick = (event: mapboxgl.MapMouseEvent) => {
+  const handleMapClick = async (event: mapboxgl.MapMouseEvent) => {
     const { lng, lat } = event.lngLat;
     setFormData({ location: { lat, lng } });
-    fetchAddress().then((data) => setFormData({ address: data }));
+    const address = await fetchAddress({ lat, lon: lng });
+    setFormData({ address });
   };
 
   const handleNext = () => {
@@ -48,7 +47,7 @@ export const LocationPick = ({
 
   return (
     <Box>
-      <Text>地図上で位置を選択してください</Text>
+      <Text>地図上で、該当する位置をタップしてしてください</Text>
       <Box
         border="1px solid lightgray"
         borderRadius="md"
@@ -79,7 +78,9 @@ export const LocationPick = ({
           ? `緯度: ${parseFloat(location.lat.toFixed(5))}, 経度: ${parseFloat(location.lng.toFixed(5))}`
           : ' 未選択'}
       </Text>
-      <Text mt="2">住所: {formData.address || '未選択'}</Text>
+      <Box mt="2">
+        住所: {loading ? '読み込み中...' : address || error || '未選択'}
+      </Box>
       <Button mr="2" mt="4" onClick={onBack}>
         戻る
       </Button>
