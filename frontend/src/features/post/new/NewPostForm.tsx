@@ -22,7 +22,10 @@ export const NewPostForm = () => {
       fieldValues: {},
       fields: [],
       location: null,
-      problem: '',
+      problem: {
+        id: 0,
+        name: '',
+      },
     });
   }, []);
 

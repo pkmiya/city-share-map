@@ -15,7 +15,10 @@ export const PostProvider = ({ children }: { children: React.ReactNode }) => {
     fieldValues: {},
     fields: [],
     location: null,
-    problem: '',
+    problem: {
+      id: 0,
+      name: '',
+    },
   });
 
   const setFormData = (data: Partial<FormData>) => {

@@ -18,12 +18,16 @@ import { ItemType } from '@/features/problem/new/data';
 
 import { Field } from '../types';
 
-export const DetailsForm = ({ onBack }: { onBack: () => void }) => {
+type Props = {
+  onBack: () => void;
+};
+
+export const DetailsForm = ({ onBack }: Props) => {
   const router = useRouter();
   const toast = useToast();
   const { formData } = usePostContext();
 
-  const problem = formData.problem || '';
+  const problem = formData.problem.name || '';
   const address = formData.address || '';
   const fields = formData.fields || [];
 
@@ -107,8 +111,8 @@ export const DetailsForm = ({ onBack }: { onBack: () => void }) => {
             </FormControl>
           );
         })}
-        <Center>
-          <Button mr="2" mt="4" onClick={onBack}>
+        <Center mt={4} gap={4}>
+          <Button mt="4" onClick={onBack}>
             戻る
           </Button>
           <Button colorScheme="teal" mt="4" type="submit">

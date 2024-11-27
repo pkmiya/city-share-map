@@ -1,4 +1,4 @@
-import { Box, Button, Text } from '@chakra-ui/react';
+import { Box, Button, Center, Text } from '@chakra-ui/react';
 import mapboxgl from 'mapbox-gl';
 import Map, { Marker } from 'react-map-gl';
 
@@ -8,13 +8,12 @@ import { usePostContext } from '@/context/postProvider';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useGetAddress } from '../hooks/useGetAddress';
 
-export const LocationPick = ({
-  onNext,
-  onBack,
-}: {
+type Props = {
   onBack: () => void;
   onNext: () => void;
-}) => {
+};
+
+export const LocationPick = ({ onNext, onBack }: Props) => {
   const { formData, setFormData } = usePostContext();
 
   const location = formData.location;
@@ -75,12 +74,12 @@ export const LocationPick = ({
       <Box mt="2">
         住所: {loading ? '読み込み中...' : address || error || '未選択'}
       </Box>
-      <Button mr="2" mt="4" onClick={onBack}>
-        戻る
-      </Button>
-      <Button colorScheme="teal" mt="4" onClick={handleNext}>
-        次へ
-      </Button>
+      <Center gap={4} mt={4}>
+        <Button onClick={onBack}>戻る</Button>
+        <Button colorScheme="teal" onClick={handleNext}>
+          次へ
+        </Button>
+      </Center>
     </Box>
   );
 };

@@ -10,7 +10,10 @@ export type FormData = {
   fieldValues: Record<string, any>;
   fields: Field[];
   location: Location | null;
-  problem: string;
+  problem: {
+    id: number;
+    name: string;
+  };
 };
 
 export type Field = {
