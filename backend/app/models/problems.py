@@ -28,6 +28,7 @@ class ProblemItem(Base, CommonColumns):
     problem_id = Column(Integer, ForeignKey('problems.id'), nullable=False)  # FK to problems
     name = Column(String)  # 項目の名前
     type_id = Column(Integer, ForeignKey('types.id'))  # FK to types
+    required = Column(Boolean, default=False)  # 必須かどうか
 
     problem = relationship('Problem', back_populates='problem_items')
     type = relationship('Type')

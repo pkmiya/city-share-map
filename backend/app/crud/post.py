@@ -65,7 +65,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                 )
             
             value = validated_values[item_name]
-            if not value:
+            if not value and problem_item.required:
                 raise HTTPException(
                     status_code=400,
                     detail=f"項目 '{item_name}' が空です"

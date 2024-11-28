@@ -58,6 +58,7 @@ class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):
                     problem_id=db_obj.id,
                     name=item.name,
                     type_id=item.type_id,
+                    required=item.required,
                     created_by=user_id
                 )
                 db_session.add(problem_item)
@@ -110,7 +111,7 @@ class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):
         
         for item in items:
             column_type = type_mapping.get(item.type_id, String(255))
-            dynamic_table.append_column(Column(f'{item.name}', column_type, nullable=True))
+            dynamic_table.append_column(Column(f'{item.name}', column_type, nullable= not item.required))
         
         for column in CommonColumns:
             dynamic_table.append_column(column)

@@ -9,6 +9,7 @@ from typing import Dict, Any
 class ProblemItemBase(BaseModel):
     name: str  # 項目名
     type_id: int = 1 # 項目のデータ型のID
+    required: bool = False  # 必須かどうかのフラグ
 
 class ProblemItemCreate(ProblemItemBase):
     pass
