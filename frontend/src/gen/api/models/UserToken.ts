@@ -16,51 +16,59 @@ import { exists, mapValues } from '../runtime';
 /**
  *
  * @export
- * @interface Token
+ * @interface UserToken
  */
-export interface Token {
+export interface UserToken {
   /**
    *
    * @type {string}
-   * @memberof Token
+   * @memberof UserToken
    */
   accessToken: string;
   /**
    *
    * @type {string}
-   * @memberof Token
+   * @memberof UserToken
+   */
+  idToken: string;
+  /**
+   *
+   * @type {string}
+   * @memberof UserToken
    */
   tokenType?: string;
 }
 
 /**
- * Check if a given object implements the Token interface.
+ * Check if a given object implements the UserToken interface.
  */
-export function instanceOfToken(value: object): boolean {
+export function instanceOfUserToken(value: object): boolean {
   let isInstance = true;
   isInstance = isInstance && 'accessToken' in value;
+  isInstance = isInstance && 'idToken' in value;
 
   return isInstance;
 }
 
-export function TokenFromJSON(json: any): Token {
-  return TokenFromJSONTyped(json, false);
+export function UserTokenFromJSON(json: any): UserToken {
+  return UserTokenFromJSONTyped(json, false);
 }
 
-export function TokenFromJSONTyped(
+export function UserTokenFromJSONTyped(
   json: any,
   ignoreDiscriminator: boolean,
-): Token {
+): UserToken {
   if (json === undefined || json === null) {
     return json;
   }
   return {
     accessToken: json['access_token'],
+    idToken: json['id_token'],
     tokenType: !exists(json, 'token_type') ? undefined : json['token_type'],
   };
 }
 
-export function TokenToJSON(value?: Token | null): any {
+export function UserTokenToJSON(value?: UserToken | null): any {
   if (value === undefined) {
     return undefined;
   }
@@ -69,6 +77,7 @@ export function TokenToJSON(value?: Token | null): any {
   }
   return {
     access_token: value.accessToken,
+    id_token: value.idToken,
     token_type: value.tokenType,
   };
 }

@@ -16,64 +16,52 @@ import { exists, mapValues } from '../runtime';
 /**
  *
  * @export
- * @interface User
+ * @interface UserUpdateMe
  */
-export interface User {
+export interface UserUpdateMe {
   /**
    *
    * @type {string}
-   * @memberof User
+   * @memberof UserUpdateMe
    */
   department?: string | null;
   /**
    *
    * @type {string}
-   * @memberof User
+   * @memberof UserUpdateMe
    */
   email?: string | null;
   /**
    *
    * @type {string}
-   * @memberof User
+   * @memberof UserUpdateMe
    */
   fullName?: string | null;
   /**
    *
-   * @type {number}
-   * @memberof User
+   * @type {string}
+   * @memberof UserUpdateMe
    */
-  id?: number;
-  /**
-   *
-   * @type {boolean}
-   * @memberof User
-   */
-  isActive?: boolean | null;
-  /**
-   *
-   * @type {boolean}
-   * @memberof User
-   */
-  isSuperuser?: boolean | null;
+  password?: string | null;
 }
 
 /**
- * Check if a given object implements the User interface.
+ * Check if a given object implements the UserUpdateMe interface.
  */
-export function instanceOfUser(value: object): boolean {
+export function instanceOfUserUpdateMe(value: object): boolean {
   let isInstance = true;
 
   return isInstance;
 }
 
-export function UserFromJSON(json: any): User {
-  return UserFromJSONTyped(json, false);
+export function UserUpdateMeFromJSON(json: any): UserUpdateMe {
+  return UserUpdateMeFromJSONTyped(json, false);
 }
 
-export function UserFromJSONTyped(
+export function UserUpdateMeFromJSONTyped(
   json: any,
   ignoreDiscriminator: boolean,
-): User {
+): UserUpdateMe {
   if (json === undefined || json === null) {
     return json;
   }
@@ -81,15 +69,11 @@ export function UserFromJSONTyped(
     department: !exists(json, 'department') ? undefined : json['department'],
     email: !exists(json, 'email') ? undefined : json['email'],
     fullName: !exists(json, 'full_name') ? undefined : json['full_name'],
-    id: !exists(json, 'id') ? undefined : json['id'],
-    isActive: !exists(json, 'is_active') ? undefined : json['is_active'],
-    isSuperuser: !exists(json, 'is_superuser')
-      ? undefined
-      : json['is_superuser'],
+    password: !exists(json, 'password') ? undefined : json['password'],
   };
 }
 
-export function UserToJSON(value?: User | null): any {
+export function UserUpdateMeToJSON(value?: UserUpdateMe | null): any {
   if (value === undefined) {
     return undefined;
   }
@@ -100,8 +84,6 @@ export function UserToJSON(value?: User | null): any {
     department: value.department,
     email: value.email,
     full_name: value.fullName,
-    id: value.id,
-    is_active: value.isActive,
-    is_superuser: value.isSuperuser,
+    password: value.password,
   };
 }
