@@ -14,6 +14,11 @@ CONTAINER_NAME="fukuoka-mitou-2024-backend-1"
 GEN_PY_PATH="backend/app/gen.py"
 OUTPUT_FILE="docs/openapi.yml"
 
+# ========================================
+# 1. バックエンドのソースコードから、openapi.ymlを生成
+# ========================================
+echo "[1] Generating openapi.yml..."
+
 # Dockerコンテナ内でPyYAMLをインストール
 docker exec -it $CONTAINER_NAME pip install PyYAML==6.0.2
 
@@ -26,8 +31,22 @@ docker exec -it $CONTAINER_NAME python app/gen.py
 # Dockerコンテナからファイルをローカルにコピー
 docker cp $CONTAINER_NAME:app/app/openapi.yml $OUTPUT_FILE
 
+# ========================================
+# 2. openapi.ymlから、APIクライアントを生成
+# ========================================
+
+echo "[2] Generating API client..."
+
 # APIクライアントを生成
 make generate-api-client
 
+# ========================================
+# 3. 生成されたファイルをフォーマット
+# ========================================
+
+echo "[3] Formatting generated files..."
+
 # ファイルをフォーマット
-cd frontend && yarn format
+cd frontend && yarn format || echo "Error occurred during format. Run format by yourself."
+
+echo "[INFO] gen.sh has finished."
