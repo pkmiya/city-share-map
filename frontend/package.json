@@ -13,7 +13,10 @@
     "lint": "next lint",
     "mock": "prism mock ../docs/openapi.yml -d -p 8080",
     "oas:validate": "cd .. && make validate-api-client",
-    "oas:gen": "cd .. && make generate-api-client"
+    "oas:gen": "cd .. && make generate-api-client",
+    "format": "run-p format:*",
+    "format:eslint": "next lint --ignore-path .gitignore --fix",
+    "format:prettier": "prettier --write --ignore-path .gitignore './**/*.{js,jsx,ts,tsx,json}'"
   },
   "dependencies": {
     "@chakra-ui/react": "^2.8.2",
