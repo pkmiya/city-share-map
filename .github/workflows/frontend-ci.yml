@@ -1,4 +1,4 @@
-name: Gov App CI
+name: Frontend CI
 
 defaults:
   run:
