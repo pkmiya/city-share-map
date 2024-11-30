@@ -15,6 +15,7 @@
 import * as runtime from '../runtime';
 import type {
   HTTPValidationError,
+  LoginRequest,
   Msg,
   NewPassword,
   UserToken,
@@ -22,6 +23,8 @@ import type {
 import {
   HTTPValidationErrorFromJSON,
   HTTPValidationErrorToJSON,
+  LoginRequestFromJSON,
+  LoginRequestToJSON,
   MsgFromJSON,
   MsgToJSON,
   NewPasswordFromJSON,
@@ -30,13 +33,8 @@ import {
   UserTokenToJSON,
 } from '../models';
 
-export interface LoginRequest {
-  password: string;
-  username: string;
-  clientId?: string | null;
-  clientSecret?: string | null;
-  grantType?: string | null;
-  scope?: string;
+export interface LoginOperationRequest {
+  loginRequest: LoginRequest;
 }
 
 export interface RecoverPasswordRequest {
@@ -55,29 +53,24 @@ export interface ResetPasswordRequest {
  */
 export interface LoginApiInterface {
   /**
-   * OAuth2 compatible token login, get an access token for future requests
+   * Token login, get an access token for future requests
    * @summary Login
-   * @param {string} password
-   * @param {string} username
-   * @param {string} [clientId]
-   * @param {string} [clientSecret]
-   * @param {string} [grantType]
-   * @param {string} [scope]
+   * @param {LoginRequest} loginRequest
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof LoginApiInterface
    */
   loginRaw(
-    requestParameters: LoginRequest,
+    requestParameters: LoginOperationRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
   ): Promise<runtime.ApiResponse<UserToken>>;
 
   /**
-   * OAuth2 compatible token login, get an access token for future requests
+   * Token login, get an access token for future requests
    * Login
    */
   login(
-    requestParameters: LoginRequest,
+    requestParameters: LoginOperationRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
   ): Promise<UserToken>;
 
@@ -131,30 +124,20 @@ export interface LoginApiInterface {
  */
 export class LoginApi extends runtime.BaseAPI implements LoginApiInterface {
   /**
-   * OAuth2 compatible token login, get an access token for future requests
+   * Token login, get an access token for future requests
    * Login
    */
   async loginRaw(
-    requestParameters: LoginRequest,
+    requestParameters: LoginOperationRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
   ): Promise<runtime.ApiResponse<UserToken>> {
     if (
-      requestParameters.password === null ||
-      requestParameters.password === undefined
+      requestParameters.loginRequest === null ||
+      requestParameters.loginRequest === undefined
     ) {
       throw new runtime.RequiredError(
-        'password',
-        'Required parameter requestParameters.password was null or undefined when calling login.',
-      );
-    }
-
-    if (
-      requestParameters.username === null ||
-      requestParameters.username === undefined
-    ) {
-      throw new runtime.RequiredError(
-        'username',
-        'Required parameter requestParameters.username was null or undefined when calling login.',
+        'loginRequest',
+        'Required parameter requestParameters.loginRequest was null or undefined when calling login.',
       );
     }
 
@@ -162,43 +145,7 @@ export class LoginApi extends runtime.BaseAPI implements LoginApiInterface {
 
     const headerParameters: runtime.HTTPHeaders = {};
 
-    const consumes: runtime.Consume[] = [
-      { contentType: 'application/x-www-form-urlencoded' },
-    ];
-    // @ts-ignore: canConsumeForm may be unused
-    const canConsumeForm = runtime.canConsumeForm(consumes);
-
-    let formParams: { append(param: string, value: any): any };
-    let useForm = false;
-    if (useForm) {
-      formParams = new FormData();
-    } else {
-      formParams = new URLSearchParams();
-    }
-
-    if (requestParameters.clientId !== undefined) {
-      formParams.append('client_id', requestParameters.clientId as any);
-    }
-
-    if (requestParameters.clientSecret !== undefined) {
-      formParams.append('client_secret', requestParameters.clientSecret as any);
-    }
-
-    if (requestParameters.grantType !== undefined) {
-      formParams.append('grant_type', requestParameters.grantType as any);
-    }
-
-    if (requestParameters.password !== undefined) {
-      formParams.append('password', requestParameters.password as any);
-    }
-
-    if (requestParameters.scope !== undefined) {
-      formParams.append('scope', requestParameters.scope as any);
-    }
-
-    if (requestParameters.username !== undefined) {
-      formParams.append('username', requestParameters.username as any);
-    }
+    headerParameters['Content-Type'] = 'application/json';
 
     const response = await this.request(
       {
@@ -206,7 +153,7 @@ export class LoginApi extends runtime.BaseAPI implements LoginApiInterface {
         method: 'POST',
         headers: headerParameters,
         query: queryParameters,
-        body: formParams,
+        body: LoginRequestToJSON(requestParameters.loginRequest),
       },
       initOverrides,
     );
@@ -217,11 +164,11 @@ export class LoginApi extends runtime.BaseAPI implements LoginApiInterface {
   }
 
   /**
-   * OAuth2 compatible token login, get an access token for future requests
+   * Token login, get an access token for future requests
    * Login
    */
   async login(
-    requestParameters: LoginRequest,
+    requestParameters: LoginOperationRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
   ): Promise<UserToken> {
     const response = await this.loginRaw(requestParameters, initOverrides);

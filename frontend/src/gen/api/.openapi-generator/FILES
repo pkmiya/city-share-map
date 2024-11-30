@@ -12,6 +12,7 @@ models/CitizenUserRead.ts
 models/HTTPValidationError.ts
 models/Latitude.ts
 models/Latitude1.ts
+models/LoginRequest.ts
 models/Longitude.ts
 models/Longitude1.ts
 models/Msg.ts
