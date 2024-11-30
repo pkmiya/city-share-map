@@ -6,3 +6,9 @@ declare module '@line/liff' {
     init: ExtendedInit;
   }
 }
+export interface LiffProfile {
+  displayName: string;
+  pictureUrl?: string;
+  statusMessage?: string;
+  userId: string;
+}
