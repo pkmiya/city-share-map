@@ -1,35 +1,29 @@
 from datetime import timedelta
-from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import HTMLResponse
-from fastapi.security import OAuth2PasswordRequestForm
-
-from app.crud.user import crud_user
-from app.api.deps import  SessionDep
+from app.api.deps import SessionDep
 from app.core import security
 from app.core.config import settings
 from app.core.security import get_password_hash
-from app.schemas.token import UserToken, NewPassword
+from app.crud.user import crud_user
+from app.schemas.login import LoginRequest
 from app.schemas.msg import Msg
-from app.schemas.user import User
-from app.utils import (
-    generate_password_reset_token,
-    generate_reset_password_email,
-    send_email,
-    verify_password_reset_token,
-)
+from app.schemas.token import NewPassword, UserToken
+from app.utils import (generate_password_reset_token,
+                       generate_reset_password_email, send_email,
+                       verify_password_reset_token)
+from fastapi import APIRouter, HTTPException
 
 router = APIRouter()
 
 
 @router.post("/")
 def login(
-    session: SessionDep, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+    session: SessionDep, form_data: LoginRequest
 ) -> UserToken:
     """
-    OAuth2 compatible token login, get an access token for future requests
+    Token login, get an access token for future requests
     """
+    # NOTE: OAuth2PasswordRequestForm は application/x-www-form-urlencoded を受け取るが、application/json を受け取るようにしたいので、LoginRequest を利用
     user = crud_user.authenticate(
         db_session=session, email=form_data.username, password=form_data.password
     )

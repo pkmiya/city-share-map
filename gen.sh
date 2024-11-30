@@ -19,12 +19,6 @@ OUTPUT_FILE="docs/openapi.yml"
 # ========================================
 echo "[1] Generating openapi.yml..."
 
-# Dockerコンテナ内でPyYAMLをインストール
-docker exec -it $CONTAINER_NAME pip install PyYAML==6.0.2
-
-# ローカルファイルをDockerコンテナにコピー
-docker cp $GEN_PY_PATH $CONTAINER_NAME:app/app/gen.py
-
 # Dockerコンテナ内でPythonスクリプトを実行
 docker exec -it $CONTAINER_NAME python app/gen.py
 
