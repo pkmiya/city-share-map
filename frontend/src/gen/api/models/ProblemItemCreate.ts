@@ -16,66 +16,51 @@ import { exists, mapValues } from '../runtime';
 /**
  *
  * @export
- * @interface Problem
+ * @interface ProblemItemCreate
  */
-export interface Problem {
+export interface ProblemItemCreate {
   /**
    *
    * @type {string}
-   * @memberof Problem
+   * @memberof ProblemItemCreate
    */
-  description?: string | null;
+  name: string;
   /**
    *
    * @type {number}
-   * @memberof Problem
+   * @memberof ProblemItemCreate
    */
-  id: number;
-  /**
-   *
-   * @type {boolean}
-   * @memberof Problem
-   */
-  isOpen?: boolean;
-  /**
-   *
-   * @type {string}
-   * @memberof Problem
-   */
-  name: string;
+  typeId?: number;
 }
 
 /**
- * Check if a given object implements the Problem interface.
+ * Check if a given object implements the ProblemItemCreate interface.
  */
-export function instanceOfProblem(value: object): boolean {
+export function instanceOfProblemItemCreate(value: object): boolean {
   let isInstance = true;
-  isInstance = isInstance && 'id' in value;
   isInstance = isInstance && 'name' in value;
 
   return isInstance;
 }
 
-export function ProblemFromJSON(json: any): Problem {
-  return ProblemFromJSONTyped(json, false);
+export function ProblemItemCreateFromJSON(json: any): ProblemItemCreate {
+  return ProblemItemCreateFromJSONTyped(json, false);
 }
 
-export function ProblemFromJSONTyped(
+export function ProblemItemCreateFromJSONTyped(
   json: any,
   ignoreDiscriminator: boolean,
-): Problem {
+): ProblemItemCreate {
   if (json === undefined || json === null) {
     return json;
   }
   return {
-    description: !exists(json, 'description') ? undefined : json['description'],
-    id: json['id'],
-    isOpen: !exists(json, 'is_open') ? undefined : json['is_open'],
     name: json['name'],
+    typeId: !exists(json, 'type_id') ? undefined : json['type_id'],
   };
 }
 
-export function ProblemToJSON(value?: Problem | null): any {
+export function ProblemItemCreateToJSON(value?: ProblemItemCreate | null): any {
   if (value === undefined) {
     return undefined;
   }
@@ -83,9 +68,7 @@ export function ProblemToJSON(value?: Problem | null): any {
     return null;
   }
   return {
-    description: value.description,
-    id: value.id,
-    is_open: value.isOpen,
     name: value.name,
+    type_id: value.typeId,
   };
 }

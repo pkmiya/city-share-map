@@ -16,57 +16,64 @@ import { exists, mapValues } from '../runtime';
 /**
  *
  * @export
- * @interface ProblemUpdate
+ * @interface CitizenUser
  */
-export interface ProblemUpdate {
+export interface CitizenUser {
   /**
    *
    * @type {string}
-   * @memberof ProblemUpdate
+   * @memberof CitizenUser
    */
-  description?: string | null;
+  id?: string;
   /**
    *
    * @type {boolean}
-   * @memberof ProblemUpdate
+   * @memberof CitizenUser
    */
-  isOpen?: boolean | null;
+  isActive?: boolean | null;
   /**
    *
    * @type {string}
-   * @memberof ProblemUpdate
+   * @memberof CitizenUser
+   */
+  lineId?: string | null;
+  /**
+   *
+   * @type {string}
+   * @memberof CitizenUser
    */
   name?: string | null;
 }
 
 /**
- * Check if a given object implements the ProblemUpdate interface.
+ * Check if a given object implements the CitizenUser interface.
  */
-export function instanceOfProblemUpdate(value: object): boolean {
+export function instanceOfCitizenUser(value: object): boolean {
   let isInstance = true;
 
   return isInstance;
 }
 
-export function ProblemUpdateFromJSON(json: any): ProblemUpdate {
-  return ProblemUpdateFromJSONTyped(json, false);
+export function CitizenUserFromJSON(json: any): CitizenUser {
+  return CitizenUserFromJSONTyped(json, false);
 }
 
-export function ProblemUpdateFromJSONTyped(
+export function CitizenUserFromJSONTyped(
   json: any,
   ignoreDiscriminator: boolean,
-): ProblemUpdate {
+): CitizenUser {
   if (json === undefined || json === null) {
     return json;
   }
   return {
-    description: !exists(json, 'description') ? undefined : json['description'],
-    isOpen: !exists(json, 'is_open') ? undefined : json['is_open'],
+    id: !exists(json, 'id') ? undefined : json['id'],
+    isActive: !exists(json, 'is_active') ? undefined : json['is_active'],
+    lineId: !exists(json, 'line_id') ? undefined : json['line_id'],
     name: !exists(json, 'name') ? undefined : json['name'],
   };
 }
 
-export function ProblemUpdateToJSON(value?: ProblemUpdate | null): any {
+export function CitizenUserToJSON(value?: CitizenUser | null): any {
   if (value === undefined) {
     return undefined;
   }
@@ -74,8 +81,9 @@ export function ProblemUpdateToJSON(value?: ProblemUpdate | null): any {
     return null;
   }
   return {
-    description: value.description,
-    is_open: value.isOpen,
+    id: value.id,
+    is_active: value.isActive,
+    line_id: value.lineId,
     name: value.name,
   };
 }

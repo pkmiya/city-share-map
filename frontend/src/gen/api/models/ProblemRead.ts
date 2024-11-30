@@ -16,66 +16,82 @@ import { exists, mapValues } from '../runtime';
 /**
  *
  * @export
- * @interface Problem
+ * @interface ProblemRead
  */
-export interface Problem {
+export interface ProblemRead {
+  /**
+   *
+   * @type {Date}
+   * @memberof ProblemRead
+   */
+  createdAt: Date | null;
   /**
    *
    * @type {string}
-   * @memberof Problem
+   * @memberof ProblemRead
    */
   description?: string | null;
   /**
    *
    * @type {number}
-   * @memberof Problem
+   * @memberof ProblemRead
    */
   id: number;
   /**
    *
    * @type {boolean}
-   * @memberof Problem
+   * @memberof ProblemRead
    */
   isOpen?: boolean;
   /**
    *
    * @type {string}
-   * @memberof Problem
+   * @memberof ProblemRead
    */
   name: string;
+  /**
+   *
+   * @type {number}
+   * @memberof ProblemRead
+   */
+  postCount?: number | null;
 }
 
 /**
- * Check if a given object implements the Problem interface.
+ * Check if a given object implements the ProblemRead interface.
  */
-export function instanceOfProblem(value: object): boolean {
+export function instanceOfProblemRead(value: object): boolean {
   let isInstance = true;
+  isInstance = isInstance && 'createdAt' in value;
   isInstance = isInstance && 'id' in value;
   isInstance = isInstance && 'name' in value;
 
   return isInstance;
 }
 
-export function ProblemFromJSON(json: any): Problem {
-  return ProblemFromJSONTyped(json, false);
+export function ProblemReadFromJSON(json: any): ProblemRead {
+  return ProblemReadFromJSONTyped(json, false);
 }
 
-export function ProblemFromJSONTyped(
+export function ProblemReadFromJSONTyped(
   json: any,
   ignoreDiscriminator: boolean,
-): Problem {
+): ProblemRead {
   if (json === undefined || json === null) {
     return json;
   }
   return {
+    createdAt:
+      json['created_at'] === null ? null : new Date(json['created_at']),
     description: !exists(json, 'description') ? undefined : json['description'],
     id: json['id'],
     isOpen: !exists(json, 'is_open') ? undefined : json['is_open'],
     name: json['name'],
+    postCount: !exists(json, 'post_count') ? undefined : json['post_count'],
   };
 }
 
-export function ProblemToJSON(value?: Problem | null): any {
+export function ProblemReadToJSON(value?: ProblemRead | null): any {
   if (value === undefined) {
     return undefined;
   }
@@ -83,9 +99,11 @@ export function ProblemToJSON(value?: Problem | null): any {
     return null;
   }
   return {
+    created_at: value.createdAt === null ? null : value.createdAt.toISOString(),
     description: value.description,
     id: value.id,
     is_open: value.isOpen,
     name: value.name,
+    post_count: value.postCount,
   };
 }
