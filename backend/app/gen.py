@@ -29,7 +29,7 @@ def format_paths(paths: dict) -> dict:
 
 
 if __name__ == "__main__":
-    export_path = "openapi.yml"
+    export_path = "app/openapi.yml"
     
     api_json = app.openapi()
     formatted_api_json = {**api_json, "paths": format_paths(api_json["paths"])}
