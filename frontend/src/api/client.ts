@@ -15,5 +15,5 @@ const config = new api.Configuration({
 });
 
 export const loginApi = new api.LoginApi(config);
-export const problemsApi = new api.ProblemsApi(config);
+export const problemsApi = new api.ProblemApi(config);
 export const usersApi = new api.UsersApi(config);
