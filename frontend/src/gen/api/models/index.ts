@@ -5,6 +5,7 @@ export * from './CitizenUserRead';
 export * from './HTTPValidationError';
 export * from './Latitude';
 export * from './Latitude1';
+export * from './LoginRequest';
 export * from './Longitude';
 export * from './Longitude1';
 export * from './Msg';
