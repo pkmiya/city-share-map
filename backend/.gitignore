@@ -8,4 +8,5 @@ htmlcov
 .venv
 .env*
 !.env.example
-
+venv
+.DS_Store
