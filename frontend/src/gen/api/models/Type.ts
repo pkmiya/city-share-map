@@ -16,39 +16,27 @@ import { exists, mapValues } from '../runtime';
 /**
  *
  * @export
- * @interface Problem
+ * @interface Type
  */
-export interface Problem {
-  /**
-   *
-   * @type {string}
-   * @memberof Problem
-   */
-  description?: string | null;
+export interface Type {
   /**
    *
    * @type {number}
-   * @memberof Problem
+   * @memberof Type
    */
   id: number;
   /**
    *
-   * @type {boolean}
-   * @memberof Problem
-   */
-  isOpen?: boolean;
-  /**
-   *
    * @type {string}
-   * @memberof Problem
+   * @memberof Type
    */
   name: string;
 }
 
 /**
- * Check if a given object implements the Problem interface.
+ * Check if a given object implements the Type interface.
  */
-export function instanceOfProblem(value: object): boolean {
+export function instanceOfType(value: object): boolean {
   let isInstance = true;
   isInstance = isInstance && 'id' in value;
   isInstance = isInstance && 'name' in value;
@@ -56,26 +44,24 @@ export function instanceOfProblem(value: object): boolean {
   return isInstance;
 }
 
-export function ProblemFromJSON(json: any): Problem {
-  return ProblemFromJSONTyped(json, false);
+export function TypeFromJSON(json: any): Type {
+  return TypeFromJSONTyped(json, false);
 }
 
-export function ProblemFromJSONTyped(
+export function TypeFromJSONTyped(
   json: any,
   ignoreDiscriminator: boolean,
-): Problem {
+): Type {
   if (json === undefined || json === null) {
     return json;
   }
   return {
-    description: !exists(json, 'description') ? undefined : json['description'],
     id: json['id'],
-    isOpen: !exists(json, 'is_open') ? undefined : json['is_open'],
     name: json['name'],
   };
 }
 
-export function ProblemToJSON(value?: Problem | null): any {
+export function TypeToJSON(value?: Type | null): any {
   if (value === undefined) {
     return undefined;
   }
@@ -83,9 +69,7 @@ export function ProblemToJSON(value?: Problem | null): any {
     return null;
   }
   return {
-    description: value.description,
     id: value.id,
-    is_open: value.isOpen,
     name: value.name,
   };
 }

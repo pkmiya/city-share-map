@@ -16,52 +16,52 @@ import { exists, mapValues } from '../runtime';
 /**
  *
  * @export
- * @interface UserUpdate
+ * @interface LoginRequest
  */
-export interface UserUpdate {
+export interface LoginRequest {
   /**
    *
-   * @type {boolean}
-   * @memberof UserUpdate
+   * @type {string}
+   * @memberof LoginRequest
    */
-  isActive?: boolean | null;
+  password: string;
   /**
    *
-   * @type {boolean}
-   * @memberof UserUpdate
+   * @type {string}
+   * @memberof LoginRequest
    */
-  isSuperuser?: boolean | null;
+  username: string;
 }
 
 /**
- * Check if a given object implements the UserUpdate interface.
+ * Check if a given object implements the LoginRequest interface.
  */
-export function instanceOfUserUpdate(value: object): boolean {
+export function instanceOfLoginRequest(value: object): boolean {
   let isInstance = true;
+  isInstance = isInstance && 'password' in value;
+  isInstance = isInstance && 'username' in value;
 
   return isInstance;
 }
 
-export function UserUpdateFromJSON(json: any): UserUpdate {
-  return UserUpdateFromJSONTyped(json, false);
+export function LoginRequestFromJSON(json: any): LoginRequest {
+  return LoginRequestFromJSONTyped(json, false);
 }
 
-export function UserUpdateFromJSONTyped(
+export function LoginRequestFromJSONTyped(
   json: any,
   ignoreDiscriminator: boolean,
-): UserUpdate {
+): LoginRequest {
   if (json === undefined || json === null) {
     return json;
   }
   return {
-    isActive: !exists(json, 'is_active') ? undefined : json['is_active'],
-    isSuperuser: !exists(json, 'is_superuser')
-      ? undefined
-      : json['is_superuser'],
+    password: json['password'],
+    username: json['username'],
   };
 }
 
-export function UserUpdateToJSON(value?: UserUpdate | null): any {
+export function LoginRequestToJSON(value?: LoginRequest | null): any {
   if (value === undefined) {
     return undefined;
   }
@@ -69,7 +69,7 @@ export function UserUpdateToJSON(value?: UserUpdate | null): any {
     return null;
   }
   return {
-    is_active: value.isActive,
-    is_superuser: value.isSuperuser,
+    password: value.password,
+    username: value.username,
   };
 }
