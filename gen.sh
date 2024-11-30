@@ -23,7 +23,7 @@ echo "[1] Generating openapi.yml..."
 docker exec -it $CONTAINER_NAME python app/gen.py
 
 # Dockerコンテナからファイルをローカルにコピー
-docker cp $CONTAINER_NAME:app/app/openapi.yml $OUTPUT_FILE
+docker cp $CONTAINER_NAME:app/openapi.yml $OUTPUT_FILE
 
 # ========================================
 # 2. openapi.ymlから、APIクライアントを生成
