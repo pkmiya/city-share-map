@@ -1,4 +1,4 @@
-name: CI
+name: Backend CI
 
 defaults:
   run:
@@ -34,7 +34,7 @@ jobs:
           pip install flake8
 
       - name: Run flake8
-        run: flake8 ./backend
+        run: flake8 ./
 
   type-check:
     name: Type Check
@@ -54,4 +54,4 @@ jobs:
           pip install mypy
 
       - name: Run mypy
-        run: mypy ./backend
+        run: mypy ./
