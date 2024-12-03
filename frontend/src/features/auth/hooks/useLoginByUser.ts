@@ -1,0 +1,54 @@
+import { useToast } from '@chakra-ui/react';
+import { useMutation } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
+
+import { usersApi } from '@/api/client';
+import { useLiff } from '@/context/liffProvider';
+import { LoginLineUserRequest, Token } from '@/gen/api';
+import queryClient from '@/lib/react-query';
+import { getErrorStatus } from '@/utils/error';
+
+import { LOCAL_STORAGE_KEYS } from '../constants/localStoageKey';
+import { userKeys } from '../constants/queryKey';
+import { UserRole } from '../constants/role';
+
+export const useLoginByUser = () => {
+  const router = useRouter();
+  const toast = useToast();
+  const { setUserRole } = useLiff();
+
+  const mutation = useMutation({
+    mutationFn: async (req: LoginLineUserRequest) => {
+      const res = await usersApi.loginLineUser(req);
+      return res;
+    },
+    onError: (error) => {
+      toast({
+        description: `${getErrorStatus(error)}エラー; ${error.message}`,
+        duration: 10000,
+        position: 'bottom-right',
+        status: 'error',
+        title: 'ログインに失敗しました',
+      });
+    },
+    onSuccess: async (res: Token) => {
+      const { accessToken } = res;
+
+      setUserRole && setUserRole(UserRole.Citizen);
+      localStorage.setItem(LOCAL_STORAGE_KEYS.accessToken, accessToken);
+      queryClient.setQueryData(userKeys.user, {
+        accessToken,
+      });
+
+      await router.push('/home');
+      toast({
+        duration: 2000,
+        position: 'bottom-right',
+        status: 'success',
+        title: 'ログインに成功しました',
+      });
+    },
+  });
+
+  return mutation;
+};

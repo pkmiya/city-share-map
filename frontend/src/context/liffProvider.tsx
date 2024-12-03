@@ -1,9 +1,11 @@
 // c.f. https://developers.line.biz/ja/docs/liff/cli-tool-create-liff-app/
 
+import { useToast } from '@chakra-ui/react';
 import LiffMockPlugin from '@line/liff-mock';
 import {
   createContext,
   ReactNode,
+  SetStateAction,
   useCallback,
   useContext,
   useEffect,
@@ -11,6 +13,8 @@ import {
   useState,
 } from 'react';
 
+import { UserRoleType } from '@/features/auth/constants/role';
+import { useLoginByUser } from '@/features/auth/hooks/useLoginByUser';
 import { generateLiffConfig, isLiffDevice } from '@/liff/liff';
 
 import type { Liff } from '@line/liff';
@@ -19,17 +23,24 @@ interface LiffContextProps {
   liffError: string | null;
   liffLogout: () => void;
   liffObject: Liff | null;
+  setUserRole?: (role: SetStateAction<UserRoleType | undefined>) => void;
+  userRole?: UserRoleType;
 }
 
 const LiffContext = createContext<LiffContextProps>({
   liffError: null,
   liffLogout: () => {},
   liffObject: null,
+  setUserRole: () => {},
+  userRole: undefined,
 });
 
 export const LiffProvider = ({ children }: { children: ReactNode }) => {
   const [liffObject, setLiffObject] = useState<Liff | null>(null);
   const [liffError, setLiffError] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<UserRoleType | undefined>(undefined);
+  const { mutate: loginByUser } = useLoginByUser();
+  const toast = useToast();
 
   const isLiffRef = useRef(true);
 
@@ -56,6 +67,23 @@ export const LiffProvider = ({ children }: { children: ReactNode }) => {
           .catch((error: Error) => {
             console.log('LIFF init failed.');
             setLiffError(error.toString());
+          })
+          .then(() => {
+            const lineId = liff.getDecodedIDToken()?.sub;
+            if (lineId != null) {
+              toast({
+                description: 'line id: ' + lineId,
+                duration: 10000,
+                position: 'top',
+                status: 'info',
+              });
+              loginByUser({
+                idToken: lineId,
+              });
+            }
+          })
+          .catch((error) => {
+            console.error('Failed to login by user:', error);
           });
       });
   }, []);
@@ -76,7 +104,15 @@ export const LiffProvider = ({ children }: { children: ReactNode }) => {
   }, [liffObject]);
 
   return (
-    <LiffContext.Provider value={{ liffError, liffLogout, liffObject }}>
+    <LiffContext.Provider
+      value={{
+        liffError,
+        liffLogout,
+        liffObject,
+        setUserRole,
+        userRole,
+      }}
+    >
       {children}
     </LiffContext.Provider>
   );

@@ -41,6 +41,7 @@ import { GrUserAdmin } from 'react-icons/gr';
 
 import { appMetadata } from '@/config/metadata';
 import { useLiff } from '@/context/liffProvider';
+import { useLogout } from '@/features/auth/hooks/useLogout';
 
 interface LinkItemProps {
   href?: string;
@@ -68,13 +69,14 @@ interface SidebarWithHeaderProps {
 }
 
 const LinkItems: Array<LinkItemProps> = [
-  { href: '/', icon: FiHome, name: 'ホーム' },
+  { href: '/admin-home/', icon: FiHome, name: 'ホーム' },
   { href: '/map/', icon: FiMap, name: 'マップ' },
   { href: '/post/', icon: FaList, name: '投稿一覧' },
   { href: '/problem/new/', icon: FiPlusSquare, name: '新規課題' },
   { href: '/problem/', icon: GoMegaphone, name: '課題一覧' },
   { href: '/user/', icon: FiUsers, name: '市民ユーザ一覧' },
   { href: '/admin/', icon: GrUserAdmin, name: '管理者ユーザ一覧' },
+  { href: '/home/', icon: FiHome, name: 'ホーム' },
   { href: '/post/new/', icon: FiPlusSquare, name: '新規投稿' },
 ];
 
@@ -185,6 +187,7 @@ const NavItem = ({ icon, href, onClick, children, ...rest }: NavItemProps) => {
 const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
   // NOTE: テスト感覚として、ユーザ名を取得して表示している
   const { liffObject } = useLiff();
+  const logout = useLogout();
   const [userName, setUserName] = useState<string | null>(null);
 
   useEffect(() => {
@@ -288,7 +291,13 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
               <MenuItem>プロフィール</MenuItem>
               <MenuItem>設定</MenuItem>
               <MenuDivider />
-              <MenuItem>ログアウト</MenuItem>
+              <MenuItem
+                onClick={() => {
+                  logout();
+                }}
+              >
+                ログアウト
+              </MenuItem>
             </MenuList>
           </Menu>
         </Flex>

@@ -33,6 +33,7 @@
     "framer-motion": "^11.3.8",
     "isomorphic-fetch": "3.0.0",
     "jotai": "^2.9.1",
+    "jwt-decode": "^4.0.0",
     "mapbox-gl": "^3.7.0",
     "next": "14.2.5",
     "npm-run-all": "^4.1.5",
