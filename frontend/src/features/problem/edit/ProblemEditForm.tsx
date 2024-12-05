@@ -18,6 +18,8 @@ import {
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 
+import { pagesPath } from '@/gen/$path';
+
 type FormData = {
   fields: { name: string; type: string }[];
   isOpen: boolean;
@@ -39,7 +41,7 @@ export const EditProblemForm = ({ initialData }: { initialData: FormData }) => {
   const onSubmit = async (data: FormData) => {
     // TODO: APIつなぎこみ
     console.log('Updated Data:', data);
-    await router.push('/problem');
+    await router.push(pagesPath.staff.problem.$url().pathname);
     toast({
       duration: 2000,
       isClosable: true,

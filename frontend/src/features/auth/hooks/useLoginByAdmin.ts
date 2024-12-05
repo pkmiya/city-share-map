@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 
 import { loginApi } from '@/api/client';
 import { useLiff } from '@/context/liffProvider';
+import { pagesPath } from '@/gen/$path';
 import { LoginOperationRequest, UserToken } from '@/gen/api';
 import queryClient from '@/lib/react-query';
 import { getErrorStatus } from '@/utils/error';
@@ -44,7 +45,7 @@ export const useLoginByAdmin = () => {
         accessToken,
       });
 
-      await router.push('/admin-home');
+      await router.push(pagesPath.staff.home.$url().pathname);
       toast({
         duration: 2000,
         position: 'bottom-right',
