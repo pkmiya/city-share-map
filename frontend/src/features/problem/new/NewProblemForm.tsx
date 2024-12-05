@@ -21,8 +21,6 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { FiTrash2 } from 'react-icons/fi';
 import { IoAddCircleOutline } from 'react-icons/io5';
 
-import { pagesPath } from '@/gen/$path';
-
 import { ItemType } from './data';
 
 type FormData = {
@@ -55,7 +53,8 @@ export const NewProblemForm = () => {
 
   const onSubmit = async (data: FormData) => {
     // TODO: APIつなぎこみ
-    await router.push(pagesPath.staff.problem.$url().pathname);
+    console.log('Submitted Data:', data);
+    await router.push('/problem');
     toast({
       duration: 2000,
       isClosable: true,

@@ -19,8 +19,6 @@ import { FaList } from 'react-icons/fa';
 import { FiMap } from 'react-icons/fi';
 import { MdEdit } from 'react-icons/md';
 
-import { pagesPath } from '@/gen/$path';
-
 import { problems } from './data';
 
 export const ProblemList = () => {
@@ -59,10 +57,8 @@ export const ProblemList = () => {
                           size="sm"
                           variant="solid"
                           onClick={() => {
-                            router.push(
-                              pagesPath.staff.problem._problemId(id).edit.$url()
-                                .pathname,
-                            );
+                            // TODO: 編集画面への遷移。ダミーデータ
+                            router.push('/problem/1/edit');
                           }}
                         >
                           編集

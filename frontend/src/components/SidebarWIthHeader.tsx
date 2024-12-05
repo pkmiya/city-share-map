@@ -41,9 +41,7 @@ import { GrUserAdmin } from 'react-icons/gr';
 
 import { appMetadata } from '@/config/metadata';
 import { useLiff } from '@/context/liffProvider';
-import { UserRole } from '@/features/auth/constants/role';
 import { useLogout } from '@/features/auth/hooks/useLogout';
-import { pagesPath } from '@/gen/$path';
 
 interface LinkItemProps {
   href?: string;
@@ -71,75 +69,18 @@ interface SidebarWithHeaderProps {
 }
 
 const LinkItems: Array<LinkItemProps> = [
-  {
-    href: pagesPath.staff.home.$url().pathname,
-    icon: FiHome,
-    name: 'ホーム',
-  },
-  {
-    href: pagesPath.staff.map.$url().pathname,
-    icon: FiMap,
-    name: 'マップ',
-  },
-  {
-    href: pagesPath.staff.post.$url().pathname,
-    icon: FaList,
-    name: '投稿一覧',
-  },
-  {
-    href: pagesPath.staff.problem.new.$url().pathname,
-    icon: FiPlusSquare,
-    name: '新規課題',
-  },
-  {
-    href: pagesPath.staff.problem.$url().pathname,
-    icon: GoMegaphone,
-    name: '課題一覧',
-  },
-  {
-    href: pagesPath.staff.user.$url().pathname,
-    icon: FiUsers,
-    name: '市民ユーザ一覧',
-  },
-  {
-    href: pagesPath.staff.admin.$url().pathname,
-    icon: GrUserAdmin,
-    name: '管理者ユーザ一覧',
-  },
-  {
-    href: pagesPath.home.$url().pathname,
-    icon: FiHome,
-    name: 'ホーム',
-  },
-  {
-    href: pagesPath.map.$url().pathname,
-    icon: FiMap,
-    name: 'マップ',
-  },
-  {
-    href: pagesPath.post.new.$url().pathname,
-    icon: FiPlusSquare,
-    name: '新規投稿',
-  },
+  { href: '/admin-home/', icon: FiHome, name: 'ホーム' },
+  { href: '/map/', icon: FiMap, name: 'マップ' },
+  { href: '/post/', icon: FaList, name: '投稿一覧' },
+  { href: '/problem/new/', icon: FiPlusSquare, name: '新規課題' },
+  { href: '/problem/', icon: GoMegaphone, name: '課題一覧' },
+  { href: '/user/', icon: FiUsers, name: '市民ユーザ一覧' },
+  { href: '/admin/', icon: GrUserAdmin, name: '管理者ユーザ一覧' },
+  { href: '/home/', icon: FiHome, name: 'ホーム' },
+  { href: '/post/new/', icon: FiPlusSquare, name: '新規投稿' },
 ];
 
 const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
-  const { userRole } = useLiff();
-
-  let redirectPath: string;
-  switch (userRole) {
-    case UserRole.Staff:
-    case UserRole.Admin:
-      redirectPath = pagesPath.staff.home.$url().pathname;
-      break;
-    case UserRole.Citizen:
-      redirectPath = pagesPath.home.$url().pathname;
-      break;
-    default:
-      redirectPath = pagesPath.$url().pathname;
-      break;
-  }
-
   return (
     <Box
       bg={useColorModeValue('white', 'gray.900')}
@@ -154,8 +95,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
       <Flex alignItems="center" h="20" justifyContent="space-between" mx="8">
         {/* TODO: ロゴを配置 */}
         {/* <Image alt="app_logo" height="36px" src="/app_logo.png" /> */}
-        {/* TODO:  */}
-        <Link href={redirectPath}>
+        <Link href="/">
           <Text fontWeight="bold">{String(appMetadata.title)}</Text>
         </Link>
         <CloseButton display={{ base: 'flex', xl: 'none' }} onClick={onClose} />
@@ -245,22 +185,6 @@ const NavItem = ({ icon, href, onClick, children, ...rest }: NavItemProps) => {
 };
 
 const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
-  const { userRole } = useLiff();
-
-  let redirectPath: string;
-  switch (userRole) {
-    case UserRole.Staff:
-    case UserRole.Admin:
-      redirectPath = pagesPath.staff.home.$url().pathname;
-      break;
-    case UserRole.Citizen:
-      redirectPath = pagesPath.home.$url().pathname;
-      break;
-    default:
-      redirectPath = pagesPath.$url().pathname;
-      break;
-  }
-
   // NOTE: テスト感覚として、ユーザ名を取得して表示している
   const { liffObject } = useLiff();
   const logout = useLogout();
@@ -320,7 +244,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
       <Box display={{ base: 'flex', xl: 'none' }}>
         {/* TODO: ロゴを配置 */}
         {/* <Image alt="app_logo" height="36px" src="/app_logo.png" /> */}
-        <Link href={redirectPath}>
+        <Link href="/">
           <Text fontWeight="bold">{String(appMetadata.title)}</Text>
         </Link>
       </Box>

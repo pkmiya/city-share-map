@@ -15,7 +15,6 @@ import { useForm } from 'react-hook-form';
 
 import { usePostContext } from '@/context/postProvider';
 import { ItemType } from '@/features/problem/new/data';
-import { pagesPath } from '@/gen/$path';
 
 import { Field } from '../types';
 
@@ -49,7 +48,7 @@ export const DetailsForm = ({ onBack }: Props) => {
       title: 'レポートを投稿しました',
     });
     console.log(formData);
-    await router.push(pagesPath.map.$url().pathname);
+    await router.push('/map');
   };
 
   return (
