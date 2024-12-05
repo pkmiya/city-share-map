@@ -66,14 +66,14 @@ async def get_line_info(id_token: str):
         response = await client.post(verify_url, params=params)
 
     if response.status_code != 200:
-        raise HTTPException(status_code=400, detail="Invalid ID token")
+        raise HTTPException(status_code=400, detail=f"LINE認証に失敗しました:{response.text}")
 
     user_info = response.json()
     line_id = user_info.get("sub")
     name = user_info.get("name")
 
     if not line_id:
-        raise HTTPException(status_code=400, detail="LINE ID not found")
+        raise HTTPException(status_code=404, detail="LINE IDが取得できませんでした")
 
     return {
         "line_id": line_id,

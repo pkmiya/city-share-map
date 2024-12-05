@@ -1,7 +1,6 @@
 from typing import Optional, List
 
 from sqlalchemy.orm import Session
-from fastapi import HTTPException
 from sqlalchemy import func
 from app.models.problems import Problem
 from app.models.user import CitizenUser
@@ -53,6 +52,13 @@ class CRUDCitizenUser(CRUDBase[CitizenUser, CitizenUserCreate, CitizenUserUpdate
             name=obj_in.name,
             is_active=obj_in.is_active
         )
+        db_session.add(db_obj)
+        db_session.commit()
+        db_session.refresh(db_obj)
+        return db_obj
+    
+    def update_last_login(self, db_session: Session, *, db_obj: CitizenUser, obj_in: dict) -> CitizenUser:
+        db_obj.last_login = obj_in["last_login"]
         db_session.add(db_obj)
         db_session.commit()
         db_session.refresh(db_obj)
