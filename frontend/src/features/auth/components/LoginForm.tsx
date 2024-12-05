@@ -27,7 +27,6 @@ export const LoginForm: React.FC = () => {
   } = useForm<LoginRequest>();
 
   const onSubmit = (data: LoginRequest) => {
-    console.log('Submitted data:', data);
     mutate({
       loginRequest: data,
     });

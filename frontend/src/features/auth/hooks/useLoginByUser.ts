@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 
 import { usersApi } from '@/api/client';
 import { useLiff } from '@/context/liffProvider';
+import { pagesPath } from '@/gen/$path';
 import { LoginLineUserRequest, Token } from '@/gen/api';
 import queryClient from '@/lib/react-query';
 import { getErrorStatus } from '@/utils/error';
@@ -40,7 +41,7 @@ export const useLoginByUser = () => {
         accessToken,
       });
 
-      await router.push('/home');
+      await router.push(pagesPath.home.$url().pathname);
       toast({
         duration: 2000,
         position: 'bottom-right',

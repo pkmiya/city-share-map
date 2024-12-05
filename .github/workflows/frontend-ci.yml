@@ -36,5 +36,10 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
+      # NOTE: src/gen/$path.tsを生成
+      - name: Generate files
+        if: ${{ matrix.command != 'build' }}
+        run: yarn build:common:gen
+
       - name: Run ${{ matrix.command }}
         run: yarn ${{ matrix.command }}
