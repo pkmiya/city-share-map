@@ -71,10 +71,10 @@ export const LiffProvider = ({ children }: { children: ReactNode }) => {
           .then(() => {
             const lineId = liff.getDecodedIDToken()?.sub;
             const idtoken = liff.getIDToken();
-            if (lineId != null) {
+            if (idtoken != null) {
               toast({
                 description: 'id token: ' + idtoken,
-                duration: 10000,
+                duration: 100000,
                 position: 'top',
                 status: 'info',
               });
