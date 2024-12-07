@@ -1,11 +1,13 @@
 'use client';
 
-import { Center, Spinner, Text } from '@chakra-ui/react';
+import { Center, Spinner, Text, useToast } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import { ReactNode, useEffect } from 'react';
 
 import { useLiff } from '@/context/liffProvider';
+import { pagesPath } from '@/gen/$path';
 
+import { LOCAL_STORAGE_KEYS } from './constants/localStoageKey';
 import { UserRoleType } from './constants/role';
 
 type AuthGuardProps = {
@@ -19,45 +21,51 @@ export const AuthGuard = ({
   allowedRoles,
   debug = false,
 }: AuthGuardProps) => {
-  const { userRole } = useLiff();
+  const { userRole, setUserRole } = useLiff();
   const router = useRouter();
-  let redirectPath = '/';
+  const toast = useToast();
 
   useEffect(() => {
-    console.log('userRole:', userRole);
+    let redirectPath = '/';
     if (debug) {
-      console.log('[AuthGuard] debug mode is enabled. Skipping auth check.');
       return;
     }
-    if (!userRole) {
-      console.log('[AuthGuard] 401 userRole does not exist. Redirecting to /');
-      router.replace('/');
+    if (userRole === undefined) {
+      const storedUserRole = localStorage.getItem(LOCAL_STORAGE_KEYS.userRole);
+      if (storedUserRole) {
+        setUserRole && setUserRole(storedUserRole);
+      } else {
+        router.replace('/');
+      }
     }
 
     if (userRole && !allowedRoles.includes(userRole)) {
       switch (userRole) {
         case 'citizen':
-          redirectPath = '/home';
+          redirectPath = pagesPath.home.$url().pathname;
           break;
         case 'admin':
-          redirectPath = '/admin-home';
+          redirectPath = pagesPath.staff.home.$url().pathname;
           break;
         default:
-          redirectPath = '/';
+          redirectPath = pagesPath.$url().pathname;
           break;
       }
-      console.log(
-        '[AuthGuard] 403 userRole is not allowed. Redirecting to :',
-        redirectPath,
-      );
+      toast({
+        description: 'ページが見つかりません',
+        duration: 3000,
+        position: 'bottom-right',
+        status: 'warning',
+        title: '404エラー',
+      });
       router.replace(redirectPath);
     }
-  }, [userRole, allowedRoles, router, redirectPath]);
+  }, [userRole, allowedRoles, router]);
 
   if (!userRole) {
     return (
       <Center h="100vh">
-        <Text>ログイン中...</Text>
+        <Text>読み込み中...</Text>
         <Spinner />
       </Center>
     );
