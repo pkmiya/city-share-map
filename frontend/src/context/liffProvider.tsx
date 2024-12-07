@@ -69,7 +69,6 @@ export const LiffProvider = ({ children }: { children: ReactNode }) => {
             setLiffError(error.toString());
           })
           .then(() => {
-            const lineId = liff.getDecodedIDToken()?.sub;
             const idtoken = liff.getIDToken();
             if (idtoken != null) {
               toast({
