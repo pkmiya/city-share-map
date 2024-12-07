@@ -7,7 +7,7 @@ from app.api.deps import SessionDep
 from app.core import security
 from app.core.config import settings
 from app.schemas.token import Token
-from app.schemas.user import CitizenUser, CitizenUserRead, CitizenUserUpdate
+from app.schemas.user import CitizenUser, CitizenUserRead, CitizenUserUpdate, CitizenUserCreate
 from app.api.deps import CurrentAdminUser
 import uuid
 from datetime import datetime
@@ -15,13 +15,13 @@ from datetime import datetime
 router = APIRouter()
 
 @router.post("/access-token")
-def login_line_user(
+async def login_line_user(
     session: SessionDep, id_token: str
 ) -> Token:
     """
     Line login, get an access token for future requests
     """
-    line_info = security.get_line_info(id_token)
+    line_info = await security.get_line_info(id_token)
     line_id = line_info["line_id"]
     name = line_info["name"]
 
@@ -29,12 +29,12 @@ def login_line_user(
         db_session=session, line_id=line_id
     )
     if not user:
-        obj_in = {"line_id": line_id, "name": name, "is_active": True}
+        obj_in = CitizenUserCreate(line_id=line_id, name=name, is_active=True)
         user = crud_citizen_user.create(db_session=session, obj_in=obj_in)
     elif not user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise HTTPException(status_code=400, detail="ログイン権限がありません")
     
-    user = crud_citizen_user.update(session, db_obj=user, obj_in={"last_login": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
+    user = crud_citizen_user.update_last_login(session, db_obj=user, obj_in={"last_login": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return Token(

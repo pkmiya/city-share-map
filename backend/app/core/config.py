@@ -1,6 +1,10 @@
 import secrets
 import warnings
+import os
 from typing import Annotated, Any, Literal
+from dotenv import load_dotenv
+
+
 
 from pydantic import (
     AnyUrl,
@@ -32,7 +36,7 @@ class Settings(BaseSettings):
     )
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str = secrets.token_urlsafe(32)
-    LIFF_CHANNEL_ID: str = "1656185983"  # TODO: あとで変える
+    LIFF_CHANNEL_ID: str = "2006579202"
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24
     ID_TOKEN_EXPIRE_MINUTES: int = 60

@@ -70,15 +70,16 @@ export const LiffProvider = ({ children }: { children: ReactNode }) => {
           })
           .then(() => {
             const lineId = liff.getDecodedIDToken()?.sub;
-            if (lineId != null) {
+            const idtoken = liff.getIDToken();
+            if (idtoken != null) {
               toast({
-                description: 'line id: ' + lineId,
-                duration: 10000,
+                description: 'id token: ' + idtoken,
+                duration: 100000,
                 position: 'top',
                 status: 'info',
               });
               loginByUser({
-                idToken: lineId,
+                idToken: idtoken,
               });
             }
           })
