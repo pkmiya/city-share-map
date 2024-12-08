@@ -26,3 +26,14 @@ export const decodeAccessToken = (
     return null;
   }
 };
+
+export const isTokenValid = (accessToken: string): boolean => {
+  try {
+    const decoded: DecodedAccessToken = jwtDecode(accessToken);
+
+    const currentTime = Math.floor(Date.now() / 1000);
+    return decoded.exp > currentTime;
+  } catch (error) {
+    return false;
+  }
+};

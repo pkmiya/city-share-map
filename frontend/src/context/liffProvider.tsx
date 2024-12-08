@@ -1,6 +1,6 @@
 // c.f. https://developers.line.biz/ja/docs/liff/cli-tool-create-liff-app/
 
-import { useToast } from '@chakra-ui/react';
+import LIFFInspectorPlugin from '@line/liff-inspector';
 import LiffMockPlugin from '@line/liff-mock';
 import {
   createContext,
@@ -40,7 +40,6 @@ export const LiffProvider = ({ children }: { children: ReactNode }) => {
   const [liffError, setLiffError] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<UserRoleType | undefined>(undefined);
   const { mutate: loginByUser } = useLoginByUser();
-  const toast = useToast();
 
   const isLiffRef = useRef(true);
 
@@ -56,6 +55,7 @@ export const LiffProvider = ({ children }: { children: ReactNode }) => {
           return;
         }
 
+        liff.use(new LIFFInspectorPlugin());
         const { liffId, mock } = generateLiffConfig();
         if (mock) liff.use(new LiffMockPlugin());
         liff
@@ -69,17 +69,11 @@ export const LiffProvider = ({ children }: { children: ReactNode }) => {
             setLiffError(error.toString());
           })
           .then(() => {
-            const lineId = liff.getDecodedIDToken()?.sub;
-            const idtoken = liff.getIDToken();
-            if (idtoken != null) {
-              toast({
-                description: 'id token: ' + idtoken,
-                duration: 100000,
-                position: 'top',
-                status: 'info',
-              });
+            const idToken = liff.getIDToken();
+            console.log('id token:', idToken);
+            if (idToken != null) {
               loginByUser({
-                idToken: idtoken,
+                idToken,
               });
             }
           })

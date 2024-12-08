@@ -1,6 +1,7 @@
 import { useToast } from '@chakra-ui/react';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 import { usersApi } from '@/api/client';
 import { useLiff } from '@/context/liffProvider';
@@ -13,10 +14,18 @@ import { LOCAL_STORAGE_KEYS } from '../constants/localStoageKey';
 import { userKeys } from '../constants/queryKey';
 import { UserRole } from '../constants/role';
 
+import { useCheckTokenAndRedirect } from './useCheckTokenAndRedirect';
+
 export const useLoginByUser = () => {
   const router = useRouter();
   const toast = useToast();
   const { setUserRole } = useLiff();
+
+  const checkTokenAndRedirect = useCheckTokenAndRedirect();
+
+  useEffect(() => {
+    checkTokenAndRedirect();
+  }, [checkTokenAndRedirect]);
 
   const mutation = useMutation({
     mutationFn: async (req: LoginLineUserRequest) => {
@@ -24,6 +33,7 @@ export const useLoginByUser = () => {
       return res;
     },
     onError: (error) => {
+      console.error(error);
       toast({
         description: `${getErrorStatus(error)}エラー; ${error.message}`,
         duration: 10000,
@@ -34,8 +44,10 @@ export const useLoginByUser = () => {
     },
     onSuccess: async (res: Token) => {
       const { accessToken } = res;
+      const userRole = UserRole.Citizen;
 
-      setUserRole && setUserRole(UserRole.Citizen);
+      setUserRole && setUserRole(userRole);
+      localStorage.setItem(LOCAL_STORAGE_KEYS.userRole, userRole);
       localStorage.setItem(LOCAL_STORAGE_KEYS.accessToken, accessToken);
       queryClient.setQueryData(userKeys.user, {
         accessToken,

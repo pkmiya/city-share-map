@@ -1,6 +1,7 @@
 import { useToast } from '@chakra-ui/react';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 import { loginApi } from '@/api/client';
 import { useLiff } from '@/context/liffProvider';
@@ -13,14 +14,21 @@ import { LOCAL_STORAGE_KEYS } from '../constants/localStoageKey';
 import { adminKeys } from '../constants/queryKey';
 import { decodeIdToken } from '../utils/idToken';
 
+import { useCheckTokenAndRedirect } from './useCheckTokenAndRedirect';
+
 export const useLoginByAdmin = () => {
   const router = useRouter();
   const toast = useToast();
   const { setUserRole } = useLiff();
 
+  const checkTokenAndRedirect = useCheckTokenAndRedirect();
+
+  useEffect(() => {
+    checkTokenAndRedirect();
+  }, [checkTokenAndRedirect]);
+
   const mutation = useMutation({
     mutationFn: async (req: LoginOperationRequest) => {
-      console.log('req:', req);
       const res = await loginApi.login(req);
       return res;
     },
@@ -39,6 +47,7 @@ export const useLoginByAdmin = () => {
         (decodedToken && decodedToken.roles && decodedToken.roles[0]) ?? '';
 
       setUserRole && setUserRole(userRole);
+      localStorage.setItem(LOCAL_STORAGE_KEYS.userRole, userRole);
       localStorage.setItem(LOCAL_STORAGE_KEYS.accessToken, accessToken);
       localStorage.setItem(LOCAL_STORAGE_KEYS.idToken, idToken);
       queryClient.setQueryData(adminKeys.admin, {
