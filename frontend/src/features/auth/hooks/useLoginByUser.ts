@@ -33,6 +33,7 @@ export const useLoginByUser = () => {
       return res;
     },
     onError: (error) => {
+      console.error(error);
       toast({
         description: `${getErrorStatus(error)}エラー; ${error.message}`,
         duration: 10000,
