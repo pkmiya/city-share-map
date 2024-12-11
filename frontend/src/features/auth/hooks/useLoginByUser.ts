@@ -10,7 +10,7 @@ import { LoginLineUserRequest, Token } from '@/gen/api';
 import queryClient from '@/lib/react-query';
 import { getErrorStatus } from '@/utils/error';
 
-import { LOCAL_STORAGE_KEYS } from '../constants/localStoageKey';
+import { LOCAL_STORAGE_KEYS } from '../constants/localStoage';
 import { userKeys } from '../constants/queryKey';
 import { UserRole } from '../constants/role';
 
