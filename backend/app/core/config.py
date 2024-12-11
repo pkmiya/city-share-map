@@ -1,7 +1,7 @@
 import secrets
 import warnings
 import os
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, Literal, ClassVar
 from dotenv import load_dotenv
 
 
@@ -28,6 +28,10 @@ def parse_cors(v: Any) -> list[str] | str:
 
 
 class Settings(BaseSettings):
+    dotenv_path: ClassVar[str] = os.path.join(os.path.dirname(__file__), "../.env.local")
+    load_dotenv(dotenv_path=dotenv_path)
+    LIFF_CHANNEL_ID: str = os.getenv("LIFF_CHANNEL_ID")
+    FRONTEND_HOST: str = os.getenv("FRONTEND_HOST")
     model_config = SettingsConfigDict(
         # Use top level .env file (one level above ./backend/)
         env_file="../.env",
@@ -36,11 +40,9 @@ class Settings(BaseSettings):
     )
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str = secrets.token_urlsafe(32)
-    LIFF_CHANNEL_ID: str = "2006579202"
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24
     ID_TOKEN_EXPIRE_MINUTES: int = 60
-    FRONTEND_HOST: str = "http://localhost:3000"
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
 
     BACKEND_CORS_ORIGINS: Annotated[
