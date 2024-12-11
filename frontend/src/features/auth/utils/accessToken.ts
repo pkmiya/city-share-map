@@ -1,5 +1,9 @@
 import { jwtDecode } from 'jwt-decode';
 
+import {
+  LOCAL_STORAGE_DUMMY_VALUES,
+  LOCAL_STORAGE_KEYS,
+} from '../constants/localStoage';
 import { UserRoleType } from '../constants/role';
 
 type DecodedAccessToken = {
@@ -36,4 +40,13 @@ export const isTokenValid = (accessToken: string): boolean => {
   } catch (error) {
     return false;
   }
+};
+
+export const getAccessToken = () => {
+  const accessToken =
+    localStorage.getItem(LOCAL_STORAGE_KEYS.accessToken) ||
+    LOCAL_STORAGE_DUMMY_VALUES.accessToken;
+
+  const cleanedAccessToken = accessToken.replace(/"/g, '');
+  return 'Bearer ' + cleanedAccessToken;
 };
