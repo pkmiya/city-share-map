@@ -115,7 +115,7 @@ export const AdminEditModal = ({
                 </Switch>
               </FormControl>
               <FormControl>
-                <Switch {...register('isSuperuser')}>スーパーユーザ</Switch>
+                <Switch {...register('isSuperuser')}>高度な管理者権限</Switch>
               </FormControl>
             </VStack>
           </form>
