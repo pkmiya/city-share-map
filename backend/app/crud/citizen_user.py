@@ -1,11 +1,11 @@
-from typing import Optional, List
+from typing import List, Optional
 
-from sqlalchemy.orm import Session
-from sqlalchemy import func
+from app.crud.base import CRUDBase
 from app.models.problems import Problem
 from app.models.user import CitizenUser
-from app.schemas.user import CitizenUserCreate, CitizenUserUpdate, CitizenUserRead
-from app.crud.base import CRUDBase
+from app.schemas.user import CitizenUserCreate, CitizenUserRead, CitizenUserUpdate
+from sqlalchemy import func
+from sqlalchemy.orm import Session
 
 
 class CRUDCitizenUser(CRUDBase[CitizenUser, CitizenUserCreate, CitizenUserUpdate]):

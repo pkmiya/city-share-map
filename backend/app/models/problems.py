@@ -1,7 +1,8 @@
-from sqlalchemy import Column, String, Integer, Boolean, ForeignKey, UUID, DECIMAL
-from sqlalchemy.orm import relationship
 import uuid
+
 from app.models.base import Base, CommonColumns
+from sqlalchemy import DECIMAL, UUID, Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
 
 
 # Problems Table

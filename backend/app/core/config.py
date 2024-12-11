@@ -1,7 +1,8 @@
+import os
 import secrets
 import warnings
-import os
-from typing import Annotated, Any, Literal, ClassVar
+from typing import Annotated, Any, ClassVar, Literal
+
 from dotenv import load_dotenv
 from pydantic import (
     AnyUrl,

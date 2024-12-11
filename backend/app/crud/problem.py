@@ -1,29 +1,29 @@
+import uuid
 from typing import List
-from sqlalchemy.orm import Session
-from app.models.problems import Problem, ProblemItem
-from app.schemas.problem import (
-    ProblemRead,
-    ProblemCreate,
-    ProblemUpdate,
-    ProblemReadByID,
-)
+
 from app.crud.base import CRUDBase
-from app.models.problems import PostBase
 from app.db.db import type_mapping
+from app.models.problems import PostBase, Problem, ProblemItem
+from app.schemas.problem import (
+    ProblemCreate,
+    ProblemRead,
+    ProblemReadByID,
+    ProblemUpdate,
+)
+from fastapi import HTTPException
 from sqlalchemy import (
-    text,
-    DateTime,
-    Table,
+    DECIMAL,
+    UUID,
+    Boolean,
     Column,
+    DateTime,
+    ForeignKey,
     Integer,
     String,
-    Boolean,
-    ForeignKey,
-    UUID,
-    DECIMAL,
+    Table,
+    text,
 )
-import uuid
-from fastapi import HTTPException
+from sqlalchemy.orm import Session
 
 
 class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):

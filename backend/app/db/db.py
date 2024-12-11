@@ -1,19 +1,18 @@
-from sqlmodel import create_engine
-from sqlalchemy import inspect
-from app.crud.user import crud_user
-from app.core.config import settings
-from app.schemas.user import UserCreate
-from app.models.problems import Type
 import uuid
 from datetime import datetime
-from app.models.user import CitizenUser
+
+from app.core.config import settings
+from app.crud.user import crud_user
 
 # make sure all SQL Alchemy models are imported before initializing DB
 # otherwise, SQL Alchemy might fail to initialize relationships properly
 # for more details: https://github.com/tiangolo/full-stack-fastapi-postgresql/issues/28
 from app.models.base import Base  # noqa: F401
-from sqlalchemy import Text, Integer, Boolean, DateTime
-
+from app.models.problems import Type
+from app.models.user import CitizenUser
+from app.schemas.user import UserCreate
+from sqlalchemy import Boolean, DateTime, Integer, Text, inspect
+from sqlmodel import create_engine
 
 engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
 

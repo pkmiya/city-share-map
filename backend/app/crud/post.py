@@ -1,14 +1,15 @@
-from typing import Optional, Dict, Any, List
-from fastapi.encoders import jsonable_encoder
-from sqlalchemy.orm import Session
-from sqlalchemy import Integer, Boolean, DateTime, Text
-from fastapi import HTTPException
+import uuid
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 from app.crud.base import CRUDBase
+from app.db.db import type_mapping
 from app.models.problems import PostBase, Problem, ProblemItem
 from app.schemas.problem import PostCreate, PostUpdate
-from app.db.db import type_mapping
-from datetime import datetime
-import uuid
+from fastapi import HTTPException
+from fastapi.encoders import jsonable_encoder
+from sqlalchemy import Boolean, DateTime, Integer, Text
+from sqlalchemy.orm import Session
 
 
 def get_type_class(value: Any) -> type:

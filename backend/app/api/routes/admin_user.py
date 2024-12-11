@@ -1,13 +1,9 @@
 from typing import List
 
-from fastapi import APIRouter, HTTPException
+from app.api.deps import CurrentAdminSuperuser, CurrentAdminUser, SessionDep
 from app.crud.user import crud_user
-from app.api.deps import (
-    CurrentAdminSuperuser,
-    CurrentAdminUser,
-    SessionDep,
-)
 from app.schemas.user import User, UserCreate, UserUpdate, UserUpdateMe
+from fastapi import APIRouter, HTTPException
 
 router = APIRouter()
 

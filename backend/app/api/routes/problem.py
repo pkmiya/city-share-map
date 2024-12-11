@@ -1,16 +1,17 @@
 from typing import List
-from fastapi import APIRouter, HTTPException
+
 from app.api.deps import CurrentAdminSuperuser, CurrentAdminUser, SessionDep
-from app.schemas.problem import (
-    Type,
-    Problem,
-    ProblemRead,
-    ProblemCreate,
-    ProblemUpdate,
-    ProblemReadByID,
-)
-from app.models.problems import Type as DBType
 from app.crud.problem import crud_problem
+from app.models.problems import Type as DBType
+from app.schemas.problem import (
+    Problem,
+    ProblemCreate,
+    ProblemRead,
+    ProblemReadByID,
+    ProblemUpdate,
+    Type,
+)
+from fastapi import APIRouter, HTTPException
 
 router = APIRouter()
 

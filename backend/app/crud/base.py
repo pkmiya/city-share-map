@@ -1,11 +1,11 @@
-from typing import List, Optional, Generic, TypeVar, Type
+from typing import Generic, List, Optional, Type, TypeVar
+
+from app.models.base import Base
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
-from app.models.base import Base
 from sqlalchemy.ext.automap import automap_base
-
+from sqlalchemy.orm import Session
 
 ModelType = TypeVar("ModelType", bound=Base)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)

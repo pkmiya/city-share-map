@@ -1,6 +1,7 @@
 from typing import Any
+
+from sqlalchemy import Column, DateTime, String, text
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
-from sqlalchemy import Column, String, DateTime, text
 
 
 @as_declarative()

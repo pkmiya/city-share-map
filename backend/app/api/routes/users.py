@@ -1,20 +1,19 @@
+import uuid
+from datetime import datetime, timedelta
 from typing import List
-from fastapi import APIRouter, HTTPException
-from app.core.config import settings
-from datetime import timedelta
-from app.crud.citizen_user import crud_citizen_user
-from app.api.deps import SessionDep
+
+from app.api.deps import CurrentAdminUser, SessionDep
 from app.core import security
+from app.core.config import settings
+from app.crud.citizen_user import crud_citizen_user
 from app.schemas.token import Token
 from app.schemas.user import (
     CitizenUser,
+    CitizenUserCreate,
     CitizenUserRead,
     CitizenUserUpdate,
-    CitizenUserCreate,
 )
-from app.api.deps import CurrentAdminUser
-import uuid
-from datetime import datetime
+from fastapi import APIRouter, HTTPException
 
 router = APIRouter()
 

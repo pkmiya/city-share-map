@@ -1,11 +1,10 @@
-from typing import Dict, Any
-from fastapi import APIRouter
+import uuid
+from typing import Any, Dict, List, Optional
+
 from app.api.deps import CurrentAdminUser, SessionDep
 from app.crud.post import crud_post
 from app.schemas.problem import PostCreate, PostUpdate
-import uuid
-from typing import Optional, List
-
+from fastapi import APIRouter
 
 router = APIRouter()
 mock_id = uuid.UUID("00000000-0000-0000-0000-000000000000")  # モック用のID

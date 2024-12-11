@@ -1,18 +1,19 @@
 from collections.abc import Generator
 from typing import Annotated
+
 import jwt
+from app.core import security
+from app.core.config import settings
+from app.crud.citizen_user import crud_citizen_user
+from app.crud.user import crud_user
+from app.db.db import engine
+from app.schemas.token import TokenPayload
+from app.schemas.user import AllUser, CitizenUser, User
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from pydantic import ValidationError
 from sqlmodel import Session
-from app.core import security
-from app.core.config import settings
-from app.db.db import engine
-from app.crud.user import crud_user
-from app.crud.citizen_user import crud_citizen_user
-from app.schemas.token import TokenPayload
-from app.schemas.user import AllUser, User, CitizenUser
 
 reusable_oauth2 = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/login/")
 
