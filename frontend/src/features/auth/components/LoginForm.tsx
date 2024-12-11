@@ -18,6 +18,8 @@ import { LoginRequest } from '@/gen/api';
 
 import { useLoginByAdmin } from '../hooks/useLoginByAdmin';
 
+import { PasswordInput } from './PasswordInput';
+
 export const LoginForm: React.FC = () => {
   const { mutate } = useLoginByAdmin();
   const {
@@ -66,20 +68,7 @@ export const LoginForm: React.FC = () => {
             </FormErrorMessage>
           </FormControl>
 
-          <FormControl isInvalid={!!errors.password}>
-            <FormLabel htmlFor="password">パスワード</FormLabel>
-            <Input
-              id="password"
-              placeholder="パスワードを入力"
-              type="password"
-              {...register('password', {
-                required: 'パスワードは必須項目です',
-              })}
-            />
-            <FormErrorMessage>
-              {errors.password && errors.password.message}
-            </FormErrorMessage>
-          </FormControl>
+          <PasswordInput error={errors.password?.message} register={register} />
 
           <Button colorScheme="teal" type="submit" width="full">
             ログイン
