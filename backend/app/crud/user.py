@@ -1,7 +1,6 @@
 from typing import Optional
 
 from sqlalchemy.orm import Session
-from fastapi import HTTPException
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate, UserInDB, UserUpdateMe
 from app.core.security import verify_password, get_password_hash

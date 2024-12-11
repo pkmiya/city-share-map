@@ -141,10 +141,5 @@ def delete_user(
             detail="削除する権限がありません",
         )
     users = crud_user.get_multi(session)
-    if len(users) == 1:
-        raise HTTPException(
-            status_code=400,
-            detail="最低1人の管理者が必要です",
-        )
     user = crud_user.delete(session, id=user_id)
     return user

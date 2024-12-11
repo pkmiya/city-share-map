@@ -35,7 +35,7 @@ def decode_token(token: str) -> TokenPayload:
     except (InvalidTokenError, ValidationError):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="validation error",
+            detail="デコードに失敗しました",
         )
 
 
@@ -79,7 +79,7 @@ def get_current_citizen_user(session: SessionDep, token: TokenDep) -> CitizenUse
 
 def get_current_admin_superuser(session: SessionDep, token: TokenDep) -> User:
     token_data = decode_token(token)
-    if token_data.user_type != "super_admin":
+    if token_data.user_type != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="権限がありません",

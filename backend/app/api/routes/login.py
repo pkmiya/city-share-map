@@ -31,11 +31,11 @@ def login(
         db_session=session, email=form_data.username, password=form_data.password
     )
     if not user:
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
+        raise HTTPException(status_code=404, detail="メールアドレスまたはパスワードが正しくありません")
     elif not user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise HTTPException(status_code=400, detail="ログイン権限がありません")
     
-    user_type = "super_admin" if user.is_superuser else "admin"
+    user_type = "admin" if user.is_superuser else "staff"
     
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     id_token_expires = timedelta(minutes=settings.ID_TOKEN_EXPIRE_MINUTES)

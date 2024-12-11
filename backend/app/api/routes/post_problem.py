@@ -81,7 +81,7 @@ def get_posts_me(
     )
 
 
-@router.post("/{problem_id}", response_model=str)
+@router.post("/{problem_id}", response_model=Dict[str, Any])
 def create_post(
     *,
     db: SessionDep,

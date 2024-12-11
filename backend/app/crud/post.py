@@ -98,7 +98,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
         problem_id: int,
         user_id: uuid.UUID,
         post_in: PostCreate,
-    ) -> str:
+    ) -> Dict[str, Any]:
         """
         動的テーブルに新しい投稿を作成
         """
@@ -122,7 +122,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
             db_session.add(post_data)
             db_session.commit()
 
-            return "success"
+            return post_data
 
         except Exception as e:
             db_session.rollback()
