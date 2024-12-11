@@ -2,7 +2,7 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 from app.models.user import User
-from app.schemas.user import UserCreate, UserUpdate, UserInDB, UserUpdateMe
+from app.schemas.user import UserCreate, UserInDB, UserUpdateMe
 from app.core.security import verify_password, get_password_hash
 from app.crud.base import CRUDBase
 
@@ -23,9 +23,11 @@ class CRUDUser(CRUDBase[User, UserCreate, UserInDB]):
         db_session.commit()
         db_session.refresh(db_obj)
         return db_obj
-    
-    def update_me(self, db_session: Session, *, db_obj: User, obj_in: UserUpdateMe) -> User:
-        
+
+    def update_me(
+        self, db_session: Session, *, db_obj: User, obj_in: UserUpdateMe
+    ) -> User:
+
         update_data = obj_in.dict(exclude_unset=True)
         if obj_in.password:
             hashed_password = get_password_hash(obj_in.password)
@@ -35,7 +37,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserInDB]):
             update_data["hashed_password"] = db_obj.hashed_password
 
         use_obj_in = UserInDB.parse_obj(update_data)
-        
+
         return super().update(db_session, db_obj=db_obj, obj_in=use_obj_in)
 
     def authenticate(

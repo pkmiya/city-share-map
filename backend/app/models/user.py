@@ -1,17 +1,7 @@
-from sqlalchemy import Column, String, Integer, Boolean, ForeignKey, DateTime, UUID, TIMESTAMP, func, text
+from sqlalchemy import Column, String, Integer, Boolean, ForeignKey, DateTime, UUID
 from sqlalchemy.orm import relationship
 import uuid
 from app.models.base import Base, CommonColumns
-
-
-class CommonColumns:
-    created_at = Column(
-        DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False
-    )
-    updated_at = Column(DateTime, server_onupdate=text("CURRENT_TIMESTAMP"))
-    deleted_at = Column(DateTime)
-    created_by = Column(String(30))
-    updated_by = Column(String(30))
 
 
 class User(Base, CommonColumns):
@@ -27,8 +17,8 @@ class User(Base, CommonColumns):
 
 # CitizenUsers Table
 class CitizenUser(Base, CommonColumns):
-    __tablename__ = 'citizen_users'
-    
+    __tablename__ = "citizen_users"
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String)  # ユーザ名
     line_id = Column(String)  # LIFF連携用のID
@@ -36,17 +26,20 @@ class CitizenUser(Base, CommonColumns):
     last_login = Column(DateTime)  # 最終ログイン日時
 
     # posts = relationship('PostBase', back_populates='user')
-    post_likes = relationship('PostLikeBase', back_populates='user')
+    post_likes = relationship("PostLikeBase", back_populates="user")
 
 
 # PostLikes Table
 class PostLikeBase(Base, CommonColumns):
-    __tablename__ = 'post_likes'
-    
+    __tablename__ = "post_likes"
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    post_id = Column(UUID(as_uuid=True), ForeignKey('posts.id'), nullable=False)  # FK to posts
-    user_id = Column(UUID, ForeignKey('citizen_users.id'), nullable=False)  # FK to citizen_users
+    post_id = Column(
+        UUID(as_uuid=True), ForeignKey("posts.id"), nullable=False
+    )  # FK to posts
+    user_id = Column(
+        UUID, ForeignKey("citizen_users.id"), nullable=False
+    )  # FK to citizen_users
 
-    post = relationship('PostBase', back_populates='post_likes')
-    user = relationship('CitizenUser', back_populates='post_likes')
-
+    post = relationship("PostBase", back_populates="post_likes")
+    user = relationship("CitizenUser", back_populates="post_likes")

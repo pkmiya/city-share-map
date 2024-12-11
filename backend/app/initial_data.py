@@ -13,7 +13,6 @@ def init() -> None:
         init_db(session)
 
 
-
 def main() -> None:
     logger.info("Creating initial data")
     init()

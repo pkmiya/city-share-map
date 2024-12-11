@@ -1,10 +1,10 @@
 from typing import Any
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
-from sqlalchemy import Column, String, DateTime, text, orm, event
-from sqlalchemy.orm import Session
+from sqlalchemy import Column, String, DateTime, text
+
 
 @as_declarative()
-class Base():
+class Base:
     id: Any
     __name__: str
 
@@ -22,6 +22,7 @@ class CommonColumns:
     created_by = Column(String(64))
     updated_by = Column(String(64))
 
+
 # soft_delete用のコード(なぜか動作しない)
 # @event.listens_for(Session, "do_orm_execute")
 # def _add_filtering_deleted_at(execute_state):
@@ -30,7 +31,7 @@ class CommonColumns:
 #     以下のようにすると、論理削除済のデータも含めて取得可能
 #     query(...).filter(...).execution_options(include_deleted=True)
 #     """
-    
+
 #     if (
 #         execute_state.is_select
 #         and not execute_state.is_column_load
@@ -44,5 +45,3 @@ class CommonColumns:
 #                 include_aliases=True,
 #             )
 #         )
-
-

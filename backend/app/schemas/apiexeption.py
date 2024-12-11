@@ -1,12 +1,13 @@
 from app.schemas.apiexeption import ApiResponse
 
+
 class ApiException(Exception):
     """
-        APIのエラークラス
+     APIのエラークラス
 
-       Attributes:
-                status_code (int): ステータス情報
-                api_response (ApiResposne): 結果を格納し返却する
+    Attributes:
+             status_code (int): ステータス情報
+             api_response (ApiResposne): 結果を格納し返却する
     """
 
     def __init__(self, status_code: int, api_response: ApiResponse):
@@ -28,6 +29,3 @@ class ApiException(Exception):
     @api_response.setter
     def api_response(self, api_response):
         self.__api_response = api_response
-    
-    
-

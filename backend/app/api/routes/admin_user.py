@@ -1,12 +1,12 @@
 from typing import List
 
-from fastapi import APIRouter, Body, Depends, HTTPException
-from fastapi.encoders import jsonable_encoder
-from pydantic.networks import EmailStr
+from fastapi import APIRouter, HTTPException
 from app.crud.user import crud_user
-from app.api.deps import CurrentCitizenUser, CurrentAdminSuperuser, CurrentAdminUser, SessionDep
-from app.core.config import settings
-from app.models.user import User as DBUser
+from app.api.deps import (
+    CurrentAdminSuperuser,
+    CurrentAdminUser,
+    SessionDep,
+)
 from app.schemas.user import User, UserCreate, UserUpdate, UserUpdateMe
 
 router = APIRouter()
@@ -14,7 +14,7 @@ router = APIRouter()
 
 @router.get("/", response_model=List[User])
 def read_admin_users(
-    session : SessionDep,
+    session: SessionDep,
     current_user: CurrentAdminUser,
     skip: int = 0,
     limit: int = 100,
@@ -28,10 +28,7 @@ def read_admin_users(
 
 @router.post("/", response_model=User)
 def create_admin_user(
-    *,
-    session : SessionDep,
-    user_in: UserCreate,
-    current_user: CurrentAdminSuperuser
+    *, session: SessionDep, user_in: UserCreate, current_user: CurrentAdminSuperuser
 ):
     """
     Create new user.
@@ -49,7 +46,7 @@ def create_admin_user(
 @router.put("/me", response_model=User)
 def update_user_me(
     *,
-    session : SessionDep,
+    session: SessionDep,
     current_user: CurrentAdminUser,
     user_in: UserUpdateMe,
 ):
@@ -59,7 +56,9 @@ def update_user_me(
     if user_in.email:
         existing_user = crud_user.get_by_email(session, email=user_in.email)
         if existing_user:
-            raise HTTPException(status_code=400, detail="そのメールアドレスは既に登録されています")
+            raise HTTPException(
+                status_code=400, detail="そのメールアドレスは既に登録されています"
+            )
 
     user = crud_user.update_me(session, db_obj=current_user, obj_in=user_in)
     return user
@@ -67,7 +66,7 @@ def update_user_me(
 
 @router.get("/me", response_model=User)
 def read_user_me(
-    session : SessionDep,
+    session: SessionDep,
     current_user: CurrentAdminUser,
 ):
     """
@@ -78,7 +77,7 @@ def read_user_me(
 
 @router.get("/{user_id}", response_model=User)
 def read_user_by_id(
-    session : SessionDep,
+    session: SessionDep,
     user_id: int,
     current_user: CurrentAdminUser,
 ):
@@ -97,7 +96,7 @@ def read_user_by_id(
 @router.put("/{user_id}", response_model=User)
 def update_user(
     *,
-    session : SessionDep,
+    session: SessionDep,
     user_id: int,
     user_in: UserUpdate,
     current_user: CurrentAdminSuperuser,
@@ -119,10 +118,11 @@ def update_user(
     user = crud_user.update(session, db_obj=user, obj_in=user_in)
     return user
 
+
 @router.delete("/{user_id}", response_model=User)
 def delete_user(
     *,
-    session : SessionDep,
+    session: SessionDep,
     user_id: int,
     current_user: CurrentAdminSuperuser,
 ):
@@ -140,6 +140,5 @@ def delete_user(
             status_code=400,
             detail="削除する権限がありません",
         )
-    users = crud_user.get_multi(session)
     user = crud_user.delete(session, id=user_id)
     return user

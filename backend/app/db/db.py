@@ -6,7 +6,6 @@ from app.schemas.user import UserCreate
 from app.models.problems import Type
 import uuid
 from datetime import datetime
-from sqlalchemy.orm import Session
 from app.models.user import CitizenUser
 
 # make sure all SQL Alchemy models are imported before initializing DB
@@ -26,6 +25,7 @@ type_mapping = {
     5: Boolean,
     # 必要に応じて他の型も追加
 }
+
 
 def init_db(db_session):
     # Tables should be created with Alembic migrations
@@ -48,11 +48,26 @@ def init_db(db_session):
                 is_superuser=True,
             )
             user = crud_user.create(db_session, obj_in=user_in)  # noqa: F841
-        
+
         citizen_user_data = [
-            {"id": uuid.UUID("00000000-0000-0000-0000-000000000000"), "name": "テストユーザ1", "line_id": "test_user_1", "is_active": True},
-            {"id": uuid.UUID("00000000-1111-0000-0000-000000000000"), "name": "テストユーザ2", "line_id": "test_user_2", "is_active": False},
-            {"id": uuid.UUID("00000000-2222-0000-0000-000000000000"), "name": "テストユーザ3", "line_id": "test_user_3", "is_active": True},
+            {
+                "id": uuid.UUID("00000000-0000-0000-0000-000000000000"),
+                "name": "テストユーザ1",
+                "line_id": "test_user_1",
+                "is_active": True,
+            },
+            {
+                "id": uuid.UUID("00000000-1111-0000-0000-000000000000"),
+                "name": "テストユーザ2",
+                "line_id": "test_user_2",
+                "is_active": False,
+            },
+            {
+                "id": uuid.UUID("00000000-2222-0000-0000-000000000000"),
+                "name": "テストユーザ3",
+                "line_id": "test_user_3",
+                "is_active": True,
+            },
         ]
         for data in citizen_user_data:
             citizen_user = CitizenUser(
@@ -60,17 +75,17 @@ def init_db(db_session):
                 name=data["name"],
                 line_id=data["line_id"],
                 is_active=data["is_active"],
-                last_login=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                last_login=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             )
             db_session.add(citizen_user)
 
         master_data = [
-                {"id": 1, "name": "テキスト"},
-                {"id": 2, "name": "写真"},
-                {"id": 3, "name": "日時"},
-                {"id": 4, "name": "数値"},
-                {"id": 5, "name": "真偽値"},
-            ]
+            {"id": 1, "name": "テキスト"},
+            {"id": 2, "name": "写真"},
+            {"id": 3, "name": "日時"},
+            {"id": 4, "name": "数値"},
+            {"id": 5, "name": "真偽値"},
+        ]
         for data in master_data:
             type_entry = Type(id=data["id"], name=data["name"])
             db_session.add(type_entry)

@@ -5,19 +5,22 @@ from datetime import timedelta
 from app.crud.citizen_user import crud_citizen_user
 from app.api.deps import SessionDep
 from app.core import security
-from app.core.config import settings
 from app.schemas.token import Token
-from app.schemas.user import CitizenUser, CitizenUserRead, CitizenUserUpdate, CitizenUserCreate
+from app.schemas.user import (
+    CitizenUser,
+    CitizenUserRead,
+    CitizenUserUpdate,
+    CitizenUserCreate,
+)
 from app.api.deps import CurrentAdminUser
 import uuid
 from datetime import datetime
 
 router = APIRouter()
 
+
 @router.post("/access-token")
-async def login_line_user(
-    session: SessionDep, id_token: str
-) -> Token:
+async def login_line_user(session: SessionDep, id_token: str) -> Token:
     """
     Line login, get an access token for future requests
     """
@@ -25,16 +28,18 @@ async def login_line_user(
     line_id = line_info["line_id"]
     name = line_info["name"]
 
-    user = crud_citizen_user.authenticate(
-        db_session=session, line_id=line_id
-    )
+    user = crud_citizen_user.authenticate(db_session=session, line_id=line_id)
     if not user:
         obj_in = CitizenUserCreate(line_id=line_id, name=name, is_active=True)
         user = crud_citizen_user.create(db_session=session, obj_in=obj_in)
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="ログイン権限がありません")
-    
-    user = crud_citizen_user.update_last_login(session, db_obj=user, obj_in={"last_login": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
+
+    user = crud_citizen_user.update_last_login(
+        session,
+        db_obj=user,
+        obj_in={"last_login": datetime.now().strftime("%Y-%m-%d %H:%M:%S")},
+    )
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return Token(
@@ -43,9 +48,10 @@ async def login_line_user(
         )
     )
 
+
 @router.get("/", response_model=List[CitizenUserRead])
 def read_citizen_users(
-    session : SessionDep,
+    session: SessionDep,
     current_user: CurrentAdminUser,
     skip: int = 0,
     limit: int = 100,
@@ -55,14 +61,14 @@ def read_citizen_users(
     """
     users = crud_citizen_user.get_multi(session, skip=skip, limit=limit)
     return users
-    
+
 
 @router.put("/{user_id}", response_model=CitizenUser)
 def update_citizen_user(
-    session : SessionDep,
+    session: SessionDep,
     current_user: CurrentAdminUser,
     user_id: uuid.UUID,
-    is_active: bool
+    is_active: bool,
 ):
     """
     Update a user.
