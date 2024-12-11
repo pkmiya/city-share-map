@@ -7,7 +7,7 @@ import { ReactNode, useEffect } from 'react';
 import { useLiff } from '@/context/liffProvider';
 import { pagesPath } from '@/gen/$path';
 
-import { LOCAL_STORAGE_KEYS } from './constants/localStoageKey';
+import { LOCAL_STORAGE_KEYS } from './constants/localStoage';
 import { UserRoleType } from './constants/role';
 
 type AuthGuardProps = {

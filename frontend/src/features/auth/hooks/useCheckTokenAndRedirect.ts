@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 
 import { pagesPath } from '@/gen/$path';
 
-import { LOCAL_STORAGE_KEYS } from '../constants/localStoageKey';
+import { LOCAL_STORAGE_KEYS } from '../constants/localStoage';
 import { isTokenValid } from '../utils/accessToken';
 
 export const useCheckTokenAndRedirect = () => {
