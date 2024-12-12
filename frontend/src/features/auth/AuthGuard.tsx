@@ -4,11 +4,10 @@ import { Center, Spinner, Text, useToast } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import { ReactNode, useEffect } from 'react';
 
-import { useLiff } from '@/context/liffProvider';
 import { pagesPath } from '@/gen/$path';
 
-import { LOCAL_STORAGE_KEYS } from './constants/localStoage';
-import { UserRoleType } from './constants/role';
+import { UserRole, UserRoleType } from './constants/role';
+import { useAuth } from './hooks/useAuth';
 
 type AuthGuardProps = {
   allowedRoles: UserRoleType[];
@@ -21,48 +20,36 @@ export const AuthGuard = ({
   allowedRoles,
   debug = false,
 }: AuthGuardProps) => {
-  const { userRole, setUserRole } = useLiff();
+  const { accessToken } = useAuth();
+  const role = accessToken.user_type;
+
   const router = useRouter();
   const toast = useToast();
 
   useEffect(() => {
-    let redirectPath = '/';
     if (debug) {
       return;
     }
-    if (userRole === undefined) {
-      const storedUserRole = localStorage.getItem(LOCAL_STORAGE_KEYS.userRole);
-      if (storedUserRole) {
-        setUserRole && setUserRole(storedUserRole);
-      } else {
-        router.replace('/');
-      }
-    }
 
-    if (userRole && !allowedRoles.includes(userRole)) {
-      switch (userRole) {
-        case 'citizen':
+    let redirectPath = '/';
+    if (role && !allowedRoles.includes(role)) {
+      switch (role) {
+        case UserRole.Citizen:
           redirectPath = pagesPath.home.$url().pathname;
           break;
-        case 'admin':
+        case UserRole.Staff:
+        case UserRole.Admin:
           redirectPath = pagesPath.staff.home.$url().pathname;
           break;
         default:
           redirectPath = pagesPath.$url().pathname;
           break;
       }
-      toast({
-        description: 'ページが見つかりません',
-        duration: 3000,
-        position: 'bottom-right',
-        status: 'warning',
-        title: '404エラー',
-      });
       router.replace(redirectPath);
     }
-  }, [userRole, allowedRoles, router]);
+  }, [role, allowedRoles, router, debug, toast]);
 
-  if (!userRole) {
+  if (!role) {
     return (
       <Center h="100vh">
         <Text>読み込み中...</Text>
@@ -71,5 +58,9 @@ export const AuthGuard = ({
     );
   }
 
-  return <>{allowedRoles.includes(userRole) && children}</>;
+  if (!allowedRoles.includes(role)) {
+    return null;
+  }
+
+  return <>{children}</>;
 };
