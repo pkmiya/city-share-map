@@ -1,3 +1,5 @@
+'use client';
+
 import { useToast } from '@chakra-ui/react';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
@@ -7,6 +9,7 @@ import { loginApi } from '@/api/client';
 import { pagesPath } from '@/gen/$path';
 import { LoginOperationRequest, UserToken } from '@/gen/api';
 import { getErrorStatus } from '@/utils/error';
+import { isClient } from '@/utils/render';
 
 import { LOCAL_STORAGE_KEYS } from '../constants/localStoage';
 
@@ -37,8 +40,11 @@ export const useLoginByAdmin = () => {
     },
     onSuccess: async (res: UserToken) => {
       const { accessToken, idToken } = res;
-      localStorage.setItem(LOCAL_STORAGE_KEYS.accessToken, accessToken);
-      localStorage.setItem(LOCAL_STORAGE_KEYS.idToken, idToken);
+
+      if (isClient) {
+        localStorage.setItem(LOCAL_STORAGE_KEYS.accessToken, accessToken);
+        localStorage.setItem(LOCAL_STORAGE_KEYS.idToken, idToken);
+      }
 
       await router.push(pagesPath.staff.home.$url().pathname);
       toast({

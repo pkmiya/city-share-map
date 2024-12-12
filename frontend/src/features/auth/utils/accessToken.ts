@@ -1,4 +1,8 @@
+'use client';
+
 import { jwtDecode } from 'jwt-decode';
+
+import { isClient } from '@/utils/render';
 
 import {
   LOCAL_STORAGE_DUMMY_VALUES,
@@ -44,7 +48,7 @@ export const isTokenValid = (accessToken: string): boolean => {
 
 export const getAccessToken = () => {
   const accessToken =
-    localStorage.getItem(LOCAL_STORAGE_KEYS.accessToken) ||
+    (isClient && localStorage.getItem(LOCAL_STORAGE_KEYS.accessToken)) ||
     LOCAL_STORAGE_DUMMY_VALUES.accessToken;
 
   const cleanedAccessToken = accessToken.replace(/"/g, '');
