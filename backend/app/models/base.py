@@ -1,27 +1,25 @@
+from datetime import datetime
 from typing import Any
 
-from sqlalchemy import Column, DateTime, String, text
-from sqlalchemy.ext.declarative import as_declarative, declared_attr
+from sqlalchemy import DateTime, text
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
-@as_declarative()
-class Base:
+class Base(DeclarativeBase):
     id: Any
-    __name__: str
-
-    @declared_attr
-    def __tablename__(cls) -> str:
-        return cls.__name__.lower()
+    __tablename__: str
 
 
 class CommonColumns:
-    created_at = Column(
-        DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP")
     )
-    updated_at = Column(DateTime, server_onupdate=text("CURRENT_TIMESTAMP"))
-    deleted_at = Column(DateTime)
-    created_by = Column(String(64))
-    updated_by = Column(String(64))
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"),
+    )
+    deleted_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
 
 
 # soft_delete用のコード(なぜか動作しない)

@@ -25,7 +25,7 @@ def get_type_class(value: Any) -> type:
         raise HTTPException(status_code=400, detail="サポートされていないデータ型です")
 
 
-def validate_datetime(value: str) -> datetime:
+def validate_datetime(value: str) -> Optional[datetime]:
     try:
         return datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
     except ValueError:
@@ -90,10 +90,9 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
 
         return validated_values
 
-    def create(
+    def create_post(
         self,
         db_session: Session,
-        *,
         problem_id: int,
         user_id: uuid.UUID,
         post_in: PostCreate,
@@ -107,7 +106,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
 
             dynamic_table = self.get_dynamic_table(db_session, problem_id)
 
-            post_data = dynamic_table(
+            post_data: Dict[str, Any] = dynamic_table(
                 id=uuid.uuid4(),
                 problem_id=problem_id,
                 latitude=post_in.latitude,
@@ -133,13 +132,12 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                     detail=f"投稿の作成中にエラーが発生しました: {str(e)}",
                 )
 
-    def get(
+    def get_post(
         self,
         db_session: Session,
-        *,
+        filters: Dict[str, Any],
         skip: int = 0,
         limit: int = 100,
-        filters: Dict[str, Any] = None,
     ) -> List[Dict[str, Any]]:
         """
         全ての投稿を取得
@@ -189,7 +187,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
 
     def get_by_id(
         self, db_session: Session, *, problem_id: int, post_id: uuid.UUID
-    ) -> Optional[Dict[str, Any]]:
+    ) -> Dict[str, Any]:
         """
         特定の投稿を取得
         """
@@ -201,8 +199,8 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                 raise HTTPException(
                     status_code=404, detail="指定された投稿が見つかりません"
                 )
-
-            return jsonable_encoder(post)
+            res: Dict[str, Any] = jsonable_encoder(post)
+            return res
 
         except Exception as e:
             if isinstance(e, HTTPException):
@@ -213,7 +211,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                     detail=f"投稿の取得中にエラーが発生しました: {str(e)}",
                 )
 
-    def update(
+    def update_post(
         self,
         db_session: Session,
         *,
@@ -245,25 +243,28 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                 )
 
             obj_data = jsonable_encoder(post)
-            update_data = update_data.dict(exclude_unset=True)
+            update_data_dict = update_data.dict(exclude_unset=True)
 
-            if "items" in update_data:
-                items = update_data.pop("items")
+            if "items" in update_data_dict:
+                items = update_data_dict.pop("items")
                 for key, value in items.items():
-                    update_data[key] = value
+                    update_data_dict[key] = value
 
-            update_data["updated_at"] = (datetime.now().strftime("%Y-%m-%d %H:%M:%S"),)
-            update_data["updated_by"] = str(user_id)
+            update_data_dict["updated_at"] = datetime.now().strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+            update_data_dict["updated_by"] = str(user_id)
 
             for field in obj_data:
                 if field in update_data:
-                    setattr(post, field, update_data[field])
+                    setattr(post, field, update_data_dict[field])
 
             db_session.add(post)
             db_session.commit()
             db_session.refresh(post)
 
-            return jsonable_encoder(post)
+            res: Dict[str, Any] = jsonable_encoder(post)
+            return res
 
         except Exception as e:
             db_session.rollback()
@@ -282,7 +283,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
         problem_id: int,
         post_id: uuid.UUID,
         user_id: int,
-        update_data: Dict[str, bool],
+        update_data: Dict[str, Any],
     ) -> Dict[str, Any]:
         """
         is_solvedを更新(自治体User用)
@@ -298,7 +299,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
 
             obj_data = jsonable_encoder(post)
 
-            update_data["updated_at"] = (datetime.now().strftime("%Y-%m-%d %H:%M:%S"),)
+            update_data["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             update_data["updated_by"] = str(user_id)
             for field in obj_data:
                 if field in update_data:
@@ -308,7 +309,8 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
             db_session.commit()
             db_session.refresh(post)
 
-            return jsonable_encoder(post)
+            res: Dict[str, Any] = jsonable_encoder(post)
+            return res
 
         except Exception as e:
             db_session.rollback()
@@ -320,7 +322,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                     detail=f"投稿の更新中にエラーが発生しました: {str(e)}",
                 )
 
-    def delete(
+    def delete_post(
         self,
         db_session: Session,
         *,
@@ -348,7 +350,8 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
             db_session.delete(post)
             db_session.commit()
 
-            return jsonable_encoder(post)
+            res: Dict[str, Any] = jsonable_encoder(post)
+            return res
 
         except Exception as e:
             db_session.rollback()

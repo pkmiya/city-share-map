@@ -1,4 +1,4 @@
-from typing import Generic, List, Optional, Type, TypeVar
+from typing import Any, Generic, List, Optional, Type, TypeVar
 
 from app.models.base import Base
 from fastapi import HTTPException
@@ -24,7 +24,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """
         self.model = model
 
-    def get_dynamic_table(self, db_session: Session, problem_id: int):
+    def get_dynamic_table(self, db_session: Session, problem_id: int) -> Any:
         """
         動的テーブルを取得
         """
@@ -40,10 +40,12 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             )
 
     def get(self, db_session: Session, id: int) -> Optional[ModelType]:
-        return db_session.query(self.model).filter(self.model.id == id).first()
+        return db_session.query(self.model).filter(self.model.id == id).first() or None
 
-    def get_multi(self, db_session: Session, *, skip=0, limit=100) -> List[ModelType]:
-        return db_session.query(self.model).offset(skip).limit(limit).all()
+    def get_multi(
+        self, db_session: Session, *, skip: int = 0, limit: int = 100
+    ) -> List[ModelType]:
+        return db_session.query(self.model).offset(skip).limit(limit).all() or []
 
     def create(self, db_session: Session, *, obj_in: CreateSchemaType) -> ModelType:
         obj_in_data = jsonable_encoder(obj_in)
@@ -67,7 +69,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         return db_obj
 
     def delete(self, db_session: Session, *, id: int) -> ModelType:
-        obj = db_session.query(self.model).get(id)
+        obj: ModelType = db_session.query(self.model).get(id)
         db_session.delete(obj)
         db_session.commit()
         return obj

@@ -12,6 +12,7 @@ from app.models.problems import Type
 from app.models.user import CitizenUser
 from app.schemas.user import UserCreate
 from sqlalchemy import Boolean, DateTime, Integer, Text, inspect
+from sqlalchemy.orm import Session
 from sqlmodel import create_engine
 
 engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
@@ -26,7 +27,7 @@ type_mapping = {
 }
 
 
-def init_db(db_session):
+def init_db(db_session: Session) -> None:
     # Tables should be created with Alembic migrations
     # But if you don't want to use migrations, create
     # the tables un-commenting the next line

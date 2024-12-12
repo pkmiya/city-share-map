@@ -1,10 +1,11 @@
 import uuid
 from typing import Any, Dict, List, Optional
 
+from fastapi import APIRouter
+
 from app.api.deps import CurrentAdminUser, SessionDep
 from app.crud.post import crud_post
 from app.schemas.problem import PostCreate, PostUpdate
-from fastapi import APIRouter
 
 router = APIRouter()
 mock_id = uuid.UUID("00000000-0000-0000-0000-000000000000")  # モック用のID
@@ -21,12 +22,12 @@ def list_posts_by_citizen(
     is_open: Optional[bool] = None,
     problem_id: Optional[int] = None,
     user_id: Optional[uuid.UUID] = None,
-):
+) -> List[Dict[str, Any]]:
     """
     投稿の一覧を取得
     フィルタリングとページネーションをサポート
     """
-    filters = {}
+    filters: Dict[str, Any] = {}
     if is_solved is not None:
         filters["is_solved"] = is_solved
 
@@ -39,7 +40,7 @@ def list_posts_by_citizen(
     if user_id is not None:
         filters["user_id"] = user_id
 
-    return crud_post.get(db_session=db, skip=skip, limit=limit, filters=filters)
+    return crud_post.get_post(db_session=db, skip=skip, limit=limit, filters=filters)
 
 
 @router.get("/me", response_model=List[Dict[str, Any]])
@@ -51,12 +52,12 @@ def get_posts_me(
     limit: int = 100,
     is_solved: Optional[bool] = None,
     is_open: Optional[bool] = None,
-):
+) -> List[Dict[str, Any]]:
     """
     Userが投稿したレポートの一覧を取得
     フィルタリングとページネーションをサポート
     """
-    filters = {}
+    filters: Dict[str, Any] = {}
     if is_solved is not None:
         filters["is_solved"] = is_solved
 
@@ -66,7 +67,7 @@ def get_posts_me(
     # filters["user_id"] = current_user.id
     filters["user_id"] = uuid.UUID("00000000-0000-0000-0000-000000000000")
 
-    return crud_post.get(db_session=db, skip=skip, limit=limit, filters=filters)
+    return crud_post.get_post(db_session=db, skip=skip, limit=limit, filters=filters)
 
 
 @router.post("/{problem_id}", response_model=Dict[str, Any])
@@ -77,11 +78,11 @@ def create_post(
     # current_user: CurrentCitizenUser,
     current_user: CurrentAdminUser,
     post_in: PostCreate
-):
+) -> Dict[str, Any]:
     """
     新しい投稿を作成
     """
-    return crud_post.create(
+    return crud_post.create_post(
         db_session=db, problem_id=problem_id, user_id=mock_id, post_in=post_in
     )
 
@@ -93,7 +94,7 @@ def get_post_by_id(
     # current_user: CurrentCitizenUser,
     current_user: CurrentAdminUser,
     post_id: uuid.UUID,
-):
+) -> Dict[str, Any]:
     """
     IDによる投稿の取得
     """
@@ -110,12 +111,12 @@ def update_post(
     # current_user: CurrentCitizenUser,
     current_user: CurrentAdminUser,
     update_data: PostUpdate
-):
+) -> Dict[str, Any]:
     """
     投稿を更新
     """
 
-    return crud_post.update(
+    return crud_post.update_post(
         db_session=db,
         problem_id=problem_id,
         post_id=post_id,
@@ -124,19 +125,19 @@ def update_post(
     )
 
 
-@router.delete("/{problem_id}/{post_id}")
+@router.delete("/{problem_id}/{post_id}", response_model=Dict[str, Any])
 def delete_post(
     problem_id: int,
     post_id: uuid.UUID,
     db: SessionDep,
     # current_user: CurrentCitizenUser,
     current_user: CurrentAdminUser,
-):
+) -> Dict[str, Any]:
     """
     投稿を削除
     """
 
-    return crud_post.delete(
+    return crud_post.delete_post(
         db_session=db, problem_id=problem_id, post_id=post_id, user_id=mock_id
     )
 
@@ -144,7 +145,7 @@ def delete_post(
 @router.patch("/{problem_id}/{post_id}/solve", response_model=Dict[str, Any])
 def mark_as_solved(
     problem_id: int, post_id: uuid.UUID, db: SessionDep, current_user: CurrentAdminUser
-):
+) -> Dict[str, Any]:
     """
     投稿を解決済みとしてマーク
     """
@@ -161,7 +162,7 @@ def mark_as_solved(
 @router.patch("/{problem_id}/{post_id}/unsolve", response_model=Dict[str, Any])
 def mark_as_unsolved(
     problem_id: int, post_id: uuid.UUID, db: SessionDep, current_user: CurrentAdminUser
-):
+) -> Dict[str, Any]:
     """
     投稿を未解決としてマーク
     """

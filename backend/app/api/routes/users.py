@@ -2,6 +2,8 @@ import uuid
 from datetime import datetime, timedelta
 from typing import List
 
+from fastapi import APIRouter, HTTPException
+
 from app.api.deps import CurrentAdminUser, SessionDep
 from app.core import security
 from app.core.config import settings
@@ -13,12 +15,11 @@ from app.schemas.user import (
     CitizenUserRead,
     CitizenUserUpdate,
 )
-from fastapi import APIRouter, HTTPException
 
 router = APIRouter()
 
 
-@router.post("/access-token")
+@router.post("/access-token", response_model=Token)
 async def login_line_user(session: SessionDep, id_token: str) -> Token:
     """
     Line login, get an access token for future requests
@@ -54,11 +55,11 @@ def read_citizen_users(
     current_user: CurrentAdminUser,
     skip: int = 0,
     limit: int = 100,
-):
+) -> List[CitizenUserRead]:
     """
     Retrieve users.
     """
-    users = crud_citizen_user.get_multi(session, skip=skip, limit=limit)
+    users = crud_citizen_user.get_users(session, skip=skip, limit=limit)
     return users
 
 
@@ -68,11 +69,11 @@ def update_citizen_user(
     current_user: CurrentAdminUser,
     user_id: uuid.UUID,
     is_active: bool,
-):
+) -> CitizenUser:
     """
     Update a user.
     """
-    user = crud_citizen_user.get(session, id=user_id)
+    user = crud_citizen_user.get_user(session, id=user_id)
     if not user:
         raise HTTPException(
             status_code=404,

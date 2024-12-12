@@ -1,9 +1,10 @@
 from typing import List
 
+from fastapi import APIRouter, HTTPException
+
 from app.api.deps import CurrentAdminSuperuser, CurrentAdminUser, SessionDep
 from app.crud.user import crud_user
 from app.schemas.user import User, UserCreate, UserUpdate, UserUpdateMe
-from fastapi import APIRouter, HTTPException
 
 router = APIRouter()
 
@@ -14,7 +15,7 @@ def read_admin_users(
     current_user: CurrentAdminUser,
     skip: int = 0,
     limit: int = 100,
-):
+) -> List[User]:
     """
     Retrieve users.
     """
@@ -25,7 +26,7 @@ def read_admin_users(
 @router.post("/", response_model=User)
 def create_admin_user(
     *, session: SessionDep, user_in: UserCreate, current_user: CurrentAdminSuperuser
-):
+) -> User:
     """
     Create new user.
     """
@@ -45,7 +46,7 @@ def update_user_me(
     session: SessionDep,
     current_user: CurrentAdminUser,
     user_in: UserUpdateMe,
-):
+) -> User:
     """
     Update own user.
     """
@@ -64,7 +65,7 @@ def update_user_me(
 def read_user_me(
     session: SessionDep,
     current_user: CurrentAdminUser,
-):
+) -> User:
     """
     Get current user.
     """
@@ -76,7 +77,7 @@ def read_user_by_id(
     session: SessionDep,
     user_id: int,
     current_user: CurrentAdminUser,
-):
+) -> User:
     """
     Get a specific user by id.
     """
@@ -96,7 +97,7 @@ def update_user(
     user_id: int,
     user_in: UserUpdate,
     current_user: CurrentAdminSuperuser,
-):
+) -> User:
     """
     Update a user.
     """
@@ -121,7 +122,7 @@ def delete_user(
     session: SessionDep,
     user_id: int,
     current_user: CurrentAdminSuperuser,
-):
+) -> User:
     """
     Delete a user.
     """

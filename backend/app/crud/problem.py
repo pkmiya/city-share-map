@@ -27,7 +27,7 @@ from sqlalchemy.orm import Session
 
 
 class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):
-    def set_post_count(self, db_session: Session, problem):
+    def set_post_count(self, db_session: Session, problem: Problem) -> None:
         """
         問題に対応する投稿数を設定
         """
@@ -102,7 +102,7 @@ class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):
 
     def create_dynamic_post_table(
         self, db_session: Session, problem_id: int, items: List[ProblemItem]
-    ):
+    ) -> None:
         """
         市民の投稿を格納するための動的テーブルを作成
         TODO: append_columnのtype
@@ -197,7 +197,9 @@ class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):
             dynamic_table = Table(table_name, metadata)
             dynamic_table.drop(bind=db_session.get_bind())
 
-            problem = db_session.query(self.model).filter_by(id=problem_id).first()
+            problem: Problem = (
+                db_session.query(self.model).filter_by(id=problem_id).first() or None
+            )
             if not problem:
                 raise HTTPException(status_code=404, detail="課題が見つかりません")
 

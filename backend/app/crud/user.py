@@ -1,15 +1,16 @@
 from typing import Optional
 
+from sqlalchemy.orm import Session
+
 from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
 from app.models.user import User
 from app.schemas.user import UserCreate, UserInDB, UserUpdateMe
-from sqlalchemy.orm import Session
 
 
 class CRUDUser(CRUDBase[User, UserCreate, UserInDB]):
     def get_by_email(self, db_session: Session, *, email: str) -> Optional[User]:
-        return db_session.query(User).filter(User.email == email).first()
+        return db_session.query(User).filter(User.email == email).first() or None
 
     def create(self, db_session: Session, *, obj_in: UserCreate) -> User:
         db_obj = User(

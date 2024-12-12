@@ -2,6 +2,12 @@ from collections.abc import Generator
 from typing import Annotated
 
 import jwt
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from jwt.exceptions import InvalidTokenError
+from pydantic import ValidationError
+from sqlmodel import Session
+
 from app.core import security
 from app.core.config import settings
 from app.crud.citizen_user import crud_citizen_user
@@ -9,11 +15,6 @@ from app.crud.user import crud_user
 from app.db.db import engine
 from app.schemas.token import TokenPayload
 from app.schemas.user import AllUser, CitizenUser, User
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from jwt.exceptions import InvalidTokenError
-from pydantic import ValidationError
-from sqlmodel import Session
 
 reusable_oauth2 = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/login/")
 
@@ -42,7 +43,7 @@ def decode_token(token: str) -> TokenPayload:
 
 def get_user_by_token(session: Session, token_data: TokenPayload) -> User:
     if token_data.user_type == "citizen":
-        user = crud_citizen_user.get(session, token_data.user_id)
+        user = crud_citizen_user.get_user(session, token_data.user_id)
     else:
         user = crud_user.get(session, token_data.user_id)
 
@@ -85,6 +86,7 @@ def get_current_admin_superuser(session: SessionDep, token: TokenDep) -> User:
             status_code=status.HTTP_403_FORBIDDEN,
             detail="権限がありません",
         )
+    return get_user_by_token(session, token_data)
 
 
 CurrentAllUser = Annotated[User, Depends(get_current_all_user)]

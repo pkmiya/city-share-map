@@ -1,3 +1,4 @@
+import uuid
 from typing import List, Optional
 
 from app.crud.base import CRUDBase
@@ -12,12 +13,17 @@ class CRUDCitizenUser(CRUDBase[CitizenUser, CitizenUserCreate, CitizenUserUpdate
     def get_by_line_id(
         self, db_session: Session, *, line_id: str
     ) -> Optional[CitizenUser]:
-        return (
+        user = (
             db_session.query(CitizenUser).filter(CitizenUser.line_id == line_id).first()
+            or None
         )
+        return user
 
-    def get_multi(
-        self, db_session: Session, *, skip=0, limit=100
+    def get_user(self, db_session: Session, id: uuid.UUID) -> Optional[CitizenUser]:
+        return db_session.query(self.model).filter(self.model.id == id).first() or None
+
+    def get_users(
+        self, db_session: Session, *, skip: int = 0, limit: int = 100
     ) -> List[CitizenUserRead]:
         user_post_counts = {}
         res = []
@@ -58,7 +64,7 @@ class CRUDCitizenUser(CRUDBase[CitizenUser, CitizenUserCreate, CitizenUserUpdate
 
     def create(self, db_session: Session, *, obj_in: CitizenUserCreate) -> CitizenUser:
         db_obj = CitizenUser(
-            line_id=obj_in.line_id, name=obj_in.name, is_active=obj_in.is_active
+            name=obj_in.name, line_id=obj_in.line_id, is_active=obj_in.is_active
         )
         db_session.add(db_obj)
         db_session.commit()
@@ -83,7 +89,8 @@ class CRUDCitizenUser(CRUDBase[CitizenUser, CitizenUserCreate, CitizenUserUpdate
         return user
 
     def is_active(self, user: CitizenUser) -> bool:
-        return user.is_active
+        response: bool = user.is_active
+        return response
 
 
 crud_citizen_user = CRUDCitizenUser(CitizenUser)

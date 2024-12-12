@@ -30,8 +30,8 @@ class Settings(BaseSettings):
         os.path.dirname(__file__), "../.env.local"
     )
     load_dotenv(dotenv_path=dotenv_path)
-    LIFF_CHANNEL_ID: str = os.getenv("LIFF_CHANNEL_ID")
-    FRONTEND_HOST: str = os.getenv("FRONTEND_HOST")
+    LIFF_CHANNEL_ID: str = os.getenv("LIFF_CHANNEL_ID", "")
+    FRONTEND_HOST: str = os.getenv("FRONTEND_HOST", "http://localhost:3000")
     model_config = SettingsConfigDict(
         # Use top level .env file (one level above ./backend/)
         env_file="../.env",
@@ -127,4 +127,4 @@ class Settings(BaseSettings):
         return self
 
 
-settings = Settings()  # type: ignore
+settings = Settings()

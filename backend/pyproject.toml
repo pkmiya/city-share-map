@@ -39,31 +39,36 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.mypy]
+plugins = [
+  "pydantic.mypy"
+]
+allow_redefinition = true
+allow_untyped_globals = true
+allow_untyped_decorators = true
+check_untyped_defs = true
+ignore_missing_imports = true
+color_output = true
+disallow_incomplete_defs = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+error_summary = true
+implicit_reexport = true
+namespace_packages = true
+no_implicit_optional = true
+pretty = true
+show_column_numbers = true
+show_error_codes = true
+show_error_context = true
+show_traceback = true
 strict = true
+warn_no_return = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unreachable = true
+warn_unused_configs = true
+warn_unused_ignores = true
 exclude = ["venv", ".venv", "alembic"]
 
-[tool.ruff]
-target-version = "py310"
-exclude = ["alembic"]
+[tool.pydantic-mypy]
+init_typed = true
 
-[tool.ruff.lint]
-select = [
-    "E",  # pycodestyle errors
-    "W",  # pycodestyle warnings
-    "F",  # pyflakes
-    "I",  # isort
-    "B",  # flake8-bugbear
-    "C4",  # flake8-comprehensions
-    "UP",  # pyupgrade
-    "ARG001", # unused arguments in functions
-]
-ignore = [
-    "E501",  # line too long, handled by black
-    "B008",  # do not perform function calls in argument defaults
-    "W191",  # indentation contains tabs
-    "B904",  # Allow raising exceptions without from e, for HTTPException
-]
-
-[tool.ruff.lint.pyupgrade]
-# Preserve types, even if a file imports `from __future__ import annotations`.
-keep-runtime-typing = true

@@ -36,7 +36,7 @@ class UserUpdateMe(BaseModel):
 
 
 class UserInDBBase(UserBase):
-    id: int = None
+    id: int
 
     class Config:
         orm_mode = True
@@ -53,7 +53,7 @@ class UserInDB(UserInDBBase):
 
 
 class CitizenUserBase(BaseModel):
-    id: uuid.UUID = None
+    id: uuid.UUID
     name: Optional[str] = None
     line_id: Optional[str] = None
     is_active: Optional[bool] = True

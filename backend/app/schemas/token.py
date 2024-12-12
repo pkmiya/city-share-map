@@ -1,3 +1,6 @@
+from typing import Union
+from uuid import UUID
+
 from pydantic import BaseModel
 from pydantic.fields import Field
 
@@ -12,8 +15,8 @@ class UserToken(Token):
 
 
 class TokenPayload(BaseModel):
-    user_id: int = None
-    user_type: str = None
+    user_id: Union[int, UUID]
+    user_type: str
 
 
 class NewPassword(BaseModel):
