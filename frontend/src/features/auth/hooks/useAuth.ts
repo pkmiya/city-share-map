@@ -1,3 +1,5 @@
+'use client';
+
 import { LOCAL_STORAGE_KEYS } from '../constants/localStoage';
 import { decodeAccessToken } from '../utils/accessToken';
 import { decodeIdToken } from '../utils/idToken';
