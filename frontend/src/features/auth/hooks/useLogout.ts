@@ -1,20 +1,21 @@
+'use client';
+
 import { useToast } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 
-import { useLiff } from '@/context/liffProvider';
 import { pagesPath } from '@/gen/$path';
 import queryClient from '@/lib/react-query';
+import { isClient } from '@/utils/render';
 
 export const useLogout = () => {
   const router = useRouter();
   const toast = useToast();
-  const { setUserRole } = useLiff();
 
   const logout = async () => {
     // TODO: APIつなぎこみ
-    setUserRole && setUserRole(undefined);
     queryClient.clear();
-    localStorage.clear();
+
+    isClient && localStorage.clear();
 
     await router.push(pagesPath.$url().pathname);
     toast({

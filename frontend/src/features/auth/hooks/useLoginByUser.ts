@@ -1,25 +1,23 @@
+'use client';
+
 import { useToast } from '@chakra-ui/react';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 import { usersApi } from '@/api/client';
-import { useLiff } from '@/context/liffProvider';
 import { pagesPath } from '@/gen/$path';
 import { LoginLineUserRequest, Token } from '@/gen/api';
-import queryClient from '@/lib/react-query';
 import { getErrorStatus } from '@/utils/error';
+import { isClient } from '@/utils/render';
 
 import { LOCAL_STORAGE_KEYS } from '../constants/localStoage';
-import { userKeys } from '../constants/queryKey';
-import { UserRole } from '../constants/role';
 
 import { useCheckTokenAndRedirect } from './useCheckTokenAndRedirect';
 
 export const useLoginByUser = () => {
   const router = useRouter();
   const toast = useToast();
-  const { setUserRole } = useLiff();
 
   const checkTokenAndRedirect = useCheckTokenAndRedirect();
 
@@ -44,14 +42,8 @@ export const useLoginByUser = () => {
     },
     onSuccess: async (res: Token) => {
       const { accessToken } = res;
-      const userRole = UserRole.Citizen;
-
-      setUserRole && setUserRole(userRole);
-      localStorage.setItem(LOCAL_STORAGE_KEYS.userRole, userRole);
-      localStorage.setItem(LOCAL_STORAGE_KEYS.accessToken, accessToken);
-      queryClient.setQueryData(userKeys.user, {
-        accessToken,
-      });
+      isClient &&
+        localStorage.setItem(LOCAL_STORAGE_KEYS.accessToken, accessToken);
 
       await router.push(pagesPath.home.$url().pathname);
       toast({

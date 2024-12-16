@@ -6,7 +6,7 @@ import { UserHome } from '@/features/home/UserHome';
 export default function Home() {
   return (
     <>
-      <AuthGuard allowedRoles={[UserRole.Staff]}>
+      <AuthGuard allowedRoles={[UserRole.Citizen]}>
         <SidebarWithHeader>
           <UserHome />
         </SidebarWithHeader>

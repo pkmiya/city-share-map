@@ -1,68 +1,59 @@
 'use client';
 
-import { Center, Spinner, Text, useToast } from '@chakra-ui/react';
+import { Center, Spinner, Text } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import { ReactNode, useEffect } from 'react';
 
-import { useLiff } from '@/context/liffProvider';
 import { pagesPath } from '@/gen/$path';
 
-import { LOCAL_STORAGE_KEYS } from './constants/localStoage';
-import { UserRoleType } from './constants/role';
+import { UserRole, UserRoleType } from './constants/role';
+import { useAuth } from './hooks/useAuth';
 
 type AuthGuardProps = {
   allowedRoles: UserRoleType[];
   children: ReactNode;
   debug?: boolean;
+  isPublic?: boolean;
+  redirectAuthenticatedTo?: Record<UserRoleType, string>;
 };
 
 export const AuthGuard = ({
   children,
   allowedRoles,
+  redirectAuthenticatedTo = {
+    [UserRole.Admin]: pagesPath.staff.home.$url().pathname,
+    [UserRole.Staff]: pagesPath.staff.home.$url().pathname,
+    [UserRole.Citizen]: pagesPath.home.$url().pathname,
+  },
+  isPublic = false,
   debug = false,
 }: AuthGuardProps) => {
-  const { userRole, setUserRole } = useLiff();
+  const { accessToken } = useAuth();
+  const role = accessToken?.user_type ?? null;
+
   const router = useRouter();
-  const toast = useToast();
 
   useEffect(() => {
-    let redirectPath = '/';
     if (debug) {
       return;
     }
-    if (userRole === undefined) {
-      const storedUserRole = localStorage.getItem(LOCAL_STORAGE_KEYS.userRole);
-      if (storedUserRole) {
-        setUserRole && setUserRole(storedUserRole);
-      } else {
-        router.replace('/');
-      }
-    }
 
-    if (userRole && !allowedRoles.includes(userRole)) {
-      switch (userRole) {
-        case 'citizen':
-          redirectPath = pagesPath.home.$url().pathname;
-          break;
-        case 'admin':
-          redirectPath = pagesPath.staff.home.$url().pathname;
-          break;
-        default:
-          redirectPath = pagesPath.$url().pathname;
-          break;
-      }
-      toast({
-        description: 'ページが見つかりません',
-        duration: 3000,
-        position: 'bottom-right',
-        status: 'warning',
-        title: '404エラー',
-      });
+    // (1) ログイン済みユーザだがアクセスが許可されていない場合、リダイレクト
+    if (role && !allowedRoles.includes(role)) {
+      const redirectPath = redirectAuthenticatedTo[role] || '/';
       router.replace(redirectPath);
+      return;
     }
-  }, [userRole, allowedRoles, router]);
+    // (2) 未ログインユーザーでアクセスが許可されていない場合、リダイレクト
+    if (!role && !isPublic) {
+      const redirectPath = pagesPath.$url().pathname;
+      router.replace(redirectPath);
+      return;
+    }
+  }, [role, allowedRoles, redirectAuthenticatedTo, router, debug, isPublic]);
 
-  if (!userRole) {
+  // 未ログインユーザーでアクセスが許可されていない場合、リダイレクトまで以下を表示
+  if (!role && isPublic === false) {
     return (
       <Center h="100vh">
         <Text>読み込み中...</Text>
@@ -71,5 +62,5 @@ export const AuthGuard = ({
     );
   }
 
-  return <>{allowedRoles.includes(userRole) && children}</>;
+  return <>{children}</>;
 };

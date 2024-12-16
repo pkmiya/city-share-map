@@ -6,7 +6,7 @@ import { UserRole } from '@/features/auth/constants/role';
 export default function Home() {
   return (
     <>
-      <AuthGuard allowedRoles={[UserRole.Admin]}>
+      <AuthGuard allowedRoles={[UserRole.Staff, UserRole.Admin]}>
         <SidebarWithHeader>
           <AdminHome />
         </SidebarWithHeader>
