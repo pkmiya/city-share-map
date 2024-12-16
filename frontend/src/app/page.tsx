@@ -3,7 +3,7 @@ import { LoginForm } from '@/features/auth/components/LoginForm';
 
 export default function Home() {
   return (
-    <AuthGuard allowedRoles={[]}>
+    <AuthGuard isPublic allowedRoles={[]}>
       <LoginForm />
     </AuthGuard>
   );

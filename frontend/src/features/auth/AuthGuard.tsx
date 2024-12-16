@@ -1,6 +1,6 @@
 'use client';
 
-import { Center, Spinner, Text, useToast } from '@chakra-ui/react';
+import { Center, Spinner, Text } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import { ReactNode, useEffect } from 'react';
 
@@ -13,53 +13,53 @@ type AuthGuardProps = {
   allowedRoles: UserRoleType[];
   children: ReactNode;
   debug?: boolean;
+  isPublic?: boolean;
+  redirectAuthenticatedTo?: Record<UserRoleType, string>;
 };
 
 export const AuthGuard = ({
   children,
   allowedRoles,
+  redirectAuthenticatedTo = {
+    [UserRole.Admin]: pagesPath.staff.home.$url().pathname,
+    [UserRole.Staff]: pagesPath.staff.home.$url().pathname,
+    [UserRole.Citizen]: pagesPath.home.$url().pathname,
+  },
+  isPublic = false,
   debug = false,
 }: AuthGuardProps) => {
   const { accessToken } = useAuth();
-  const role = accessToken.user_type;
+  const role = accessToken?.user_type ?? null;
 
   const router = useRouter();
-  const toast = useToast();
 
   useEffect(() => {
     if (debug) {
       return;
     }
 
-    let redirectPath = '/';
+    // (1) ログイン済みユーザだがアクセスが許可されていない場合、リダイレクト
     if (role && !allowedRoles.includes(role)) {
-      switch (role) {
-        case UserRole.Citizen:
-          redirectPath = pagesPath.home.$url().pathname;
-          break;
-        case UserRole.Staff:
-        case UserRole.Admin:
-          redirectPath = pagesPath.staff.home.$url().pathname;
-          break;
-        default:
-          redirectPath = pagesPath.$url().pathname;
-          break;
-      }
+      const redirectPath = redirectAuthenticatedTo[role] || '/';
       router.replace(redirectPath);
+      return;
     }
-  }, [role, allowedRoles, router, debug, toast]);
+    // (2) 未ログインユーザーでアクセスが許可されていない場合、リダイレクト
+    if (!role && !isPublic) {
+      const redirectPath = pagesPath.$url().pathname;
+      router.replace(redirectPath);
+      return;
+    }
+  }, [role, allowedRoles, redirectAuthenticatedTo, router, debug, isPublic]);
 
-  if (!role) {
+  // 未ログインユーザーでアクセスが許可されていない場合、リダイレクトまで以下を表示
+  if (!role && isPublic === false) {
     return (
       <Center h="100vh">
         <Text>読み込み中...</Text>
         <Spinner />
       </Center>
     );
-  }
-
-  if (!allowedRoles.includes(role)) {
-    return null;
   }
 
   return <>{children}</>;
