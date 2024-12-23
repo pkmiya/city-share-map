@@ -7,6 +7,7 @@ import {
   FormErrorMessage,
   FormLabel,
   Input,
+  Link,
   Text,
   VStack,
 } from '@chakra-ui/react';
@@ -14,6 +15,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 
 import { appMetadata } from '@/config/metadata';
+import { pagesPath } from '@/gen/$path';
 import { LoginRequest } from '@/gen/api';
 
 import { useLoginByAdmin } from '../hooks/useLoginByAdmin';
@@ -75,6 +77,9 @@ export const LoginForm: React.FC = () => {
           </Button>
         </VStack>
       </form>
+      <Link href={pagesPath.map.$url().pathname}>
+        市民ユーザ向けホーム画面へ
+      </Link>
     </Box>
   );
 };
