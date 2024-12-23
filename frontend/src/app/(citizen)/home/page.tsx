@@ -6,7 +6,11 @@ import { UserHome } from '@/features/home/UserHome';
 export default function Home() {
   return (
     <>
-      <AuthGuard allowedRoles={[UserRole.Citizen]}>
+      {/* 一時的に全体公開に設定 */}
+      <AuthGuard
+        isPublic
+        allowedRoles={[UserRole.Admin, UserRole.Staff, UserRole.Citizen]}
+      >
         <SidebarWithHeader>
           <UserHome />
         </SidebarWithHeader>
