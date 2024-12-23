@@ -93,7 +93,7 @@ export const PostList = () => {
                         </Tag>
                       </Td>
                       <Td>
-                        <Tag colorScheme={isOpen ? 'green' : 'red'}>
+                        <Tag colorScheme={isSolved ? 'green' : 'red'}>
                           {isSolved ? '解決済' : '未解決'}
                         </Tag>
                       </Td>
