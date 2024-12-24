@@ -148,6 +148,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
       borderRight="1px"
       borderRightColor={useColorModeValue('gray.200', 'gray.700')}
       h="full"
+      overflowY="scroll"
       pos="fixed"
       transition="width 1s ease"
       w={{ base: 'full', xl: 60 }}
