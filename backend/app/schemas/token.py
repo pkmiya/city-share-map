@@ -1,7 +1,7 @@
 from typing import Union
 from uuid import UUID
 
-from app.schemas.base_schemas import BaseSchema
+from app.schemas.base_schema import BaseSchema
 from pydantic.fields import Field
 
 

@@ -3,10 +3,8 @@ app.egg-info
 *.pyc
 .mypy_cache
 .coverage
-htmlcov
 .cache
 .venv
 .env*
 !.env.example
 venv
-.DS_Store

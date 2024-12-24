@@ -7,10 +7,8 @@ from app.core.config import settings
 from app.crud.citizen_user import crud_citizen_user
 from app.crud.user import crud_user
 from app.db.db import engine
-from app.models.user import CitizenUser as DBCitizenUser
-from app.models.user import User as DBUser
+from app.models.user import CitizenUser, User
 from app.schemas.token import TokenPayload
-from app.schemas.user import CitizenUser, User
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
@@ -103,6 +101,6 @@ def get_current_admin_superuser(
 
 
 CurrentAllUser = Annotated[Union[CitizenUser, User], Depends(get_current_all_user)]
-CurrentCitizenUser = Annotated[DBCitizenUser, Depends(get_current_citizen_user)]
-CurrentStaffUser = Annotated[DBUser, Depends(get_current_admin_user)]
-CurrentAdminUser = Annotated[DBUser, Depends(get_current_admin_superuser)]
+CurrentCitizenUser = Annotated[CitizenUser, Depends(get_current_citizen_user)]
+CurrentStaffUser = Annotated[User, Depends(get_current_admin_user)]
+CurrentAdminUser = Annotated[User, Depends(get_current_admin_superuser)]

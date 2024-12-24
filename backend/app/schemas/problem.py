@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 
-from app.schemas.base_schemas import BaseSchema
+from app.schemas.base_schema import BaseSchema
 
 
 # ProblemItemの作成時のスキーマ
