@@ -63,5 +63,5 @@ class PostBase(Base, CommonColumns):
     is_solved: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     problem = relationship("Problem", back_populates="posts")
-    # user = relationship('CitizenUser', back_populates='posts')
-    post_likes = relationship("PostLikeBase", back_populates="post")
+    # user = relationship("CitizenUser", back_populates="posts")
+    # post_likes = relationship("PostLikeBase", back_populates="post")

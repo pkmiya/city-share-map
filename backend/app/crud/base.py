@@ -1,4 +1,5 @@
-from typing import Any, Generic, List, Optional, Type, TypeVar
+from typing import Any, Generic, List, Optional, Type, TypeVar, Union
+from uuid import UUID
 
 from app.models.base import Base
 from fastapi import HTTPException
@@ -39,13 +40,13 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
                 status_code=404, detail=f"テーブル '{table_name}' が見つかりません"
             )
 
-    def get(self, db_session: Session, id: int) -> Optional[ModelType]:
-        return db_session.query(self.model).filter(self.model.id == id).first() or None
+    def get(self, db_session: Session, id: Union[int, UUID]) -> Optional[ModelType]:
+        return db_session.query(self.model).filter(self.model.id == id).first()
 
     def get_multi(
         self, db_session: Session, *, skip: int = 0, limit: int = 100
     ) -> List[ModelType]:
-        return db_session.query(self.model).offset(skip).limit(limit).all() or []
+        return db_session.query(self.model).offset(skip).limit(limit).all()
 
     def create(self, db_session: Session, *, obj_in: CreateSchemaType) -> ModelType:
         obj_in_data = jsonable_encoder(obj_in)
@@ -68,8 +69,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         db_session.refresh(db_obj)
         return db_obj
 
-    def delete(self, db_session: Session, *, id: int) -> ModelType:
-        obj: ModelType = db_session.query(self.model).get(id)
-        db_session.delete(obj)
+    def delete(self, db_session: Session, *, id: int) -> Optional[ModelType]:
+        db_obj = db_session.query(self.model).filter(self.model.id == id).first()
+        db_session.delete(db_obj)
         db_session.commit()
-        return obj
+        return db_obj

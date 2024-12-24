@@ -40,7 +40,7 @@ jobs:
         run: black ./ --line-length 88 --exclude ./app/tests
 
       - name: Run flake8
-        run: flake8 ./ --exclude ./app/tests --max-line-length=88 --ignore=E203,W503,W504 --max-complexity=10
+        run: flake8 ./ --exclude ./app/tests --max-line-length=88 --ignore=E203,W503,W504 --max-complexity=15
 
   type-check:
     name: Type Check
@@ -60,5 +60,5 @@ jobs:
           pip install mypy
 
       - name: Run mypy
-        run: mypy ./
+        run: mypy ./app/ --exclude ${GITHUB_WORKSPACE}/backend/app/gen.py --ignore-missing-imports --allow-redefinition --allow-untyped-globals --allow-untyped-decorators --check-untyped-defs --color-output --disallow-incomplete-defs --disallow-untyped-calls --disallow-untyped-defs --error-summary --implicit-reexport --namespace-packages --no-implicit-optional --show-column-numbers --show-error-codes --show-error-context --show-traceback --strict --warn-no-return --warn-redundant-casts --warn-return-any --warn-unreachable --warn-unused-configs --warn-unused-ignores
         

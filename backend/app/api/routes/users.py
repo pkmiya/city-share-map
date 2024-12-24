@@ -2,12 +2,11 @@ import uuid
 from datetime import datetime, timedelta
 from typing import List
 
-from fastapi import APIRouter, HTTPException
-
-from app.api.deps import CurrentAdminUser, SessionDep
+from app.api.deps import CurrentStaffUser, SessionDep
 from app.core import security
 from app.core.config import settings
 from app.crud.citizen_user import crud_citizen_user
+from app.models.user import CitizenUser as DBCitizenUser
 from app.schemas.token import Token
 from app.schemas.user import (
     CitizenUser,
@@ -15,6 +14,7 @@ from app.schemas.user import (
     CitizenUserRead,
     CitizenUserUpdate,
 )
+from fastapi import APIRouter, HTTPException
 
 router = APIRouter()
 
@@ -38,7 +38,7 @@ async def login_line_user(session: SessionDep, id_token: str) -> Token:
     user = crud_citizen_user.update_last_login(
         session,
         db_obj=user,
-        obj_in={"last_login": datetime.now().strftime("%Y-%m-%d %H:%M:%S")},
+        obj_in={"last_login": datetime.now()},
     )
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -52,7 +52,7 @@ async def login_line_user(session: SessionDep, id_token: str) -> Token:
 @router.get("/", response_model=List[CitizenUserRead])
 def read_citizen_users(
     session: SessionDep,
-    current_user: CurrentAdminUser,
+    current_user: CurrentStaffUser,
     skip: int = 0,
     limit: int = 100,
 ) -> List[CitizenUserRead]:
@@ -66,14 +66,14 @@ def read_citizen_users(
 @router.put("/{user_id}", response_model=CitizenUser)
 def update_citizen_user(
     session: SessionDep,
-    current_user: CurrentAdminUser,
+    current_user: CurrentStaffUser,
     user_id: uuid.UUID,
     is_active: bool,
 ) -> CitizenUser:
     """
     Update a user.
     """
-    user = crud_citizen_user.get_user(session, id=user_id)
+    user = session.query(DBCitizenUser).filter(DBCitizenUser.id == user_id).first()
     if not user:
         raise HTTPException(
             status_code=404,

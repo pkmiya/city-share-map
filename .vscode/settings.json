@@ -51,7 +51,7 @@
     "--ignore=E203,W503,W504"
   ],
   "mypy-type-checker.args": [
-    "--config=${workspaceFolder}/backend/pyproject.toml",
+    "--exclude=${workspaceFolder}/backend/app/gen.py",
     "--ignore-missing-imports",
     "--allow-redefinition",
     "--allow-untyped-globals",
@@ -62,7 +62,6 @@
     "--disallow-untyped-calls",
     "--disallow-untyped-defs",
     "--error-summary",
-    "--ignore-missing-imports",
     "--implicit-reexport",
     "--namespace-packages",
     "--no-implicit-optional",
@@ -77,6 +76,5 @@
     "--warn-unreachable",
     "--warn-unused-configs",
     "--warn-unused-ignores"
-
   ]
 }

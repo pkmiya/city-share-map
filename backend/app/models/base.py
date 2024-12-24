@@ -16,8 +16,8 @@ class CommonColumns:
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime,
-        nullable=False,
-        server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"),
+        nullable=True,
+        server_default=text("CURRENT_TIMESTAMP"),
     )
     deleted_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
 

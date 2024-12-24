@@ -1,11 +1,13 @@
 import uuid
-from typing import List
+from typing import Any, List
 
 from app.crud.base import CRUDBase
 from app.db.db import type_mapping
 from app.models.problems import PostBase, Problem, ProblemItem
 from app.schemas.problem import (
     ProblemCreate,
+    ProblemItemBase,
+    ProblemItemCreate,
     ProblemRead,
     ProblemReadByID,
     ProblemUpdate,
@@ -27,16 +29,16 @@ from sqlalchemy.orm import Session
 
 
 class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):
-    def set_post_count(self, db_session: Session, problem: Problem) -> None:
+    def set_post_count(self, db_session: Session, problem: Problem) -> int:
         """
         問題に対応する投稿数を設定
         """
         try:
             dynamic_table = self.get_dynamic_table(db_session, problem.id)
-            post_count = db_session.query(dynamic_table).count()
-            setattr(problem, "post_count", post_count)
+            post_count: int = db_session.query(dynamic_table).count()
+            return post_count
         except HTTPException:
-            setattr(problem, "post_count", 0)
+            return 0
 
     def create_with_items(
         self, db_session: Session, *, obj_in: ProblemCreate, user_id: int
@@ -86,7 +88,6 @@ class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):
 
             # 市民投稿用の動的テーブルを作成
             self.create_dynamic_post_table(db_session, db_obj.id, obj_in.items)
-
             return db_obj
 
         except Exception as e:
@@ -101,7 +102,7 @@ class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):
                 )
 
     def create_dynamic_post_table(
-        self, db_session: Session, problem_id: int, items: List[ProblemItem]
+        self, db_session: Session, problem_id: int, items: List[ProblemItemCreate]
     ) -> None:
         """
         市民の投稿を格納するための動的テーブルを作成
@@ -123,7 +124,7 @@ class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):
             Column("is_solved", Boolean, default=False),
         )
 
-        CommonColumns = [
+        CommonColumns: List[Column[Any]] = [
             Column(
                 "created_at",
                 DateTime,
@@ -152,31 +153,54 @@ class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):
         self, db_session: Session, *, skip: int = 0, limit: int = 100
     ) -> List[ProblemRead]:
         problems = self.get_multi(db_session, skip=skip, limit=limit)
+        responses = []
 
         for problem in problems:
             self.set_post_count(db_session, problem)
             setattr(problem, "created_at", problem.created_at)
+            response = ProblemRead(
+                id=problem.id,
+                name=problem.name,
+                is_open=problem.is_open,
+                description=problem.description,
+                post_count=self.set_post_count(db_session, problem),
+                created_at=problem.created_at,
+            )
+            responses.append(response)
 
-        return problems
+        return responses
 
     def get_problem_by_id(self, db_session: Session, *, id: int) -> ProblemReadByID:
         try:
-            problem = db_session.query(self.model).filter_by(id=id).first()
+            problem = self.get(db_session, id)
             if not problem:
                 raise HTTPException(status_code=404, detail="課題が見つかりません")
 
-            self.set_post_count(db_session, problem)
-            setattr(problem, "created_at", problem.created_at)
-
-            problem_data = db_session.query(ProblemItem).filter_by(problem_id=id).all()
-            if not problem_data:
+            problem_datas = db_session.query(ProblemItem).filter_by(problem_id=id).all()
+            if not problem_datas:
                 raise HTTPException(
                     status_code=404, detail="課題の項目が見つかりません"
                 )
+            items = []
+            for problem_data in problem_datas:
+                item = ProblemItemBase(
+                    name=problem_data.name,
+                    type_id=problem_data.type_id,
+                    required=problem_data.required,
+                )
+                items.append(item)
 
-            setattr(problem, "items", problem_data)
+            response = ProblemReadByID(
+                id=problem.id,
+                name=problem.name,
+                is_open=problem.is_open,
+                description=problem.description,
+                post_count=self.set_post_count(db_session, problem),
+                created_at=problem.created_at,
+                items=items,
+            )
 
-            return problem
+            return response
 
         except Exception as e:
             db_session.rollback()
@@ -197,9 +221,7 @@ class CRUDProblem(CRUDBase[Problem, ProblemCreate, ProblemUpdate]):
             dynamic_table = Table(table_name, metadata)
             dynamic_table.drop(bind=db_session.get_bind())
 
-            problem: Problem = (
-                db_session.query(self.model).filter_by(id=problem_id).first() or None
-            )
+            problem = self.get(db_session, problem_id)
             if not problem:
                 raise HTTPException(status_code=404, detail="課題が見つかりません")
 

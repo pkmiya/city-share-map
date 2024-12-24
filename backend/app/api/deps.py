@@ -1,20 +1,21 @@
 from collections.abc import Generator
-from typing import Annotated
+from typing import Annotated, Union
 
 import jwt
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from jwt.exceptions import InvalidTokenError
-from pydantic import ValidationError
-from sqlmodel import Session
-
 from app.core import security
 from app.core.config import settings
 from app.crud.citizen_user import crud_citizen_user
 from app.crud.user import crud_user
 from app.db.db import engine
+from app.models.user import CitizenUser as DBCitizenUser
+from app.models.user import User as DBUser
 from app.schemas.token import TokenPayload
-from app.schemas.user import AllUser, CitizenUser, User
+from app.schemas.user import CitizenUser, User
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from jwt.exceptions import InvalidTokenError
+from pydantic import ValidationError
+from sqlmodel import Session
 
 reusable_oauth2 = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/login/")
 
@@ -41,9 +42,13 @@ def decode_token(token: str) -> TokenPayload:
         )
 
 
-def get_user_by_token(session: Session, token_data: TokenPayload) -> User:
+def get_user_by_token(
+    session: Session, token_data: TokenPayload
+) -> Union[CitizenUser, User]:
+    user: Union[CitizenUser, User, None] = None
+
     if token_data.user_type == "citizen":
-        user = crud_citizen_user.get_user(session, token_data.user_id)
+        user = crud_citizen_user.get(session, token_data.user_id)
     else:
         user = crud_user.get(session, token_data.user_id)
 
@@ -54,12 +59,16 @@ def get_user_by_token(session: Session, token_data: TokenPayload) -> User:
     return user
 
 
-def get_current_all_user(session: SessionDep, token: TokenDep) -> AllUser:
+def get_current_all_user(
+    session: SessionDep, token: TokenDep
+) -> Union[CitizenUser, User]:
     token_data = decode_token(token)
     return get_user_by_token(session, token_data)
 
 
-def get_current_admin_user(session: SessionDep, token: TokenDep) -> User:
+def get_current_admin_user(
+    session: SessionDep, token: TokenDep
+) -> Union[CitizenUser, User]:
     token_data = decode_token(token)
     if token_data.user_type == "citizen":
         raise HTTPException(
@@ -69,7 +78,9 @@ def get_current_admin_user(session: SessionDep, token: TokenDep) -> User:
     return get_user_by_token(session, token_data)
 
 
-def get_current_citizen_user(session: SessionDep, token: TokenDep) -> CitizenUser:
+def get_current_citizen_user(
+    session: SessionDep, token: TokenDep
+) -> Union[CitizenUser, User]:
     token_data = decode_token(token)
     if token_data.user_type != "citizen":
         raise HTTPException(
@@ -79,7 +90,9 @@ def get_current_citizen_user(session: SessionDep, token: TokenDep) -> CitizenUse
     return get_user_by_token(session, token_data)
 
 
-def get_current_admin_superuser(session: SessionDep, token: TokenDep) -> User:
+def get_current_admin_superuser(
+    session: SessionDep, token: TokenDep
+) -> Union[CitizenUser, User]:
     token_data = decode_token(token)
     if token_data.user_type != "admin":
         raise HTTPException(
@@ -89,7 +102,7 @@ def get_current_admin_superuser(session: SessionDep, token: TokenDep) -> User:
     return get_user_by_token(session, token_data)
 
 
-CurrentAllUser = Annotated[User, Depends(get_current_all_user)]
-CurrentAdminUser = Annotated[User, Depends(get_current_admin_user)]
-CurrentCitizenUser = Annotated[User, Depends(get_current_citizen_user)]
-CurrentAdminSuperuser = Annotated[User, Depends(get_current_admin_superuser)]
+CurrentAllUser = Annotated[Union[CitizenUser, User], Depends(get_current_all_user)]
+CurrentCitizenUser = Annotated[DBCitizenUser, Depends(get_current_citizen_user)]
+CurrentStaffUser = Annotated[DBUser, Depends(get_current_admin_user)]
+CurrentAdminUser = Annotated[DBUser, Depends(get_current_admin_superuser)]

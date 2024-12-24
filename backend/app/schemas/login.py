@@ -1,6 +1,6 @@
-from pydantic import BaseModel
+from app.schemas.base_schemas import BaseSchema
 
 
-class LoginRequest(BaseModel):
+class LoginRequest(BaseSchema):
     username: str
     password: str

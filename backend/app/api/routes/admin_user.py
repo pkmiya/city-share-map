@@ -1,10 +1,10 @@
 from typing import List
 
-from fastapi import APIRouter, HTTPException
-
-from app.api.deps import CurrentAdminSuperuser, CurrentAdminUser, SessionDep
+from app.api.deps import CurrentAdminUser, CurrentStaffUser, SessionDep
 from app.crud.user import crud_user
+from app.models.user import User as DBUser
 from app.schemas.user import User, UserCreate, UserUpdate, UserUpdateMe
+from fastapi import APIRouter, HTTPException
 
 router = APIRouter()
 
@@ -12,7 +12,7 @@ router = APIRouter()
 @router.get("/", response_model=List[User])
 def read_admin_users(
     session: SessionDep,
-    current_user: CurrentAdminUser,
+    current_user: CurrentStaffUser,
     skip: int = 0,
     limit: int = 100,
 ) -> List[User]:
@@ -25,7 +25,7 @@ def read_admin_users(
 
 @router.post("/", response_model=User)
 def create_admin_user(
-    *, session: SessionDep, user_in: UserCreate, current_user: CurrentAdminSuperuser
+    *, session: SessionDep, user_in: UserCreate, current_user: CurrentAdminUser
 ) -> User:
     """
     Create new user.
@@ -44,7 +44,7 @@ def create_admin_user(
 def update_user_me(
     *,
     session: SessionDep,
-    current_user: CurrentAdminUser,
+    current_user: CurrentStaffUser,
     user_in: UserUpdateMe,
 ) -> User:
     """
@@ -56,7 +56,6 @@ def update_user_me(
             raise HTTPException(
                 status_code=400, detail="そのメールアドレスは既に登録されています"
             )
-
     user = crud_user.update_me(session, db_obj=current_user, obj_in=user_in)
     return user
 
@@ -64,19 +63,20 @@ def update_user_me(
 @router.get("/me", response_model=User)
 def read_user_me(
     session: SessionDep,
-    current_user: CurrentAdminUser,
+    current_user: CurrentStaffUser,
 ) -> User:
     """
     Get current user.
     """
-    return current_user
+    response = User.model_validate(current_user)
+    return response
 
 
 @router.get("/{user_id}", response_model=User)
 def read_user_by_id(
     session: SessionDep,
     user_id: int,
-    current_user: CurrentAdminUser,
+    current_user: CurrentStaffUser,
 ) -> User:
     """
     Get a specific user by id.
@@ -96,12 +96,12 @@ def update_user(
     session: SessionDep,
     user_id: int,
     user_in: UserUpdate,
-    current_user: CurrentAdminSuperuser,
+    current_user: CurrentAdminUser,
 ) -> User:
     """
     Update a user.
     """
-    user = crud_user.get(session, id=user_id)
+    user = session.query(DBUser).filter(id=user_id).first()
     if not user:
         raise HTTPException(
             status_code=404,
@@ -121,7 +121,7 @@ def delete_user(
     *,
     session: SessionDep,
     user_id: int,
-    current_user: CurrentAdminSuperuser,
+    current_user: CurrentAdminUser,
 ) -> User:
     """
     Delete a user.

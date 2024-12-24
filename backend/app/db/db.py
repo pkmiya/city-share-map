@@ -47,7 +47,7 @@ def init_db(db_session: Session) -> None:
                 department="Admin",
                 is_superuser=True,
             )
-            user = crud_user.create(db_session, obj_in=user_in)  # noqa: F841
+            create_user = crud_user.create(db_session, obj_in=user_in)  # noqa: F841
 
         citizen_user_data = [
             {
@@ -75,7 +75,7 @@ def init_db(db_session: Session) -> None:
                 name=data["name"],
                 line_id=data["line_id"],
                 is_active=data["is_active"],
-                last_login=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                last_login=datetime.now(),
             )
             db_session.add(citizen_user)
 

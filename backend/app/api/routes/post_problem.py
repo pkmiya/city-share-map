@@ -1,11 +1,10 @@
 import uuid
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter
-
-from app.api.deps import CurrentAdminUser, SessionDep
+from app.api.deps import CurrentStaffUser, SessionDep
 from app.crud.post import crud_post
 from app.schemas.problem import PostCreate, PostUpdate
+from fastapi import APIRouter
 
 router = APIRouter()
 mock_id = uuid.UUID("00000000-0000-0000-0000-000000000000")  # モック用のID
@@ -15,7 +14,7 @@ mock_id = uuid.UUID("00000000-0000-0000-0000-000000000000")  # モック用のID
 def list_posts_by_citizen(
     db: SessionDep,
     # current_user: CurrentCitizenUser,
-    current_user: CurrentAdminUser,
+    current_user: CurrentStaffUser,
     skip: int = 0,
     limit: int = 100,
     is_solved: Optional[bool] = None,
@@ -47,7 +46,7 @@ def list_posts_by_citizen(
 def get_posts_me(
     db: SessionDep,
     # current_user: CurrentCitizenUser,
-    current_user: CurrentAdminUser,
+    current_user: CurrentStaffUser,
     skip: int = 0,
     limit: int = 100,
     is_solved: Optional[bool] = None,
@@ -76,7 +75,7 @@ def create_post(
     db: SessionDep,
     problem_id: int,
     # current_user: CurrentCitizenUser,
-    current_user: CurrentAdminUser,
+    current_user: CurrentStaffUser,
     post_in: PostCreate
 ) -> Dict[str, Any]:
     """
@@ -92,7 +91,7 @@ def get_post_by_id(
     problem_id: int,
     db: SessionDep,
     # current_user: CurrentCitizenUser,
-    current_user: CurrentAdminUser,
+    current_user: CurrentStaffUser,
     post_id: uuid.UUID,
 ) -> Dict[str, Any]:
     """
@@ -109,7 +108,7 @@ def update_post(
     *,
     db: SessionDep,
     # current_user: CurrentCitizenUser,
-    current_user: CurrentAdminUser,
+    current_user: CurrentStaffUser,
     update_data: PostUpdate
 ) -> Dict[str, Any]:
     """
@@ -131,7 +130,7 @@ def delete_post(
     post_id: uuid.UUID,
     db: SessionDep,
     # current_user: CurrentCitizenUser,
-    current_user: CurrentAdminUser,
+    current_user: CurrentStaffUser,
 ) -> Dict[str, Any]:
     """
     投稿を削除
@@ -144,7 +143,7 @@ def delete_post(
 
 @router.patch("/{problem_id}/{post_id}/solve", response_model=Dict[str, Any])
 def mark_as_solved(
-    problem_id: int, post_id: uuid.UUID, db: SessionDep, current_user: CurrentAdminUser
+    problem_id: int, post_id: uuid.UUID, db: SessionDep, current_user: CurrentStaffUser
 ) -> Dict[str, Any]:
     """
     投稿を解決済みとしてマーク
@@ -161,7 +160,7 @@ def mark_as_solved(
 
 @router.patch("/{problem_id}/{post_id}/unsolve", response_model=Dict[str, Any])
 def mark_as_unsolved(
-    problem_id: int, post_id: uuid.UUID, db: SessionDep, current_user: CurrentAdminUser
+    problem_id: int, post_id: uuid.UUID, db: SessionDep, current_user: CurrentStaffUser
 ) -> Dict[str, Any]:
     """
     投稿を未解決としてマーク

@@ -1,5 +1,5 @@
-import uuid
-from typing import List, Optional
+from datetime import datetime
+from typing import Dict, List, Optional
 
 from app.crud.base import CRUDBase
 from app.models.problems import Problem
@@ -15,12 +15,8 @@ class CRUDCitizenUser(CRUDBase[CitizenUser, CitizenUserCreate, CitizenUserUpdate
     ) -> Optional[CitizenUser]:
         user = (
             db_session.query(CitizenUser).filter(CitizenUser.line_id == line_id).first()
-            or None
         )
         return user
-
-    def get_user(self, db_session: Session, id: uuid.UUID) -> Optional[CitizenUser]:
-        return db_session.query(self.model).filter(self.model.id == id).first() or None
 
     def get_users(
         self, db_session: Session, *, skip: int = 0, limit: int = 100
@@ -62,17 +58,8 @@ class CRUDCitizenUser(CRUDBase[CitizenUser, CitizenUserCreate, CitizenUserUpdate
 
         return res
 
-    def create(self, db_session: Session, *, obj_in: CitizenUserCreate) -> CitizenUser:
-        db_obj = CitizenUser(
-            name=obj_in.name, line_id=obj_in.line_id, is_active=obj_in.is_active
-        )
-        db_session.add(db_obj)
-        db_session.commit()
-        db_session.refresh(db_obj)
-        return db_obj
-
     def update_last_login(
-        self, db_session: Session, *, db_obj: CitizenUser, obj_in: dict
+        self, db_session: Session, *, db_obj: CitizenUser, obj_in: Dict[str, datetime]
     ) -> CitizenUser:
         db_obj.last_login = obj_in["last_login"]
         db_session.add(db_obj)

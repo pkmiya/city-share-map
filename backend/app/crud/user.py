@@ -1,16 +1,15 @@
 from typing import Optional
 
-from sqlalchemy.orm import Session
-
 from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
 from app.models.user import User
-from app.schemas.user import UserCreate, UserInDB, UserUpdateMe
+from app.schemas.user import UserCreate, UserUpdate, UserUpdateMe
+from sqlalchemy.orm import Session
 
 
-class CRUDUser(CRUDBase[User, UserCreate, UserInDB]):
+class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     def get_by_email(self, db_session: Session, *, email: str) -> Optional[User]:
-        return db_session.query(User).filter(User.email == email).first() or None
+        return db_session.query(User).filter(User.email == email).first()
 
     def create(self, db_session: Session, *, obj_in: UserCreate) -> User:
         db_obj = User(
@@ -29,7 +28,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserInDB]):
         self, db_session: Session, *, db_obj: User, obj_in: UserUpdateMe
     ) -> User:
 
-        update_data = obj_in.dict(exclude_unset=True)
+        update_data = obj_in.model_dump(exclude_unset=True)
         if obj_in.password:
             hashed_password = get_password_hash(obj_in.password)
             del update_data["password"]
@@ -37,9 +36,13 @@ class CRUDUser(CRUDBase[User, UserCreate, UserInDB]):
         else:
             update_data["hashed_password"] = db_obj.hashed_password
 
-        use_obj_in = UserInDB.parse_obj(update_data)
-
-        return super().update(db_session, db_obj=db_obj, obj_in=use_obj_in)
+        for field in update_data:
+            if field in update_data:
+                setattr(db_obj, field, update_data[field])
+        db_session.add(db_obj)
+        db_session.commit()
+        db_session.refresh(db_obj)
+        return db_obj
 
     def authenticate(
         self, db_session: Session, *, email: str, password: str

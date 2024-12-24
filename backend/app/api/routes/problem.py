@@ -1,9 +1,8 @@
 from typing import List
 
-from fastapi import APIRouter, HTTPException
-
-from app.api.deps import CurrentAdminSuperuser, CurrentAdminUser, SessionDep
+from app.api.deps import CurrentAdminUser, CurrentStaffUser, SessionDep
 from app.crud.problem import crud_problem
+from app.models.problems import Problem as DBProblem
 from app.models.problems import Type as DBType
 from app.schemas.problem import (
     Problem,
@@ -13,13 +12,14 @@ from app.schemas.problem import (
     ProblemUpdate,
     Type,
 )
+from fastapi import APIRouter, HTTPException
 
 router = APIRouter()
 
 
 @router.post("/", response_model=Problem)
 def create_problem(
-    *, db: SessionDep, current_user: CurrentAdminUser, problem_in: ProblemCreate
+    *, db: SessionDep, current_user: CurrentStaffUser, problem_in: ProblemCreate
 ) -> Problem:
     """
     Create new problem with items.
@@ -27,12 +27,13 @@ def create_problem(
     problem = crud_problem.create_with_items(
         db_session=db, obj_in=problem_in, user_id=current_user.id
     )
-    return problem
+    response = Problem.model_validate(problem)
+    return response
 
 
 @router.get("/", response_model=List[ProblemRead])
 def read_problems(
-    *, db: SessionDep, current_user: CurrentAdminUser, skip: int = 0, limit: int = 100
+    *, db: SessionDep, current_user: CurrentStaffUser, skip: int = 0, limit: int = 100
 ) -> List[ProblemRead]:
     """
     Retrieve problems.
@@ -46,7 +47,7 @@ def read_problems(
 def read_item_type(
     *,
     db: SessionDep,
-    current_user: CurrentAdminUser,
+    current_user: CurrentStaffUser,
 ) -> List[Type]:
     """
     Retrieve problems.
@@ -59,7 +60,7 @@ def read_item_type(
 
 @router.get("/data/{id}", response_model=ProblemReadByID)
 def read_problem_by_id(
-    *, db: SessionDep, current_user: CurrentAdminUser, id: int
+    *, db: SessionDep, current_user: CurrentStaffUser, id: int
 ) -> ProblemReadByID:
     """
     Get problem by ID.
@@ -73,14 +74,14 @@ def read_problem_by_id(
 def update_problem(
     *,
     db: SessionDep,
-    current_user: CurrentAdminUser,
+    current_user: CurrentStaffUser,
     id: int,
     problem_in: ProblemUpdate,
 ) -> Problem:
     """
     Get problem posts by ID.
     """
-    problem = crud_problem.get(db_session=db, id=id)
+    problem = db.query(DBProblem).filter(DBProblem.id == id).first()
     if not problem:
         raise HTTPException(status_code=404, detail="課題が見つかりません")
     problem = crud_problem.update(db_session=db, db_obj=problem, obj_in=problem_in)
@@ -89,7 +90,7 @@ def update_problem(
 
 @router.delete("/data/{id}", response_model=Problem)
 def delete_problem(
-    *, db: SessionDep, current_user: CurrentAdminSuperuser, id: int
+    *, db: SessionDep, current_user: CurrentAdminUser, id: int
 ) -> Problem:
     """
     Delete a problem.
