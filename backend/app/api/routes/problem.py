@@ -20,15 +20,14 @@ router = APIRouter()
 @router.post("/", response_model=Problem)
 def create_problem(
     *, db: SessionDep, current_user: CurrentStaffUser, problem_in: ProblemCreate
-) -> Problem:
+) -> DBProblem:
     """
     Create new problem with items.
     """
     problem = crud_problem.create_with_items(
         db_session=db, obj_in=problem_in, user_id=current_user.id
     )
-    response = Problem.model_validate(problem)
-    return response
+    return problem
 
 
 @router.get("/", response_model=List[ProblemRead])
@@ -77,7 +76,7 @@ def update_problem(
     current_user: CurrentStaffUser,
     id: int,
     problem_in: ProblemUpdate,
-) -> Problem:
+) -> DBProblem:
     """
     Get problem posts by ID.
     """
@@ -91,7 +90,7 @@ def update_problem(
 @router.delete("/data/{id}", response_model=Problem)
 def delete_problem(
     *, db: SessionDep, current_user: CurrentAdminUser, id: int
-) -> Problem:
+) -> DBProblem:
     """
     Delete a problem.
     """

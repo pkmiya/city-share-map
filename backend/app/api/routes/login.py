@@ -1,13 +1,12 @@
 from datetime import timedelta
 
-from fastapi import APIRouter, HTTPException
-
 from app.api.deps import SessionDep
 from app.core import security
 from app.core.config import settings
 from app.crud.user import crud_user
 from app.schemas.login import LoginRequest
 from app.schemas.token import UserToken
+from fastapi import APIRouter, HTTPException
 
 router = APIRouter()
 

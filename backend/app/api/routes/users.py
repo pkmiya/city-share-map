@@ -69,7 +69,7 @@ def update_citizen_user(
     current_user: CurrentStaffUser,
     user_id: uuid.UUID,
     is_active: bool,
-) -> CitizenUser:
+) -> DBCitizenUser:
     """
     Update a user.
     """

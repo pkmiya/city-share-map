@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from app.api.deps import CurrentAdminUser, CurrentStaffUser, SessionDep
 from app.crud.user import crud_user
@@ -15,7 +15,7 @@ def read_admin_users(
     current_user: CurrentStaffUser,
     skip: int = 0,
     limit: int = 100,
-) -> List[User]:
+) -> List[DBUser]:
     """
     Retrieve users.
     """
@@ -26,7 +26,7 @@ def read_admin_users(
 @router.post("/", response_model=User)
 def create_admin_user(
     *, session: SessionDep, user_in: UserCreate, current_user: CurrentAdminUser
-) -> User:
+) -> DBUser:
     """
     Create new user.
     """
@@ -46,7 +46,7 @@ def update_user_me(
     session: SessionDep,
     current_user: CurrentStaffUser,
     user_in: UserUpdateMe,
-) -> User:
+) -> DBUser:
     """
     Update own user.
     """
@@ -64,12 +64,11 @@ def update_user_me(
 def read_user_me(
     session: SessionDep,
     current_user: CurrentStaffUser,
-) -> User:
+) -> DBUser:
     """
     Get current user.
     """
-    response = User.model_validate(current_user)
-    return response
+    return current_user
 
 
 @router.get("/{user_id}", response_model=User)
@@ -77,7 +76,7 @@ def read_user_by_id(
     session: SessionDep,
     user_id: int,
     current_user: CurrentStaffUser,
-) -> User:
+) -> DBUser:
     """
     Get a specific user by id.
     """
@@ -97,7 +96,7 @@ def update_user(
     user_id: int,
     user_in: UserUpdate,
     current_user: CurrentAdminUser,
-) -> User:
+) -> DBUser:
     """
     Update a user.
     """
@@ -122,7 +121,7 @@ def delete_user(
     session: SessionDep,
     user_id: int,
     current_user: CurrentAdminUser,
-) -> User:
+) -> Optional[DBUser]:
     """
     Delete a user.
     """
