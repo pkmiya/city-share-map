@@ -24,7 +24,7 @@ import {
 } from '@chakra-ui/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { IconType } from 'react-icons';
 import { FaList } from 'react-icons/fa';
 import {
@@ -42,8 +42,10 @@ import { GrUserAdmin } from 'react-icons/gr';
 import { appMetadata } from '@/config/metadata';
 import { useLiff } from '@/context/liffProvider';
 import { UserRole } from '@/features/auth/constants/role';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useLogout } from '@/features/auth/hooks/useLogout';
 import { pagesPath } from '@/gen/$path';
+import { removeTrailingSlash } from '@/utils/url';
 
 interface LinkItemProps {
   href?: string;
@@ -210,6 +212,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
 
 const NavItem = ({ icon, href, onClick, children, ...rest }: NavItemProps) => {
   const pathname = usePathname();
+  const isActive = removeTrailingSlash(pathname) === removeTrailingSlash(href);
 
   return (
     <Box
@@ -221,9 +224,9 @@ const NavItem = ({ icon, href, onClick, children, ...rest }: NavItemProps) => {
     >
       <Flex
         align="center"
-        bg={pathname === href ? 'blue.500' : undefined}
+        bg={isActive ? 'blue.500' : undefined}
         borderRadius="lg"
-        color={pathname === href ? 'white' : undefined}
+        color={isActive ? 'white' : undefined}
         cursor="pointer"
         mx="4"
         p="4"
@@ -233,7 +236,7 @@ const NavItem = ({ icon, href, onClick, children, ...rest }: NavItemProps) => {
         {icon && (
           <Icon
             as={icon}
-            color={pathname === href ? 'white' : undefined}
+            color={isActive ? 'white' : undefined}
             fontSize="16"
             mr="4"
           />
@@ -261,41 +264,34 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
       break;
   }
 
-  // NOTE: テスト感覚として、ユーザ名を取得して表示している
   const { liffObject } = useLiff();
   const logout = useLogout();
   const [userName, setUserName] = useState<string | null>(null);
+  const [department, setDepartment] = useState<string | null>(null);
+  const { idToken } = useAuth();
+
+  const fetchProfile = useCallback(() => {
+    if (liffObject) {
+      // 1. 市民ユーザ
+      liffObject
+        .getProfile()
+        .then((profile) => {
+          console.log('LIFF profile:', profile);
+          setUserName(profile.displayName);
+        })
+        .catch((profileError) => {
+          console.log('Failed to get profile:', profileError);
+        });
+    } else {
+      // 2. 管理者ユーザ
+      setUserName(idToken.name);
+      setDepartment(idToken.department ?? '');
+    }
+  }, [liffObject, idToken]);
 
   useEffect(() => {
-    const fetchProfile = () => {
-      liffObject &&
-        liffObject
-          .getProfile()
-          .then((profile) => {
-            console.log('LIFF profile:', profile);
-            setUserName(profile.displayName);
-          })
-          .catch((profileError) => {
-            console.log('Failed to get profile:', profileError);
-          });
-    };
-
-    if (liffObject) {
-      if (!liffObject.isLoggedIn()) {
-        (async () => {
-          try {
-            await liffObject.login();
-            console.log('LIFF login...');
-            fetchProfile();
-          } catch (error) {
-            console.error('Login failed:', error);
-          }
-        })();
-      } else {
-        fetchProfile();
-      }
-    }
-  }, [liffObject]);
+    fetchProfile();
+  }, [fetchProfile]);
 
   return (
     <Flex
@@ -347,9 +343,9 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
                   ml="2"
                   spacing="1px"
                 >
-                  <Text fontSize="sm">{userName ?? 'サンプル管理者'}</Text>
+                  <Text fontSize="sm">{userName ?? '  '}</Text>
                   <Text color="gray.600" fontSize="xs">
-                    サンプル課
+                    {department ?? '  '}
                   </Text>
                 </VStack>
                 <Box display={{ base: 'none', xl: 'flex' }}>
@@ -362,7 +358,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
               borderColor={useColorModeValue('gray.200', 'gray.700')}
             >
               <Text fontSize="sm" fontWeight="bold" mx={3} my={2}>
-                {userName ?? 'サンプル管理者'}
+                {userName ?? '  '}
               </Text>
               <MenuItem>プロフィール</MenuItem>
               <MenuItem>設定</MenuItem>
