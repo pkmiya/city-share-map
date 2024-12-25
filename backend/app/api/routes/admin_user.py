@@ -100,7 +100,7 @@ def update_user(
     """
     Update a user.
     """
-    user = session.query(DBUser).filter(id=user_id).first()
+    user = crud_user.get(session, id=user_id)
     if not user:
         raise HTTPException(
             status_code=404,

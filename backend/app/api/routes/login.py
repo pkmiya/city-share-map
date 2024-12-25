@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Annotated
 
 from app.api.deps import SessionDep
 from app.core import security
@@ -6,7 +7,8 @@ from app.core.config import settings
 from app.crud.user import crud_user
 from app.schemas.login import LoginRequest
 from app.schemas.token import UserToken
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 
 router = APIRouter()
 
@@ -40,7 +42,9 @@ def login(session: SessionDep, form_data: LoginRequest) -> UserToken:
 
 
 @router.post("/swagger/")
-def swagger_login(session: SessionDep, form_data: LoginRequest) -> UserToken:
+def swagger_login(
+    session: SessionDep, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+) -> UserToken:
     """
     Token login, get an access token for future requests
     """

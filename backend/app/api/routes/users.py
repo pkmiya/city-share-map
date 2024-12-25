@@ -73,7 +73,7 @@ def update_citizen_user(
     """
     Update a user.
     """
-    user = session.query(DBCitizenUser).filter(DBCitizenUser.id == user_id).first()
+    user = crud_citizen_user.get(session, user_id)
     if not user:
         raise HTTPException(
             status_code=404,

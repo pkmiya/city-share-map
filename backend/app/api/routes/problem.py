@@ -80,7 +80,7 @@ def update_problem(
     """
     Get problem posts by ID.
     """
-    problem = db.query(DBProblem).filter(DBProblem.id == id).first()
+    problem = crud_problem.get(db_session=db, id=id)
     if not problem:
         raise HTTPException(status_code=404, detail="課題が見つかりません")
     problem = crud_problem.update(db_session=db, db_obj=problem, obj_in=problem_in)

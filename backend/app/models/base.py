@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import DateTime, text
+from sqlalchemy import DateTime, String, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -20,6 +20,8 @@ class CommonColumns:
         server_default=text("CURRENT_TIMESTAMP"),
     )
     deleted_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    created_by: Mapped[String] = mapped_column(String, nullable=True)
+    updated_by: Mapped[String] = mapped_column(String, nullable=True)
 
 
 # soft_delete用のコード(なぜか動作しない)

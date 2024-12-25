@@ -105,9 +105,10 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
             item_values = self.validate_post_items(db_session, problem_id, items)
 
             dynamic_table = self.get_dynamic_table(db_session, problem_id)
+            id = uuid.uuid4()
 
-            post_data: Dict[str, Any] = dynamic_table(
-                id=uuid.uuid4(),
+            post_data = dynamic_table(
+                id=id,
                 problem_id=problem_id,
                 latitude=post_in.latitude,
                 longitude=post_in.longitude,
@@ -119,8 +120,11 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
             )
             db_session.add(post_data)
             db_session.commit()
+            new_post = db_session.query(dynamic_table).filter_by(id=id).first()
 
-            return post_data
+            res: Dict[str, Any] = jsonable_encoder(new_post)
+
+            return res
 
         except Exception as e:
             db_session.rollback()

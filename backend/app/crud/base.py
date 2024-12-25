@@ -37,7 +37,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             return Base.classes[table_name]
         else:
             raise HTTPException(
-                status_code=404, detail=f"テーブル '{table_name}' が見つかりません"
+                status_code=404, detail="指定された課題が見つかりません"
             )
 
     def get(self, db_session: Session, id: Union[int, UUID]) -> Optional[ModelType]:
