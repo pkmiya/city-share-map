@@ -16,11 +16,13 @@ class UserBase(BaseSchema):
 
 
 # Properties to receive via API on creation
-class UserCreate(UserBase):
+class UserCreate(BaseSchema):
     email: EmailStr
     password: str
     full_name: str
     department: str
+    is_active: bool = True
+    is_superuser: bool = False
 
 
 # Properties to receive via API on update
@@ -71,5 +73,4 @@ class CitizenUserUpdate(BaseSchema):
 
 
 class CitizenUserRead(CitizenUser):
-    last_login: datetime
     post_count: int
