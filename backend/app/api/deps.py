@@ -11,7 +11,7 @@ from app.models.user import CitizenUser, User
 from app.schemas.token import TokenPayload
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jwt.exceptions import InvalidTokenError
+from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 from pydantic import ValidationError
 from sqlmodel import Session
 
@@ -33,6 +33,11 @@ def decode_token(token: str) -> TokenPayload:
             token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
         )
         return TokenPayload(**payload)
+    except ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="トークンの有効期限が切れています",
+        )
     except (InvalidTokenError, ValidationError):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
