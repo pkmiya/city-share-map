@@ -1,17 +1,18 @@
 # c.f. https://qiita.com/fukutaro/items/0521f45a5aaed7326e76
-
 import os
 import sys
+from typing import Any, Dict
 
 import yaml
 
 sys.path.append("/app")
 sys.path.append(os.path.dirname(__file__))
+
 from app.main import app  # noqa: E402
 
 
-def format_paths(paths: dict) -> dict:
-    def format_response(responses: dict) -> dict:
+def format_paths(paths: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+    def format_response(responses: Dict[str, Any]) -> Dict[str, Any]:
         return {
             status_code if status_code != "422" else "400": contents
             for status_code, contents in responses.items()

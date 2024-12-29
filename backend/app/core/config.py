@@ -1,9 +1,7 @@
-import os
 import secrets
 import warnings
-from typing import Annotated, Any, ClassVar, Literal
+from typing import Annotated, Any, Literal
 
-from dotenv import load_dotenv
 from pydantic import (
     AnyUrl,
     BeforeValidator,
@@ -25,12 +23,6 @@ def parse_cors(v: Any) -> list[str] | str:
 
 
 class Settings(BaseSettings):
-    dotenv_path: ClassVar[str] = os.path.join(
-        os.path.dirname(__file__), "../.env.local"
-    )
-    load_dotenv(dotenv_path=dotenv_path)
-    LIFF_CHANNEL_ID: str = os.getenv("LIFF_CHANNEL_ID", "")
-    FRONTEND_HOST: str = os.getenv("FRONTEND_HOST", "http://localhost:3000")
     model_config = SettingsConfigDict(
         # Use top level .env file (one level above ./backend/)
         env_file="../.env",
@@ -43,6 +35,8 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24
     ID_TOKEN_EXPIRE_MINUTES: int = 60
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
+    LIFF_CHANNEL_ID: str = ""
+    FRONTEND_HOST: str = ""
 
     BACKEND_CORS_ORIGINS: Annotated[list[AnyUrl] | str, BeforeValidator(parse_cors)] = (
         []
@@ -101,8 +95,8 @@ class Settings(BaseSettings):
     # TODO: update type to EmailStr when sqlmodel supports it
     EMAIL_TEST_USER: str = "test@example.com"
     # TODO: update type to EmailStr when sqlmodel supports it
-    FIRST_SUPERUSER: str = os.getenv("EMAIL", "example@example.com")
-    FIRST_SUPERUSER_PASSWORD: str = os.getenv("PASSWORD", "changethis")
+    FIRST_SUPERUSER: str = ""
+    FIRST_SUPERUSER_PASSWORD: str = ""
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":
