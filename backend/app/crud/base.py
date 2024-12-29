@@ -1,15 +1,12 @@
-from typing import List, Optional, Generic, TypeVar, Type
+from typing import Any, Generic, List, Optional, Type, TypeVar, Union
+from uuid import UUID
+
+from app.models.base import Base
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
-from app.models.base import Base
-from sqlalchemy import event
-from sqlmodel import Session, select, orm
-from datetime import datetime
 from sqlalchemy.ext.automap import automap_base
-
-
+from sqlalchemy.orm import Session
 
 ModelType = TypeVar("ModelType", bound=Base)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
@@ -27,8 +24,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         * `schema`: A Pydantic model (schema) class
         """
         self.model = model
-    
-    def get_dynamic_table(self, db_session: Session, problem_id: int):
+
+    def get_dynamic_table(self, db_session: Session, problem_id: int) -> Any:
         """
         動的テーブルを取得
         """
@@ -39,12 +36,16 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         if table_name in Base.classes:
             return Base.classes[table_name]
         else:
-            raise HTTPException(status_code=404, detail=f"テーブル '{table_name}' が見つかりません")
+            raise HTTPException(
+                status_code=404, detail="指定された課題が見つかりません"
+            )
 
-    def get(self, db_session: Session, id: int) -> Optional[ModelType]:
-        return db_session.query(self.model).filter(self.model.id == id).first()
+    def get(self, db_session: Session, id: Union[int, UUID]) -> Optional[ModelType]:
+        return db_session.query(self.model).filter(self.model.id == id).first() or None
 
-    def get_multi(self, db_session: Session, *, skip=0, limit=100) -> List[ModelType]:
+    def get_multi(
+        self, db_session: Session, *, skip: int = 0, limit: int = 100
+    ) -> List[ModelType]:
         return db_session.query(self.model).offset(skip).limit(limit).all()
 
     def create(self, db_session: Session, *, obj_in: CreateSchemaType) -> ModelType:
@@ -68,8 +69,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         db_session.refresh(db_obj)
         return db_obj
 
-    def delete(self, db_session: Session, *, id: int) -> ModelType:
-        obj = db_session.query(self.model).get(id)
-        db_session.delete(obj)
+    def delete(self, db_session: Session, *, id: int) -> Optional[ModelType]:
+        db_obj = db_session.query(self.model).filter(self.model.id == id).first()
+        db_session.delete(db_obj)
         db_session.commit()
-        return obj
+        return db_obj

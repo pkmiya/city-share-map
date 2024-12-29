@@ -1,11 +1,13 @@
-from typing import Optional
-
-from pydantic import BaseModel, EmailStr
 from datetime import datetime
-import uuid
+from typing import Optional
+from uuid import UUID
+
+from app.schemas.base_schema import BaseSchema
+from pydantic import EmailStr
+
 
 # Shared properties
-class UserBase(BaseModel):
+class UserBase(BaseSchema):
     email: Optional[EmailStr] = None
     department: Optional[str] = None
     is_active: Optional[bool] = True
@@ -14,19 +16,22 @@ class UserBase(BaseModel):
 
 
 # Properties to receive via API on creation
-class UserCreate(UserBase):
+class UserCreate(BaseSchema):
     email: EmailStr
     password: str
     full_name: str
     department: str
+    is_active: bool = True
+    is_superuser: bool = False
 
 
 # Properties to receive via API on update
-class UserUpdate(BaseModel):
+class UserUpdate(BaseSchema):
     is_active: Optional[bool] = True
     is_superuser: Optional[bool] = False
 
-class UserUpdateMe(BaseModel):
+
+class UserUpdateMe(BaseSchema):
     email: Optional[EmailStr] = None
     full_name: Optional[str] = None
     department: Optional[str] = None
@@ -34,10 +39,7 @@ class UserUpdateMe(BaseModel):
 
 
 class UserInDBBase(UserBase):
-    id: int = None
-
-    class Config:
-        orm_mode = True
+    id: int
 
 
 # Additional properties to return via API
@@ -50,26 +52,25 @@ class UserInDB(UserInDBBase):
     hashed_password: str
 
 
-class CitizenUserBase(BaseModel):
-    id: uuid.UUID = None
+class CitizenUserBase(BaseSchema):
+
     name: Optional[str] = None
     line_id: Optional[str] = None
-    is_active: Optional[bool] = True
-    class Config:
-        arbitrary_types_allowed = True
+    is_active: bool = True
+    last_login: Optional[datetime] = None
+
 
 class CitizenUser(CitizenUserBase):
-    pass
+    id: UUID
 
-class AllUser(User, CitizenUser):
-    id: Optional[int|str] = None
 
 class CitizenUserCreate(CitizenUserBase):
     pass
 
-class CitizenUserUpdate(BaseModel):
+
+class CitizenUserUpdate(BaseSchema):
     is_active: Optional[bool] = True
 
-class CitizenUserRead(CitizenUserBase):
-    last_login: datetime
-    post_count: int 
+
+class CitizenUserRead(CitizenUser):
+    post_count: int

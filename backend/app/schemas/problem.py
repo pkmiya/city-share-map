@@ -1,21 +1,27 @@
-from typing import List, Optional
-from pydantic import BaseModel
-from uuid import UUID
 from datetime import datetime
 from decimal import Decimal
-from typing import Dict, Any
+from typing import Any, Dict, List, Optional
+
+from app.schemas.base_schema import BaseSchema
+
 
 # ProblemItemの作成時のスキーマ
-class ProblemItemBase(BaseModel):
+class ProblemItemBase(BaseSchema):
     name: str  # 項目名
-    type_id: int = 1 # 項目のデータ型のID
+    type_id: int = 1  # 項目のデータ型のID
     required: bool = False  # 必須かどうかのフラグ
+
+    class Config:
+        orm_mode = True
+
 
 class ProblemItemCreate(ProblemItemBase):
     pass
 
+
 class ProblemItemUpdate(ProblemItemBase):
     pass
+
 
 class ProblemItemInDBBase(ProblemItemBase):
     id: int
@@ -26,17 +32,21 @@ class ProblemItemInDBBase(ProblemItemBase):
 
 
 # Problemの作成時のスキーマ
-class ProblemBase(BaseModel):
+class ProblemBase(BaseSchema):
     name: str  # 課題の名前
     is_open: bool = False  # 募集中かどうかのフラグ
     description: Optional[str] = None  # 課題の説明
 
+
 class ProblemCreate(ProblemBase):
     items: List[ProblemItemCreate]  # 問題の項目リスト
 
-class ProblemUpdate(ProblemBase):
-    name: Optional[str] = None  # オプションで課題名の変更
-    is_open: Optional[bool] = None  # オプションで現在募集中かの変更
+
+class ProblemUpdate(BaseSchema):
+    name: Optional[str]
+    is_open: Optional[bool]
+    description: Optional[str]
+
 
 class ProblemInDBBase(ProblemBase):
     id: int
@@ -49,9 +59,11 @@ class ProblemInDBBase(ProblemBase):
 class Problem(ProblemInDBBase):
     pass
 
+
 class ProblemRead(ProblemInDBBase):
     post_count: Optional[int] = 0
     created_at: Optional[datetime]
+
 
 class ProblemReadByID(ProblemRead):
     items: List[ProblemItemBase]
@@ -60,11 +72,13 @@ class ProblemReadByID(ProblemRead):
 class ProblemInDB(ProblemInDBBase):
     pass
 
-class Type(BaseModel):
+
+class Type(BaseSchema):
     id: int
     name: str
 
-class PostBase(BaseModel):
+
+class PostBase(BaseSchema):
     latitude: Decimal
     longitude: Decimal
     is_solved: bool = False
@@ -73,9 +87,12 @@ class PostBase(BaseModel):
     class Config:
         orm_mode = True
 
+
 class PostCreate(PostBase):
     pass
-class PostUpdate(BaseModel):
+
+
+class PostUpdate(BaseSchema):
     latitude: Optional[Decimal] = None
     longitude: Optional[Decimal] = None
     items: Optional[Dict[str, Any]] = None

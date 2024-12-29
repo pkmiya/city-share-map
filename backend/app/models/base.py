@@ -1,26 +1,28 @@
+from datetime import datetime
 from typing import Any
-from sqlalchemy.ext.declarative import as_declarative, declared_attr
-from sqlalchemy import Column, String, DateTime, text, orm, event
-from sqlalchemy.orm import Session
 
-@as_declarative()
-class Base():
+from sqlalchemy import DateTime, String, text
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
+
+class Base(DeclarativeBase):
     id: Any
-    __name__: str
-
-    @declared_attr
-    def __tablename__(cls) -> str:
-        return cls.__name__.lower()
+    __tablename__: str
 
 
 class CommonColumns:
-    created_at = Column(
-        DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP")
     )
-    updated_at = Column(DateTime, server_onupdate=text("CURRENT_TIMESTAMP"))
-    deleted_at = Column(DateTime)
-    created_by = Column(String(64))
-    updated_by = Column(String(64))
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=True,
+        server_default=text("CURRENT_TIMESTAMP"),
+    )
+    deleted_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    created_by: Mapped[String] = mapped_column(String, nullable=True)
+    updated_by: Mapped[String] = mapped_column(String, nullable=True)
+
 
 # soft_delete用のコード(なぜか動作しない)
 # @event.listens_for(Session, "do_orm_execute")
@@ -30,7 +32,7 @@ class CommonColumns:
 #     以下のようにすると、論理削除済のデータも含めて取得可能
 #     query(...).filter(...).execution_options(include_deleted=True)
 #     """
-    
+
 #     if (
 #         execute_state.is_select
 #         and not execute_state.is_column_load
@@ -44,5 +46,3 @@ class CommonColumns:
 #                 include_aliases=True,
 #             )
 #         )
-
-

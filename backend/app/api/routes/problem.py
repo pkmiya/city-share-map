@@ -1,22 +1,26 @@
 from typing import List
-from fastapi import APIRouter, HTTPException, Depends
-from sqlalchemy.orm import Session
-from app.api.deps import CurrentAdminSuperuser, CurrentAdminUser, SessionDep
-from app.schemas.problem import Type, Problem, ProblemRead, ProblemCreate, ProblemUpdate, ProblemReadByID
-from app.models.problems import Type as DBType, Problem as DBProblem
-from app.models.user import User as DBUser
+
+from app.api.deps import CurrentAdminUser, CurrentStaffUser, SessionDep
 from app.crud.problem import crud_problem
+from app.models.problems import Problem as DBProblem
+from app.models.problems import Type as DBType
+from app.schemas.problem import (
+    Problem,
+    ProblemCreate,
+    ProblemRead,
+    ProblemReadByID,
+    ProblemUpdate,
+    Type,
+)
+from fastapi import APIRouter, HTTPException
 
 router = APIRouter()
 
 
 @router.post("/", response_model=Problem)
 def create_problem(
-    *,
-    db: SessionDep,
-    current_user: CurrentAdminUser,
-    problem_in: ProblemCreate
-):
+    *, db: SessionDep, current_user: CurrentStaffUser, problem_in: ProblemCreate
+) -> DBProblem:
     """
     Create new problem with items.
     """
@@ -28,12 +32,8 @@ def create_problem(
 
 @router.get("/", response_model=List[ProblemRead])
 def read_problems(
-    *,
-    db: SessionDep,
-    current_user: CurrentAdminUser,
-    skip: int = 0,
-    limit: int = 100
-):
+    *, db: SessionDep, current_user: CurrentStaffUser, skip: int = 0, limit: int = 100
+) -> List[ProblemRead]:
     """
     Retrieve problems.
     """
@@ -41,33 +41,31 @@ def read_problems(
 
     return problems
 
+
 @router.get("/item_type", response_model=List[Type])
 def read_item_type(
     *,
     db: SessionDep,
-    current_user: CurrentAdminUser,
-):
+    current_user: CurrentStaffUser,
+) -> List[Type]:
     """
     Retrieve problems.
     """
 
-    item_type=db.query(DBType).all()
+    item_type: List[Type] = db.query(DBType).all()
 
     return item_type
 
 
 @router.get("/data/{id}", response_model=ProblemReadByID)
 def read_problem_by_id(
-    *,
-    db: SessionDep,
-    current_user: CurrentAdminUser,
-    id: int
-):
+    *, db: SessionDep, current_user: CurrentStaffUser, id: int
+) -> ProblemReadByID:
     """
     Get problem by ID.
     """
     problem = crud_problem.get_problem_by_id(db_session=db, id=id)
-    
+
     return problem
 
 
@@ -75,10 +73,10 @@ def read_problem_by_id(
 def update_problem(
     *,
     db: SessionDep,
-    current_user: CurrentAdminUser,
+    current_user: CurrentStaffUser,
     id: int,
-    problem_in: ProblemUpdate
-):
+    problem_in: ProblemUpdate,
+) -> DBProblem:
     """
     Get problem posts by ID.
     """
@@ -89,18 +87,12 @@ def update_problem(
     return problem
 
 
-
 @router.delete("/data/{id}", response_model=Problem)
 def delete_problem(
-    *,
-    db: SessionDep,
-    current_user: CurrentAdminSuperuser,
-    id: int
-):
+    *, db: SessionDep, current_user: CurrentAdminUser, id: int
+) -> DBProblem:
     """
     Delete a problem.
     """
-    problem = crud_problem.delete_with_items(
-        db_session=db, problem_id=id
-    )
+    problem = crud_problem.delete_with_items(db_session=db, problem_id=id)
     return problem

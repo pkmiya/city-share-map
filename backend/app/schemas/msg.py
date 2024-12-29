@@ -1,5 +1,5 @@
-from pydantic import BaseModel
+from app.schemas.base_schema import BaseSchema
 
 
-class Msg(BaseModel):
+class Msg(BaseSchema):
     msg: str
