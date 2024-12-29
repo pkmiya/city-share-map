@@ -5,3 +5,9 @@ export const adminKeys = {
 export const userKeys = {
   user: ['user'],
 };
+
+export const problemKeys = {
+  itemType: ['itemType'],
+  problem: ['problem'],
+  problems: ['problems'],
+};
