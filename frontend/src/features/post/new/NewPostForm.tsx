@@ -11,22 +11,19 @@ import { ProblemSelect } from './components/ProblemSelect';
 
 export const NewPostForm = () => {
   const [step, setStep] = useState(1);
-  const { setFormData } = usePostContext();
+  const { formData, setFormData } = usePostContext();
 
   const handleNext = () => setStep(step + 1);
   const handleBack = () => setStep(step - 1);
 
   useEffect(() => {
     setFormData({
-      address: '',
       fieldValues: {},
-      fields: [],
-      location: null,
-      problem: {
-        id: 0,
-        name: '',
-      },
+      location: undefined,
+      problems: [],
+      selectedProblemDetail: null,
     });
+    console.log('formData', formData);
   }, []);
 
   return (

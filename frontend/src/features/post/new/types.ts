@@ -1,4 +1,4 @@
-import { ItemType } from '@/features/problem/new/data';
+import { ProblemRead, ProblemReadByID } from '@/gen/api';
 
 export type Location = {
   lat: number;
@@ -6,23 +6,23 @@ export type Location = {
 };
 
 export type FormData = {
-  address: string | null;
-  fieldValues: Record<string, any>;
-  fields: Field[];
-  location: Location | null;
-  problem: {
-    id: number;
-    name: string;
+  fieldValues?: Record<string, any>;
+  location?: {
+    address?: string;
+    coordinates?: Location;
   };
+  problems: ProblemRead[];
+  selectedProblemDetail: ProblemReadByID | null;
 };
 
-export type Field = {
+export type item = {
   name: string;
-  type: ItemType;
+  required?: boolean;
+  typeId?: number;
 };
 
 export type DetailedProblem = {
-  fields: Field[];
+  fields: item[];
   id: number;
   name: string;
 };

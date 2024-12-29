@@ -8,48 +8,108 @@ import {
   Input,
   Switch,
   Text,
-  useToast,
 } from '@chakra-ui/react';
-import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 
 import { usePostContext } from '@/context/postProvider';
-import { ItemType } from '@/features/problem/new/data';
-import { pagesPath } from '@/gen/$path';
+import { ItemType, ItemTypeName } from '@/features/problem/new/data';
 
-import { Field } from '../types';
+import { usePostPost } from '../../hooks/usePostPost';
+import { item } from '../types';
 
 type Props = {
   onBack: () => void;
 };
 
 export const DetailsForm = ({ onBack }: Props) => {
-  const router = useRouter();
-  const toast = useToast();
   const { formData } = usePostContext();
+  const { mutate: createPost } = usePostPost();
 
-  const problem = formData.problem.name || '';
-  const address = formData.address || '';
-  const fields = formData.fields || [];
+  const problem = formData.selectedProblemDetail?.name;
+  const address = formData.location?.address;
+  const fields = formData.selectedProblemDetail?.items ?? [];
 
   const {
     register,
     handleSubmit,
+    setValue,
+    getValues,
     formState: { errors },
   } = useForm<{ [key: string]: string }>({
     defaultValues: formData.fieldValues,
   });
 
+  // ファイルをBase64にエンコードする関数
+  const handleFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    fieldName: string,
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setValue(fieldName, reader.result as string); // Base64エンコード結果をフォームに設定
+      };
+      reader.readAsDataURL(file); // Base64エンコード
+    } else {
+      setValue(fieldName, ''); // ファイルが選択されていない場合は空文字列を設定
+    }
+  };
+
   const onSubmit = async () => {
-    // TODO: APIつなぎこみ
-    toast({
-      duration: 2000,
-      isClosable: true,
-      status: 'success',
-      title: 'レポートを投稿しました',
+    const fieldValues = getValues();
+
+    createPost({
+      postCreate: {
+        // NOTE: convert from array to dictionary
+        items: fields.reduce((acc: Record<string, any>, field) => {
+          acc[field.name] = parseValue(
+            field.typeId ?? 0,
+            fieldValues[field.name],
+          );
+          return acc;
+        }, {}),
+        latitude: formData.location?.coordinates?.lat ?? 0,
+        longitude: formData.location?.coordinates?.lng ?? 0,
+      },
+      problemId: formData.selectedProblemDetail?.id ?? 0,
     });
-    console.log(formData);
-    await router.push(pagesPath.map.$url().pathname);
+  };
+
+  // NOTE: ItemTypeName に基づくマッピングを事前生成
+  const typeIdMap = ItemType.reduce(
+    (acc, item) => {
+      acc[item.name] = item.id;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+
+  const parseValue = (typeId: number, value: any) => {
+    // NOTE: nullを返すとAPIリクエスト時にエラーになるため、nullを返さない場合がある
+    if (value === undefined || value === null || value === '') {
+      // NOTE: 数値の場合は未入力時に 0 を返す
+      if (typeId === typeIdMap[ItemTypeName.Number]) {
+        return 0;
+      }
+      return null;
+    }
+    switch (typeId) {
+      case typeIdMap[ItemTypeName.Text]:
+        return String(value); // テキスト
+      case typeIdMap[ItemTypeName.Number]:
+        return !isNaN(Number(value)) ? Number(value) : 0; // 数値
+      case typeIdMap[ItemTypeName.DateTime]:
+        return new Date(value).toISOString().replace('T', ' ').split('.')[0]; // 日時
+      case typeIdMap[ItemTypeName.Boolean]:
+        return Boolean(value); // 真偽値
+      case typeIdMap[ItemTypeName.Photo]:
+        return typeof value === 'string' && value.startsWith('data:image/')
+          ? value
+          : ''; // Base64画像データ
+      default:
+        return null;
+    }
   };
 
   return (
@@ -60,26 +120,52 @@ export const DetailsForm = ({ onBack }: Props) => {
       </Box>
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        {fields.map((field: Field) => {
-          const value = formData.fieldValues[field.name];
+        {fields.map((field: item) => {
+          const value =
+            formData.fieldValues && formData.fieldValues[field.name];
           const isInvalid = !!errors[field.name];
+          const isRequired = field.required;
+
           return (
             <FormControl key={field.name} isInvalid={isInvalid} mt="4">
-              <FormLabel>{field.name}</FormLabel>
-              {field.type === ItemType.Text && (
+              <FormLabel>
+                {field.name}
+                {isRequired && (
+                  <Text as="span" color="red.500">
+                    *
+                  </Text>
+                )}
+              </FormLabel>
+              {field.typeId === typeIdMap[ItemTypeName.Text] && (
                 <Input
                   placeholder={field.name}
                   value={value}
                   {...register(field.name, {
-                    required: `${field.name}を入力してください`,
+                    required: isRequired
+                      ? `${field.name}を入力してください`
+                      : false,
                   })}
                 />
               )}
-              {field.type === ItemType.DateTime && (
+              {field.typeId === typeIdMap[ItemTypeName.Photo] && (
+                <Input
+                  accept="image/*"
+                  type="file"
+                  {...register(field.name, {
+                    required: isRequired
+                      ? `${field.name}をアップロードしてください`
+                      : false,
+                  })}
+                  onChange={(e) => handleFileChange(e, field.name)}
+                />
+              )}
+              {field.typeId === typeIdMap[ItemTypeName.DateTime] && (
                 <Input
                   type="datetime-local"
                   {...register(field.name, {
-                    required: `${field.name}を選択してください`,
+                    required: isRequired
+                      ? `${field.name}を選択してください`
+                      : false,
                     validate: (value) => {
                       const selectedDate = new Date(value);
                       const currentDate = new Date();
@@ -91,18 +177,23 @@ export const DetailsForm = ({ onBack }: Props) => {
                   })}
                 />
               )}
-              {field.type === ItemType.Photo && (
+              {field.typeId === typeIdMap[ItemTypeName.Number] && (
                 <Input
-                  accept="image/*"
-                  type="file"
+                  placeholder={field.name}
+                  type="number"
+                  value={value}
                   {...register(field.name, {
-                    required: `${field.name}をアップロードしてください`,
+                    required: isRequired
+                      ? `${field.name}を入力してください`
+                      : false,
                   })}
                 />
               )}
-              {field.type === ItemType.OnOff && (
+              {field.typeId === typeIdMap[ItemTypeName.Boolean] && (
+                // NOTE: isRequired == trueだとcheckedでないとリクエスト時にエラーになるため、readOnlyで常にcheckedにして対応
                 <Switch
-                  defaultChecked={formData.fieldValues[field.name] || false}
+                  isReadOnly
+                  defaultChecked={isRequired}
                   {...register(field.name)}
                 />
               )}

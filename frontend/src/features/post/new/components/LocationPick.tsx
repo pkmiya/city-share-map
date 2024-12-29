@@ -16,8 +16,8 @@ type Props = {
 export const LocationPick = ({ onNext, onBack }: Props) => {
   const { formData, setFormData } = usePostContext();
 
-  const location = formData.location;
-  const address = formData.address;
+  const coordinates = formData.location?.coordinates;
+  const address = formData.location?.address;
 
   const accessToken = Env.mapboxAccessToken;
 
@@ -31,16 +31,17 @@ export const LocationPick = ({ onNext, onBack }: Props) => {
 
   const handleMapClick = async (event: mapboxgl.MapMouseEvent) => {
     const { lng, lat } = event.lngLat;
-    setFormData({ location: { lat, lng } });
+    const coordinates = { lat, lng };
     const address = await fetchAddress({ lat, lon: lng });
-    setFormData({ address });
+    setFormData({ ...formData, location: { address, coordinates } });
   };
 
   const handleNext = () => {
-    if (!location) {
+    if (!coordinates) {
       alert('位置情報を選択してください');
       return;
     }
+    console.log('formData', formData);
     onNext();
   };
 
@@ -62,11 +63,11 @@ export const LocationPick = ({ onNext, onBack }: Props) => {
           style={{ height: '100%', width: '100%' }}
           onClick={handleMapClick}
         >
-          {location && (
+          {coordinates && (
             <Marker
               color="red"
-              latitude={location.lat}
-              longitude={location.lng}
+              latitude={coordinates.lat}
+              longitude={coordinates.lng}
             />
           )}
         </Map>

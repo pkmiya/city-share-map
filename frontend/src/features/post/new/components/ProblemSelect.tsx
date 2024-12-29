@@ -7,18 +7,24 @@ import {
   FormLabel,
   Select,
 } from '@chakra-ui/react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { usePostContext } from '@/context/postProvider';
-
-import { problems } from '../data';
+import { useGetProblemById } from '@/features/problem/hooks/useGetProblemById';
+import { useGetProblems } from '@/features/problem/hooks/useGetProblems';
 
 type Props = {
   onNext: () => void;
 };
 
 export const ProblemSelect = ({ onNext }: Props) => {
+  const problemIdDefaultValue = 0;
+
+  const [problemId, setProblemId] = useState<number | null>(null);
   const { formData, setFormData } = usePostContext();
+  const { refetch } = useGetProblemById(problemId ?? problemIdDefaultValue);
+  const { data: problems } = useGetProblems({});
 
   const {
     register,
@@ -28,30 +34,41 @@ export const ProblemSelect = ({ onNext }: Props) => {
     formState: { errors },
   } = useForm<{ problem: string }>({
     defaultValues: {
-      problem: formData.problem?.name || '',
+      problem: formData.selectedProblemDetail?.name || '',
     },
   });
 
-  const onSubmit = (data: { problem: string }) => {
-    const selectedProblem = problems.find((p) => p.name === data.problem);
+  const fetchProblemDetail = async () => {
+    if (problemId === null) return;
+    try {
+      const { data: selectedProblemDetail } = await refetch();
+      setFormData({
+        ...formData,
+        selectedProblemDetail,
+      });
+      onNext();
+    } catch (error) {
+      console.error('Failed to fetch problem details:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProblemDetail();
+  }, [problemId, refetch, formData, setFormData, onNext]);
+
+  const onSubmit = async (data: { problem: string }) => {
+    const selectedProblem =
+      problems && problems.find((p) => p.name === data.problem);
     if (!selectedProblem) {
       return;
     }
-
-    const fields = selectedProblem.fields || [];
-    setFormData({ fields: fields, problem: selectedProblem });
-    onNext();
+    setProblemId(selectedProblem.id);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setValue('problem', value);
     clearErrors('problem');
-
-    const selectedProblem = problems.find((p) => p.name === e.target.value);
-    if (selectedProblem) {
-      setFormData({ problem: selectedProblem });
-    }
   };
 
   return (
@@ -66,11 +83,13 @@ export const ProblemSelect = ({ onNext }: Props) => {
             })}
             onChange={handleChange}
           >
-            {problems.map((p) => (
-              <option key={p.id} value={p.name}>
-                {p.name}
-              </option>
-            ))}
+            {problems &&
+              problems.length > 0 &&
+              problems.map((p) => (
+                <option key={p.id} value={p.name}>
+                  {p.name}
+                </option>
+              ))}
           </Select>
           <FormErrorMessage>
             {errors.problem && errors.problem.message}

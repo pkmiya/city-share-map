@@ -11,14 +11,10 @@ const PostContext = createContext<PostContextType | undefined>(undefined);
 
 export const PostProvider = ({ children }: { children: React.ReactNode }) => {
   const [formData, setFormDataState] = useState<FormData>({
-    address: '',
     fieldValues: {},
-    fields: [],
-    location: null,
-    problem: {
-      id: 0,
-      name: '',
-    },
+    location: undefined,
+    problems: [],
+    selectedProblemDetail: null,
   });
 
   const setFormData = (data: Partial<FormData>) => {
