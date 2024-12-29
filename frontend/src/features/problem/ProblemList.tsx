@@ -3,6 +3,8 @@
 import {
   Box,
   Button,
+  HStack,
+  Spacer,
   Stack,
   Table,
   TableContainer,
@@ -21,84 +23,103 @@ import { MdEdit } from 'react-icons/md';
 
 import { pagesPath } from '@/gen/$path';
 
-import { problems } from './data';
+import { useGetProblems } from './hooks/useGetProblems';
 
 export const ProblemList = () => {
   const router = useRouter();
+
+  const { data } = useGetProblems();
 
   return (
     <Box w="full">
       <Text fontSize="x-large" fontWeight="bold">
         課題一覧
       </Text>
-      <Box>
-        <TableContainer>
-          <Table maxW="40%" variant="simple">
-            <Thead>
-              <Tr>
-                <Th w="1%">操作</Th>
-                <Th minW="10%" width="auto">
-                  課題名
-                </Th>
-                <Th w="1%">公開状態</Th>
-                <Th w="1%">更新日時</Th>
-                <Th isNumeric w="1%">
-                  投稿数
-                </Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {problems.map(({ id, name, isOpen, updatedAt, postCount }) => {
-                return (
-                  <Tr key={id}>
-                    <Td>
-                      <Stack direction="row" spacing={4}>
-                        <Button
-                          colorScheme="teal"
-                          leftIcon={<MdEdit />}
-                          size="sm"
-                          variant="solid"
-                          onClick={() => {
-                            router.push(
-                              pagesPath.staff.problem._problemId(id).edit.$url()
-                                .pathname,
-                            );
-                          }}
-                        >
-                          編集
-                        </Button>
-                        <Button
-                          colorScheme="teal"
-                          leftIcon={<FaList />}
-                          size="sm"
-                          variant="outline"
-                        >
-                          投稿
-                        </Button>
-                        <Button
-                          colorScheme="teal"
-                          leftIcon={<FiMap />}
-                          size="sm"
-                          variant="outline"
-                        >
-                          マップ
-                        </Button>
-                      </Stack>
-                    </Td>
-                    <Td>{name}</Td>
-                    <Td>
-                      <Tag colorScheme={isOpen ? 'blue' : 'red'}>
-                        {isOpen ? '公開' : '非公開'}
-                      </Tag>
-                    </Td>
-                    <Td>{updatedAt.toLocaleDateString()}</Td>
-                    <Td isNumeric>{postCount}</Td>
-                  </Tr>
-                );
-              })}
-            </Tbody>
-          </Table>
-        </TableContainer>
+      <Box m="auto" w="80vw">
+        <HStack my={4}>
+          <Spacer />
+          <Text mr={4}>合計課題件数：{data ? data.length : 0}件</Text>
+          <Button
+            colorScheme="teal"
+            onClick={() => {
+              router.push(pagesPath.staff.problem.new.$url().pathname);
+            }}
+          >
+            新規課題
+          </Button>
+        </HStack>
+
+        {data && data.length > 0 && (
+          <TableContainer>
+            <Table variant="simple">
+              <Thead>
+                <Tr>
+                  <Th>操作</Th>
+                  <Th>課題名</Th>
+                  <Th>公開状態</Th>
+                  {/* NOTE: updatedAt型が追加されたら対応 */}
+                  {/* <Th w="1%">更新日時</Th> */}
+                  <Th>投稿数</Th>
+                  <Th>課題ID</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {data.map((problem) => {
+                  const { id, name, isOpen, postCount } = problem;
+                  return (
+                    <Tr key={id}>
+                      <Td>
+                        <Stack direction="row" spacing={4}>
+                          <Button
+                            colorScheme="teal"
+                            leftIcon={<MdEdit />}
+                            size="sm"
+                            variant="solid"
+                            onClick={() => {
+                              router.push(
+                                pagesPath.staff.problem
+                                  ._problemId(id)
+                                  .edit.$url().path,
+                              );
+                            }}
+                          >
+                            編集
+                          </Button>
+                          <Button
+                            colorScheme="teal"
+                            leftIcon={<FaList />}
+                            size="sm"
+                            variant="outline"
+                          >
+                            投稿
+                          </Button>
+                          <Button
+                            colorScheme="teal"
+                            leftIcon={<FiMap />}
+                            size="sm"
+                            variant="outline"
+                          >
+                            マップ
+                          </Button>
+                        </Stack>
+                      </Td>
+                      <Td>{name}</Td>
+                      <Td>
+                        <Tag colorScheme={isOpen ? 'blue' : 'red'}>
+                          {isOpen ? '公開' : '非公開'}
+                        </Tag>
+                      </Td>
+                      {/* NOTE: updatedAt型が追加されたら対応 */}
+                      {/* <Td>{updatedAt.toLocaleDateString()}</Td> */}
+                      <Td isNumeric>{postCount}</Td>
+                      <Td isNumeric>{id}</Td>
+                    </Tr>
+                  );
+                })}
+              </Tbody>
+            </Table>
+          </TableContainer>
+        )}
       </Box>
     </Box>
   );

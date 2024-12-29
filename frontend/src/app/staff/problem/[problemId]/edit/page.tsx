@@ -1,16 +1,20 @@
+'use client';
+
+import { useParams } from 'next/navigation';
+
 import { SidebarWithHeader } from '@/components/SidebarWIthHeader';
 import { EditProblemForm } from '@/features/problem/edit/ProblemEditForm';
-import { problem } from '@/features/problem/edit/data';
+import { useGetProblemById } from '@/features/problem/hooks/useGetProblemById';
 
 export default function ProblemEdit() {
-  // TODO: APIつなぎこみ。例えば、以下
-  // const problemId = router.query.problemId ?? '';
-  // const problem = useGetProblemById(problemId);
+  const searchParams = useParams();
+  const problemId = Number(searchParams.problemId);
+  const { data } = useGetProblemById(problemId);
 
   return (
     <>
       <SidebarWithHeader>
-        <EditProblemForm initialData={problem} />
+        {data && <EditProblemForm initialData={data} />}
       </SidebarWithHeader>
     </>
   );
