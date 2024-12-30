@@ -123,6 +123,11 @@ const LinkItems: Array<LinkItemProps> = [
     icon: FiPlusSquare,
     name: '新規投稿',
   },
+  {
+    href: pagesPath.profile.$url().pathname,
+    icon: FaList,
+    name: 'マイレポート一覧',
+  },
 ];
 
 const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
@@ -359,7 +364,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
               borderColor={useColorModeValue('gray.200', 'gray.700')}
             >
               <Text fontSize="sm" fontWeight="bold" mx={3} my={2}>
-                {userName ?? '  '}
+                {userName ?? 'ゲストユーザ'}
               </Text>
               <MenuItem>プロフィール</MenuItem>
               <MenuItem>設定</MenuItem>

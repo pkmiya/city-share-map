@@ -1,19 +1,33 @@
-export type post = {
+// NOTE: 削除予定
+export type postByAdmin = {
+  createdAt: string;
+  createdBy: string;
+  deletedAt?: string;
+  id: string;
+  is_solved: boolean;
+  latitude: number;
+  longitude: number;
+  // is_open: boolean;
+  problem_id: number;
+  updated_at: string;
+  updated_by: string;
+  user_id: string;
+} & {
+  [key: string]: any;
+};
+
+export type postByCitizen = {
   coordinate: {
     latitude: number;
     longitude: number;
   };
-  customItems: {
-    itemName: string;
-    itemValue: any;
-  }[];
+  createdAt: string;
   id: number;
-  isOpen: boolean;
   isSolved: boolean;
-  postedAt: Date;
   problemId: number;
   problemName: string;
-  userName: string;
+} & {
+  [key: string]: any;
 };
 
 export type getListOfPostsRequest = {
@@ -23,8 +37,10 @@ export type getListOfPostsRequest = {
   skip?: number;
 };
 
-export type getListOfPostsResponse = {
-  posts: post[];
+export type getListOfPostsByAdminResponse = postByAdmin[];
+
+export type getListOfPostsByCitizenResponse = {
+  posts: postByCitizen[];
 };
 
 export type getListOfPostsByProblemIdRequest = {
@@ -36,7 +52,7 @@ export type getListOfPostsByProblemIdRequest = {
 };
 
 export type getListOfPostsByProblemIdResponse = {
-  posts: post[];
+  posts: postByAdmin[];
   problemId: number;
   problemName: string;
 };
