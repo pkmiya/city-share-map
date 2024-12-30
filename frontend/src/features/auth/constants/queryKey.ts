@@ -4,6 +4,7 @@ export const adminKeys = {
 
 export const userKeys = {
   user: ['user'],
+  users: ['users'],
 };
 
 export const problemKeys = {
