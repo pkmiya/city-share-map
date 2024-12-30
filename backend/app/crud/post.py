@@ -1,14 +1,15 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
+from app.core.config import settings
 from app.crud.base import CRUDBase
 from app.db.db import type_mapping
 from app.models.problems import PostBase, Problem, ProblemItem
 from app.schemas.problem import PostCreate, PostUpdate
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import Boolean, DateTime, Integer, Text
+from sqlalchemy import Boolean, DateTime, Integer, Text, or_
 from sqlalchemy.orm import Session
 
 
@@ -140,6 +141,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
         self,
         db_session: Session,
         filters: Dict[str, Any],
+        user_type: str,
         skip: int = 0,
         limit: int = 100,
     ) -> List[Dict[str, Any]]:
@@ -165,18 +167,34 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
             for problem_id in open_problem:
                 dynamic_table = self.get_dynamic_table(db_session, problem_id)
 
-                query = db_session.query(dynamic_table)
-                if "is_solved" in filters:
-                    query = query.filter(
-                        getattr(dynamic_table, "is_solved") == filters["is_solved"]
-                    )
-                if "user_id" in filters:
-                    query = query.filter(
-                        getattr(dynamic_table, "user_id") == filters["user_id"]
-                    )
+                if user_type == "staff":
+                    query = db_session.query(dynamic_table)
+                    if "is_solved" in filters:
+                        query = query.filter(
+                            getattr(dynamic_table, "is_solved") == filters["is_solved"]
+                        )
+                    if "user_id" in filters:
+                        query = query.filter(
+                            getattr(dynamic_table, "user_id") == filters["user_id"]
+                        )
 
-                posts = query.offset(skip).limit(limit).all()
-                res.extend([jsonable_encoder(post) for post in posts])
+                    posts = query.offset(skip).limit(limit).all()
+                    res.extend([jsonable_encoder(post) for post in posts])
+
+                elif user_type == "citizen":
+                    now = datetime.now()
+                    two_months_ago = now - timedelta(days=settings.POST_LIMIT_DAYS)
+                    posts = (
+                        db_session.query(dynamic_table)
+                        .filter(
+                            or_(
+                                dynamic_table.is_solved,
+                                dynamic_table.created_at.between(two_months_ago, now),
+                            )
+                        )
+                        .all()
+                    )
+                    res.extend([jsonable_encoder(post) for post in posts])
 
             return res
 
