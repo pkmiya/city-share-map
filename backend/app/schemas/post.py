@@ -39,7 +39,7 @@ class ProblemForPost(BaseSchema):
 
 class UserForPost(BaseSchema):
     id: UUID
-    username: str
+    name: str
 
 
 class PostResponseBase(BaseSchema):
@@ -64,7 +64,7 @@ class PostResponse(PostResponseBase):
 
 
 class ProblemMapResponse(BaseSchema):
-    item_name: str
+    name: str
     value: str
 
 

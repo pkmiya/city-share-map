@@ -147,7 +147,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                 id=problem.id, name=problem.name, is_open=problem.is_open
             ),
             user=(
-                UserForPost(id=user.id, username=user.name)
+                UserForPost(id=user.id, name=user.name)
                 if user_type != "citizen"
                 else None
             ),
@@ -198,11 +198,11 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
         for item in problem_items:
             if item.type_id == 1:  # テキストの場合
                 descriptions = ProblemMapResponse(
-                    item_name=item.name, value=post_data[item.name]
+                    name=item.name, value=post_data[item.name]
                 )
             elif item.type_id == 2:  # 写真の場合
                 photo_field = ProblemMapResponse(
-                    item_name=item.name, value=post_data[item.name]
+                    name=item.name, value=post_data[item.name]
                 )
 
         response = PostMapResponse(
@@ -212,7 +212,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                 id=problem.id, name=problem.name, is_open=problem.is_open
             ),
             user=(
-                UserForPost(id=user.id, username=user.name)
+                UserForPost(id=user.id, name=user.name)
                 if user_type != "citizen"
                 else None
             ),
@@ -260,7 +260,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                 id=problem.id, name=problem.name, is_open=problem.is_open
             ),
             user=(
-                UserForPost(id=user.id, username=user.name)
+                UserForPost(id=user.id, name=user.name)
                 if user_type != "citizen"
                 else None
             ),
