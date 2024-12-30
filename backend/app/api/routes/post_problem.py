@@ -1,7 +1,7 @@
 import uuid
 from typing import Any, Dict, List, Optional
 
-from app.api.deps import CurrentStaffUser, SessionDep
+from app.api.deps import CurrentAllUser, CurrentStaffUser, SessionDep
 from app.crud.post import crud_post
 from app.schemas.problem import PostCreate, PostUpdate
 from fastapi import APIRouter
@@ -11,10 +11,9 @@ mock_id = uuid.UUID("00000000-0000-0000-0000-000000000000")  # モック用のID
 
 
 @router.get("/", response_model=List[Dict[str, Any]])
-def list_posts_by_citizen(
+def get_posts(
     db: SessionDep,
-    # current_user: CurrentCitizenUser,
-    current_user: CurrentStaffUser,
+    current_user: CurrentAllUser,
     skip: int = 0,
     limit: int = 100,
     is_solved: Optional[bool] = None,
@@ -39,7 +38,14 @@ def list_posts_by_citizen(
     if user_id is not None:
         filters["user_id"] = user_id
 
-    return crud_post.get_post(db_session=db, skip=skip, limit=limit, filters=filters)
+    if isinstance(current_user.id, int):
+        user_type = "staff"
+    else:
+        user_type = "citizen"
+
+    return crud_post.get_post(
+        db_session=db, skip=skip, limit=limit, filters=filters, user_type=user_type
+    )
 
 
 @router.get("/me", response_model=List[Dict[str, Any]])
@@ -66,7 +72,9 @@ def get_posts_me(
     # filters["user_id"] = current_user.id
     filters["user_id"] = uuid.UUID("00000000-0000-0000-0000-000000000000")
 
-    return crud_post.get_post(db_session=db, skip=skip, limit=limit, filters=filters)
+    return crud_post.get_post(
+        db_session=db, skip=skip, limit=limit, filters=filters, user_type="staff"
+    )
 
 
 @router.post("/{problem_id}", response_model=Dict[str, Any])
