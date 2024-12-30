@@ -1,10 +1,12 @@
 import uuid
 from typing import Any, Dict, List, Optional
 
+import boto3
 from app.api.deps import CurrentAllUser, CurrentStaffUser, SessionDep
+from app.core.config import settings
 from app.crud.post import crud_post
 from app.schemas.problem import PostCreate, PostUpdate
-from fastapi import APIRouter
+from fastapi import APIRouter, File, UploadFile
 
 router = APIRouter()
 mock_id = uuid.UUID("00000000-0000-0000-0000-000000000000")  # モック用のID
@@ -48,6 +50,34 @@ def get_posts(
     )
 
 
+@router.post("/file_upload", response_model=Dict[str, str])
+async def file_upload(file: UploadFile = File(None)) -> Dict[str, str]:
+    s3_bucket = settings.AWS_S3_BUCKET_NAME
+    region_name = settings.AWS_REGION
+    print("🫶")
+    print(s3_bucket, region_name)
+
+    s3 = boto3.client(
+        "s3",
+        region_name=region_name,
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+    )
+
+    s3.put_object(Body=file.file, Bucket=s3_bucket, Key=f"{file.filename}")
+
+    # S3にアップロードしたオブジェクトのパス
+    file_url = "https://%s.s3-%s.amazonaws.com/%s" % (
+        s3_bucket,
+        region_name,
+        file.filename,
+    )
+
+    response = {"file_url": file_url}
+
+    return response
+
+
 @router.get("/me", response_model=List[Dict[str, Any]])
 def get_posts_me(
     db: SessionDep,
@@ -84,7 +114,7 @@ def create_post(
     problem_id: int,
     # current_user: CurrentCitizenUser,
     current_user: CurrentStaffUser,
-    post_in: PostCreate
+    post_in: PostCreate,
 ) -> Dict[str, Any]:
     """
     新しい投稿を作成
@@ -117,7 +147,7 @@ def update_post(
     db: SessionDep,
     # current_user: CurrentCitizenUser,
     current_user: CurrentStaffUser,
-    update_data: PostUpdate
+    update_data: PostUpdate,
 ) -> Dict[str, Any]:
     """
     投稿を更新
