@@ -1,12 +1,22 @@
 import uuid
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
+from uuid import UUID
 
 from app.core.config import settings
 from app.crud.base import CRUDBase
 from app.db.db import type_mapping
 from app.models.problems import PostBase, Problem, ProblemItem
-from app.schemas.problem import PostCreate, PostUpdate
+from app.models.user import CitizenUser
+from app.schemas.problem import (
+    Coordinate,
+    PostCreate,
+    PostResponse,
+    PostResponseBase,
+    PostUpdate,
+    ProblemForPost,
+    UserForPost,
+)
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import Boolean, DateTime, Integer, Text, or_
@@ -97,7 +107,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
         problem_id: int,
         user_id: uuid.UUID,
         post_in: PostCreate,
-    ) -> Dict[str, Any]:
+    ) -> PostResponse:
         """
         動的テーブルに新しい投稿を作成
         """
@@ -121,11 +131,56 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
             )
             db_session.add(post_data)
             db_session.commit()
-            new_post = db_session.query(dynamic_table).filter_by(id=id).first()
 
-            res: Dict[str, Any] = jsonable_encoder(new_post)
+            post = db_session.query(dynamic_table).filter_by(id=id).first()
 
-            return res
+            if not post:
+                raise HTTPException(
+                    status_code=404, detail="指定された投稿が見つかりません"
+                )
+
+            post_data = jsonable_encoder(post)
+            user = (
+                db_session.query(CitizenUser).filter_by(id=post_data["user_id"]).first()
+            )
+            if user is None:
+                raise HTTPException(
+                    status_code=404, detail="指定されたユーザーが見つかりません"
+                )
+            post_user = UserForPost(id=user.id, username=user.name)
+
+            problem = (
+                db_session.query(Problem).filter_by(id=post_data["problem_id"]).first()
+            )
+            if problem is None:
+                raise HTTPException(
+                    status_code=404, detail="指定された課題が見つかりません"
+                )
+            post_problem = ProblemForPost(
+                id=problem.id, name=problem.name, is_open=problem.is_open
+            )
+
+            problem_items = (
+                db_session.query(ProblemItem).filter_by(problem_id=problem_id).all()
+            )
+            items = {}
+            for item in problem_items:
+                items[item.name] = post_data[item.name]
+            print("🐰")
+            print(items)
+            return PostResponse(
+                id=post_data["id"],
+                is_solved=post_data["is_solved"],
+                problem=post_problem,
+                user=post_user,
+                coodinate=Coordinate(
+                    latitude=post_data["latitude"],
+                    longitude=post_data["longitude"],
+                ),
+                items=items,
+                created_at=post_data["created_at"],
+                updated_at=post_data["updated_at"],
+            )
 
         except Exception as e:
             db_session.rollback()
@@ -141,9 +196,10 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
         self,
         db_session: Session,
         filters: Dict[str, Any],
-        user_type: str,
         skip: int = 0,
         limit: int = 100,
+        summary: bool = False,
+        user_type: str = "citizen",
     ) -> List[Dict[str, Any]]:
         """
         全ての投稿を取得
@@ -207,9 +263,106 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                     detail=f"投稿の取得中にエラーが発生しました: {str(e)}",
                 )
 
+    def get_post_summary(
+        self,
+        db_session: Session,
+        filters: Dict[str, Union[int, bool, UUID]],
+        skip: int = 0,
+        limit: int = 100,
+        user_type: str = "staff",
+    ) -> List[PostResponseBase]:
+        """
+        全ての投稿を取得
+        """
+        try:
+            if "is_open" in filters:
+                problems = (
+                    db_session.query(Problem)
+                    .filter_by(is_open=filters["is_open"])
+                    .all()
+                )
+            else:
+                problems = db_session.query(Problem).all()
+
+            if "problem_id" in filters:
+                open_problem = [int(filters["problem_id"])]
+            else:
+                open_problem = [problem.id for problem in problems]
+
+            res = []
+            for problem_id in open_problem:
+                dynamic_table = self.get_dynamic_table(db_session, problem_id)
+
+                query = db_session.query(dynamic_table)
+                if "is_solved" in filters:
+                    query = query.filter(
+                        getattr(dynamic_table, "is_solved") == filters["is_solved"]
+                    )
+                if "user_id" in filters:
+                    query = query.filter(
+                        getattr(dynamic_table, "user_id") == filters["user_id"]
+                    )
+
+                posts = query.offset(skip).limit(limit).all()
+
+                for post in posts:
+                    post_data = jsonable_encoder(post)
+                    user = (
+                        db_session.query(CitizenUser)
+                        .filter_by(id=post_data["user_id"])
+                        .first()
+                    )
+                    if user is None:
+                        raise HTTPException(
+                            status_code=404, detail="指定されたユーザーが見つかりません"
+                        )
+                    post_user = UserForPost(id=user.id, username=user.name)
+
+                    problem = (
+                        db_session.query(Problem)
+                        .filter_by(id=post_data["problem_id"])
+                        .first()
+                    )
+                    if problem is None:
+                        raise HTTPException(
+                            status_code=404, detail="指定された課題が見つかりません"
+                        )
+                    post_problem = ProblemForPost(
+                        id=problem.id, name=problem.name, is_open=problem.is_open
+                    )
+
+                    summary = PostResponseBase(
+                        id=post_data["id"],
+                        is_solved=post_data["is_solved"],
+                        problem=post_problem,
+                        user=post_user if user_type == "staff" else None,
+                        coodinate=Coordinate(
+                            latitude=post_data["latitude"],
+                            longitude=post_data["longitude"],
+                        ),
+                        created_at=post_data["created_at"],
+                        updated_at=post_data["updated_at"],
+                    )
+                    res.append(summary)
+            return res
+
+        except Exception as e:
+            if isinstance(e, HTTPException):
+                raise e
+            else:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"投稿の取得中にエラーが発生しました: {str(e)}",
+                )
+
     def get_by_id(
-        self, db_session: Session, *, problem_id: int, post_id: uuid.UUID
-    ) -> Dict[str, Any]:
+        self,
+        db_session: Session,
+        *,
+        problem_id: int,
+        post_id: uuid.UUID,
+        user_type: str,
+    ) -> PostResponse:
         """
         特定の投稿を取得
         """
@@ -221,8 +374,48 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                 raise HTTPException(
                     status_code=404, detail="指定された投稿が見つかりません"
                 )
-            res: Dict[str, Any] = jsonable_encoder(post)
-            return res
+
+            post_data = jsonable_encoder(post)
+            user = (
+                db_session.query(CitizenUser).filter_by(id=post_data["user_id"]).first()
+            )
+            if user is None:
+                raise HTTPException(
+                    status_code=404, detail="指定されたユーザーが見つかりません"
+                )
+            post_user = UserForPost(id=user.id, username=user.name)
+
+            problem = (
+                db_session.query(Problem).filter_by(id=post_data["problem_id"]).first()
+            )
+            if problem is None:
+                raise HTTPException(
+                    status_code=404, detail="指定された課題が見つかりません"
+                )
+            post_problem = ProblemForPost(
+                id=problem.id, name=problem.name, is_open=problem.is_open
+            )
+
+            problem_items = (
+                db_session.query(ProblemItem).filter_by(problem_id=problem_id).all()
+            )
+            items = {}
+            for item in problem_items:
+                items[item.name] = post_data[item.name]
+
+            return PostResponse(
+                id=post_data["id"],
+                is_solved=post_data["is_solved"],
+                problem=post_problem,
+                user=post_user,
+                coodinate=Coordinate(
+                    latitude=post_data["latitude"],
+                    longitude=post_data["longitude"],
+                ),
+                items=items,
+                created_at=post_data["created_at"],
+                updated_at=post_data["updated_at"],
+            )
 
         except Exception as e:
             if isinstance(e, HTTPException):
