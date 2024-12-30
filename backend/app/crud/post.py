@@ -1,40 +1,57 @@
 import uuid
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
+from uuid import UUID
 
 from app.core.config import settings
 from app.crud.base import CRUDBase
 from app.db.db import type_mapping
 from app.models.problems import PostBase, Problem, ProblemItem
-from app.schemas.problem import PostCreate, PostUpdate
+from app.models.user import CitizenUser
+from app.schemas.post import (
+    Coordinate,
+    PostCreate,
+    PostMapResponse,
+    PostResponse,
+    PostResponseBase,
+    PostUpdate,
+    ProblemForPost,
+    ProblemMapResponse,
+    UserForPost,
+)
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import Boolean, DateTime, Integer, Text, or_
 from sqlalchemy.orm import Session
 
 
-def get_type_class(value: Any) -> type:
-    if isinstance(value, bool):
-        return Boolean
-    elif isinstance(value, int):
-        return Integer
-    elif isinstance(value, datetime):
-        return DateTime
-    elif isinstance(value, str):
-        return Text
-    else:
+class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
+    """
+    投稿管理クラス
+    - 投稿内容の検証、作成、取得、更新を行う
+    """
+
+    @staticmethod
+    def _get_type_class(value: Any) -> type:
+        type_mapping = {
+            bool: Boolean,
+            int: Integer,
+            datetime: DateTime,
+            str: Text,
+        }
+        for py_type, sa_type in type_mapping.items():
+            if isinstance(value, py_type):
+                return sa_type
         raise HTTPException(status_code=400, detail="サポートされていないデータ型です")
 
+    @staticmethod
+    def _validate_datetime(value: str) -> Optional[datetime]:
+        try:
+            return datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            return None
 
-def validate_datetime(value: str) -> Optional[datetime]:
-    try:
-        return datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
-    except ValueError:
-        return None
-
-
-class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
-    def validate_post_items(
+    def _validate_post_items(
         self, db_session: Session, problem_id: int, items: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
@@ -73,11 +90,11 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                 )
 
             expected_type = type_mapping[problem_item.type_id]
-            actual_type = get_type_class(value)
+            actual_type = self._get_type_class(value)
 
             if expected_type != actual_type:
                 if expected_type == DateTime:
-                    converted_value = validate_datetime(value)
+                    converted_value = self._validate_datetime(value)
                     if converted_value is None:
                         raise HTTPException(
                             status_code=400,
@@ -91,60 +108,215 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
 
         return validated_values
 
+    def _build_post_response(
+        self,
+        db_session: Session,
+        dynamic_table: Any,
+        post_id: uuid.UUID,
+        user_type: Optional[str] = None,
+    ) -> PostResponse:
+        """
+        投稿データからレスポンスを構築
+        """
+        post = db_session.query(dynamic_table).filter_by(id=post_id).first()
+        if not post:
+            raise HTTPException(status_code=404, detail="投稿が見つかりません")
+
+        post_data = jsonable_encoder(post)
+        user = db_session.query(CitizenUser).filter_by(id=post_data["user_id"]).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="ユーザーが見つかりません")
+
+        problem = (
+            db_session.query(Problem).filter_by(id=post_data["problem_id"]).first()
+        )
+        if not problem:
+            raise HTTPException(status_code=404, detail="課題が見つかりません")
+
+        problem_items = (
+            db_session.query(ProblemItem).filter_by(problem_id=problem.id).all()
+        )
+        items = {}
+        for item in problem_items:
+            items[item.name] = post_data[item.name]
+
+        response = PostResponse(
+            id=post_data["id"],
+            is_solved=post_data["is_solved"],
+            problem=ProblemForPost(
+                id=problem.id, name=problem.name, is_open=problem.is_open
+            ),
+            user=(
+                UserForPost(id=user.id, name=user.name)
+                if user_type != "citizen"
+                else None
+            ),
+            coodinate=Coordinate(
+                latitude=post_data["latitude"], longitude=post_data["longitude"]
+            ),
+            items=items,
+            created_at=post_data["created_at"],
+            updated_at=post_data["updated_at"] if user_type != "citizen" else None,
+            updated_by=post_data["updated_by"] if user_type != "citizen" else None,
+        )
+
+        return response
+
+    def _build_post_map_response(
+        self,
+        db_session: Session,
+        dynamic_table: Any,
+        post_id: uuid.UUID,
+        user_type: Optional[str] = None,
+    ) -> PostMapResponse:
+        """
+        投稿データからレスポンスを構築
+        """
+        post = db_session.query(dynamic_table).filter_by(id=post_id).first()
+        if not post:
+            raise HTTPException(status_code=404, detail="投稿が見つかりません")
+
+        post_data = jsonable_encoder(post)
+        user = db_session.query(CitizenUser).filter_by(id=post_data["user_id"]).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="ユーザーが見つかりません")
+
+        problem = (
+            db_session.query(Problem).filter_by(id=post_data["problem_id"]).first()
+        )
+        if not problem:
+            raise HTTPException(status_code=404, detail="課題が見つかりません")
+
+        problem_items = (
+            db_session.query(ProblemItem).filter_by(problem_id=problem.id).all()
+        )
+
+        photo_field = None
+        descriptions = None
+
+        # 問題項目を走査してデータを取得
+        for item in problem_items:
+            if item.type_id == 1:  # テキストの場合
+                descriptions = ProblemMapResponse(
+                    name=item.name, value=post_data[item.name]
+                )
+            elif item.type_id == 2:  # 写真の場合
+                photo_field = ProblemMapResponse(
+                    name=item.name, value=post_data[item.name]
+                )
+
+        response = PostMapResponse(
+            id=post_data["id"],
+            is_solved=post_data["is_solved"],
+            problem=ProblemForPost(
+                id=problem.id, name=problem.name, is_open=problem.is_open
+            ),
+            user=(
+                UserForPost(id=user.id, name=user.name)
+                if user_type != "citizen"
+                else None
+            ),
+            coodinate=Coordinate(
+                latitude=post_data["latitude"], longitude=post_data["longitude"]
+            ),
+            created_at=post_data["created_at"],
+            updated_at=post_data["updated_at"] if user_type != "citizen" else None,
+            updated_by=post_data["updated_by"] if user_type != "citizen" else None,
+            photo_field=photo_field,
+            descriptions=descriptions,
+        )
+
+        return response
+
+    def _build_post_summary_response(
+        self,
+        db_session: Session,
+        dynamic_table: Any,
+        post_id: uuid.UUID,
+        user_type: Optional[str] = None,
+    ) -> PostResponseBase:
+        """
+        投稿データからレスポンスを構築
+        """
+        post = db_session.query(dynamic_table).filter_by(id=post_id).first()
+        if not post:
+            raise HTTPException(status_code=404, detail="投稿が見つかりません")
+
+        post_data = jsonable_encoder(post)
+        user = db_session.query(CitizenUser).filter_by(id=post_data["user_id"]).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="ユーザーが見つかりません")
+
+        problem = (
+            db_session.query(Problem).filter_by(id=post_data["problem_id"]).first()
+        )
+        if not problem:
+            raise HTTPException(status_code=404, detail="課題が見つかりません")
+
+        response = PostResponseBase(
+            id=post_data["id"],
+            is_solved=post_data["is_solved"],
+            problem=ProblemForPost(
+                id=problem.id, name=problem.name, is_open=problem.is_open
+            ),
+            user=(
+                UserForPost(id=user.id, name=user.name)
+                if user_type != "citizen"
+                else None
+            ),
+            coodinate=Coordinate(
+                latitude=post_data["latitude"],
+                longitude=post_data["longitude"],
+            ),
+            created_at=post_data["created_at"],
+            updated_at=post_data["updated_at"] if user_type != "citizen" else None,
+            updated_by=post_data["updated_by"] if user_type != "citizen" else None,
+        )
+
+        return response
+
     def create_post(
         self,
         db_session: Session,
         problem_id: int,
         user_id: uuid.UUID,
         post_in: PostCreate,
-    ) -> Dict[str, Any]:
+    ) -> PostResponse:
         """
         動的テーブルに新しい投稿を作成
         """
-        try:
-            items = jsonable_encoder(post_in.items)
-            item_values = self.validate_post_items(db_session, problem_id, items)
+        items = jsonable_encoder(post_in.items)
+        validated_items = self._validate_post_items(db_session, problem_id, items)
 
-            dynamic_table = self.get_dynamic_table(db_session, problem_id)
-            id = uuid.uuid4()
+        dynamic_table = self.get_dynamic_table(db_session, problem_id)
+        post_id = uuid.uuid4()
+        post_data = dynamic_table(
+            id=post_id,
+            problem_id=problem_id,
+            latitude=post_in.latitude,
+            longitude=post_in.longitude,
+            user_id=user_id,
+            is_solved=post_in.is_solved,
+            created_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            created_by=str(user_id),
+            **validated_items,
+        )
 
-            post_data = dynamic_table(
-                id=id,
-                problem_id=problem_id,
-                latitude=post_in.latitude,
-                longitude=post_in.longitude,
-                user_id=user_id,
-                is_solved=post_in.is_solved,
-                created_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                created_by=str(user_id),
-                **item_values,
-            )
-            db_session.add(post_data)
-            db_session.commit()
-            new_post = db_session.query(dynamic_table).filter_by(id=id).first()
+        db_session.add(post_data)
+        db_session.commit()
 
-            res: Dict[str, Any] = jsonable_encoder(new_post)
+        response = self._build_post_response(db_session, dynamic_table, post_id)
 
-            return res
+        return response
 
-        except Exception as e:
-            db_session.rollback()
-            if isinstance(e, HTTPException):
-                raise e
-            else:
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"投稿の作成中にエラーが発生しました: {str(e)}",
-                )
-
-    def get_post(
+    def get_post_for_map(
         self,
         db_session: Session,
         filters: Dict[str, Any],
-        user_type: str,
         skip: int = 0,
         limit: int = 100,
-    ) -> List[Dict[str, Any]]:
+        user_type: str = "citizen",
+    ) -> List[PostMapResponse]:
         """
         全ての投稿を取得
         """
@@ -163,7 +335,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
             else:
                 open_problem = [problem.id for problem in problems]
 
-            res = []
+            response = []
             for problem_id in open_problem:
                 dynamic_table = self.get_dynamic_table(db_session, problem_id)
 
@@ -173,30 +345,88 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                         query = query.filter(
                             getattr(dynamic_table, "is_solved") == filters["is_solved"]
                         )
-                    if "user_id" in filters:
-                        query = query.filter(
-                            getattr(dynamic_table, "user_id") == filters["user_id"]
-                        )
-
                     posts = query.offset(skip).limit(limit).all()
-                    res.extend([jsonable_encoder(post) for post in posts])
 
                 elif user_type == "citizen":
                     now = datetime.now()
                     two_months_ago = now - timedelta(days=settings.POST_LIMIT_DAYS)
-                    posts = (
-                        db_session.query(dynamic_table)
-                        .filter(
-                            or_(
-                                dynamic_table.is_solved,
-                                dynamic_table.created_at.between(two_months_ago, now),
-                            )
+                    query = db_session.query(dynamic_table)
+                    if "is_solved" in filters:
+                        query = query.filter(
+                            getattr(dynamic_table, "is_solved") == filters["is_solved"]
                         )
-                        .all()
-                    )
-                    res.extend([jsonable_encoder(post) for post in posts])
+                    posts = query.filter(
+                        or_(
+                            dynamic_table.is_solved,
+                            dynamic_table.created_at.between(two_months_ago, now),
+                        )
+                    ).all()
 
-            return res
+                for post in posts:
+                    res = self._build_post_map_response(
+                        db_session, dynamic_table, post.id, user_type
+                    )
+                    response.append(res)
+
+            return response
+
+        except Exception as e:
+            if isinstance(e, HTTPException):
+                raise e
+            else:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"投稿の取得中にエラーが発生しました: {str(e)}",
+                )
+
+    def get_post_summary(
+        self,
+        db_session: Session,
+        filters: Dict[str, Union[int, bool, UUID]],
+        skip: int = 0,
+        limit: int = 100,
+        user_type: str = "staff",
+    ) -> List[PostResponseBase]:
+        """
+        全ての投稿を取得
+        """
+        try:
+            if "is_open" in filters:
+                problems = (
+                    db_session.query(Problem)
+                    .filter_by(is_open=filters["is_open"])
+                    .all()
+                )
+            else:
+                problems = db_session.query(Problem).all()
+
+            if "problem_id" in filters:
+                open_problem = [int(filters["problem_id"])]
+            else:
+                open_problem = [problem.id for problem in problems]
+
+            response = []
+            for problem_id in open_problem:
+                dynamic_table = self.get_dynamic_table(db_session, problem_id)
+
+                query = db_session.query(dynamic_table)
+                if "is_solved" in filters:
+                    query = query.filter(
+                        getattr(dynamic_table, "is_solved") == filters["is_solved"]
+                    )
+                if "user_id" in filters:
+                    query = query.filter(
+                        getattr(dynamic_table, "user_id") == filters["user_id"]
+                    )
+
+                posts = query.offset(skip).limit(limit).all()
+                for post in posts:
+                    res = self._build_post_summary_response(
+                        db_session, dynamic_table, post.id, user_type
+                    )
+                    response.append(res)
+
+            return response
 
         except Exception as e:
             if isinstance(e, HTTPException):
@@ -208,8 +438,13 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                 )
 
     def get_by_id(
-        self, db_session: Session, *, problem_id: int, post_id: uuid.UUID
-    ) -> Dict[str, Any]:
+        self,
+        db_session: Session,
+        *,
+        problem_id: int,
+        post_id: uuid.UUID,
+        user_type: str,
+    ) -> PostResponse:
         """
         特定の投稿を取得
         """
@@ -221,8 +456,11 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                 raise HTTPException(
                     status_code=404, detail="指定された投稿が見つかりません"
                 )
-            res: Dict[str, Any] = jsonable_encoder(post)
-            return res
+            response = self._build_post_response(
+                db_session, dynamic_table, post.id, user_type
+            )
+
+            return response
 
         except Exception as e:
             if isinstance(e, HTTPException):
@@ -241,7 +479,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
         post_id: uuid.UUID,
         user_id: uuid.UUID,
         update_data: PostUpdate,
-    ) -> Dict[str, Any]:
+    ) -> PostResponse:
         """
         投稿を更新
         """
@@ -285,8 +523,8 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
             db_session.commit()
             db_session.refresh(post)
 
-            res: Dict[str, Any] = jsonable_encoder(post)
-            return res
+            response = self._build_post_response(db_session, dynamic_table, post.id)
+            return response
 
         except Exception as e:
             db_session.rollback()
@@ -306,7 +544,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
         post_id: uuid.UUID,
         user_id: int,
         update_data: Dict[str, Any],
-    ) -> Dict[str, Any]:
+    ) -> PostResponse:
         """
         is_solvedを更新(自治体User用)
         """
@@ -331,8 +569,8 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
             db_session.commit()
             db_session.refresh(post)
 
-            res: Dict[str, Any] = jsonable_encoder(post)
-            return res
+            response = self._build_post_response(db_session, dynamic_table, post.id)
+            return response
 
         except Exception as e:
             db_session.rollback()
@@ -351,7 +589,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
         problem_id: int,
         post_id: uuid.UUID,
         user_id: uuid.UUID,
-    ) -> Dict[str, Any]:
+    ) -> PostResponse:
         """
         投稿を削除
         """
@@ -372,8 +610,8 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
             db_session.delete(post)
             db_session.commit()
 
-            res: Dict[str, Any] = jsonable_encoder(post)
-            return res
+            response = self._build_post_response(db_session, dynamic_table, post.id)
+            return response
 
         except Exception as e:
             db_session.rollback()

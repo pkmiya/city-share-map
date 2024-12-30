@@ -1,6 +1,5 @@
 from datetime import datetime
-from decimal import Decimal
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 from app.schemas.base_schema import BaseSchema
 
@@ -76,23 +75,3 @@ class ProblemInDB(ProblemInDBBase):
 class Type(BaseSchema):
     id: int
     name: str
-
-
-class PostBase(BaseSchema):
-    latitude: Decimal
-    longitude: Decimal
-    is_solved: bool = False
-    items: Dict[str, Any]
-
-    class Config:
-        orm_mode = True
-
-
-class PostCreate(PostBase):
-    pass
-
-
-class PostUpdate(BaseSchema):
-    latitude: Optional[Decimal] = None
-    longitude: Optional[Decimal] = None
-    items: Optional[Dict[str, Any]] = None
