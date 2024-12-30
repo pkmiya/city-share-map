@@ -1,17 +1,17 @@
 // NOTE: 削除予定
 export type postByAdmin = {
-  latitude: number;
-  longitude: number;
-  id: string;
-  // is_open: boolean;
-  is_solved: boolean;
   createdAt: string;
   createdBy: string;
   deletedAt?: string;
+  id: string;
+  is_solved: boolean;
+  latitude: number;
+  longitude: number;
+  // is_open: boolean;
   problem_id: number;
-  user_id: string;
   updated_at: string;
   updated_by: string;
+  user_id: string;
 } & {
   [key: string]: any;
 };
@@ -21,9 +21,9 @@ export type postByCitizen = {
     latitude: number;
     longitude: number;
   };
+  createdAt: string;
   id: number;
   isSolved: boolean;
-  createdAt: string;
   problemId: number;
   problemName: string;
 } & {

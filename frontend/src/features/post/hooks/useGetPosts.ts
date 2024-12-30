@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { postProblemApi } from '@/api/client';
 import { postKeys } from '@/features/auth/constants/queryKey';
+
 import { getListOfPostsRequest } from '../types';
 
 export const useGetPosts = (req: getListOfPostsRequest) => {

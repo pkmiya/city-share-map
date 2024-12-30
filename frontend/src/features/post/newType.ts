@@ -1,3 +1,4 @@
+/* eslint-disable typescript-sort-keys/interface */
 // NOTE: 2024-12-30　投稿取得用APIのリファクタリング提案用
 
 // ------------------------------
@@ -9,17 +10,17 @@ export type postSummary = {
   // 対象画面：投稿一覧画面、可視化マップ画面
   id: string;
   isSolved: boolean;
-  user: {
-    userId: string;
-    userName: string;
+  coordinate: {
+    latitude: number;
+    longitude: number;
   };
   problem: {
     problemId: string;
     problemName: string;
   };
-  coordinate: {
-    latitude: number;
-    longitude: number;
+  user: {
+    userId: string;
+    userName: string;
   };
   createdAt: Date;
 
