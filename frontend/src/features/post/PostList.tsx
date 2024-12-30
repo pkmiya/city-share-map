@@ -22,6 +22,9 @@ import { getListOfPostsResponse } from './types';
 const data: getListOfPostsResponse = { posts: posts };
 
 export const PostList = () => {
+  // TODO: APIつなぎこみ
+  // const { data } = useGetPosts({});
+
   return (
     <Box w="full">
       <Text fontSize="x-large" fontWeight="bold">

@@ -28,7 +28,7 @@ import { useGetProblems } from './hooks/useGetProblems';
 export const ProblemList = () => {
   const router = useRouter();
 
-  const { data } = useGetProblems();
+  const { data } = useGetProblems({});
 
   return (
     <Box w="full">

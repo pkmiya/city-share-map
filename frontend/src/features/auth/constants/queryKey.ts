@@ -12,3 +12,8 @@ export const problemKeys = {
   problem: ['problem'],
   problems: ['problems'],
 };
+
+export const postKeys = {
+  post: ['post'],
+  posts: ['posts'],
+};

@@ -5,6 +5,7 @@ import { problemKeys } from '@/features/auth/constants/queryKey';
 
 export const useGetProblemById = (problemId: number) => {
   const query = useQuery({
+    enabled: !!problemId,
     queryFn: async () => {
       const res = await problemsApi.readProblemById({ id: problemId });
       return res;
