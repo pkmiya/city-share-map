@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Box,
   Button,
@@ -16,14 +18,14 @@ import {
 import { FiMap } from 'react-icons/fi';
 import { MdEdit, MdOpenInNew } from 'react-icons/md';
 
-import { posts } from './data';
-import { getListOfPostsResponse } from './types';
-
-const data: getListOfPostsResponse = { posts: posts };
+import { useGetPosts } from './hooks/useGetPosts';
+import { postByAdmin } from './types';
 
 export const PostList = () => {
   // TODO: APIつなぎこみ
-  // const { data } = useGetPosts({});
+  // NOTE: 型の事故が起こっているが、一旦放置
+  const { data } = useGetPosts({});
+  console.log('data:', data);
 
   return (
     <Box w="full">
@@ -39,7 +41,8 @@ export const PostList = () => {
                 <Th minW="10%" width="auto">
                   課題名
                 </Th>
-                <Th w="1%">公開状態</Th>
+                {/* TODO: 今後対応 */}
+                {/* <Th w="1%">公開状態</Th> */}
                 <Th w="1%">対応状況</Th>
                 <Th w="1%">投稿ユーザ</Th>
                 <Th w="1%">投稿日時</Th>
@@ -49,8 +52,17 @@ export const PostList = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {data.posts.map(
-                ({ id, problemName, userName, isOpen, isSolved, postedAt }) => {
+              {data &&
+                data.length > 0 &&
+                data.map((post: postByAdmin) => {
+                  const {
+                    id,
+                    problemName,
+                    userName,
+                    // isOpen,
+                    is_solved: isSolved,
+                    createdAt,
+                  } = post;
                   return (
                     <Tr key={id}>
                       <Td>
@@ -90,23 +102,23 @@ export const PostList = () => {
                         </Stack>
                       </Td>
                       <Td>{problemName}</Td>
-                      <Td>
+                      {/* TODO: 今後対応 */}
+                      {/* <Td>
                         <Tag colorScheme={isOpen ? 'blue' : 'red'}>
                           {isOpen ? '公開' : '非公開'}
                         </Tag>
-                      </Td>
+                      </Td> */}
                       <Td>
                         <Tag colorScheme={isSolved ? 'green' : 'red'}>
                           {isSolved ? '解決済' : '未解決'}
                         </Tag>
                       </Td>
                       <Td>{userName}</Td>
-                      <Td>{postedAt.toLocaleDateString()}</Td>
+                      <Td>{new Date(createdAt).toLocaleDateString()}</Td>
                       <Td>{id}</Td>
                     </Tr>
                   );
-                },
-              )}
+                })}
             </Tbody>
           </Table>
         </TableContainer>

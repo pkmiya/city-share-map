@@ -12,16 +12,13 @@
  * Do not edit the class manually.
  */
 
-import * as runtime from '../runtime';
-import type { HTTPValidationError, PostCreate, PostUpdate } from '../models';
 import {
-  HTTPValidationErrorFromJSON,
-  HTTPValidationErrorToJSON,
-  PostCreateFromJSON,
-  PostCreateToJSON,
-  PostUpdateFromJSON,
-  PostUpdateToJSON,
-} from '../models';
+  getListOfPostsByAdminResponse,
+  getListOfPostsByCitizenResponse,
+} from '@/features/post/types';
+import type { PostCreate, PostUpdate } from '../models';
+import { PostCreateToJSON, PostUpdateToJSON } from '../models';
+import * as runtime from '../runtime';
 
 export interface CreatePostRequest {
   problemId: number;
@@ -187,7 +184,7 @@ export interface PostProblemApiInterface {
   listPostsByCitizenRaw(
     requestParameters: ListPostsByCitizenRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<runtime.ApiResponse<Array<object>>>;
+  ): Promise<runtime.ApiResponse<getListOfPostsByAdminResponse>>;
 
   /**
    * 投稿の一覧を取得 フィルタリングとページネーションをサポート
@@ -196,7 +193,7 @@ export interface PostProblemApiInterface {
   listPostsByCitizen(
     requestParameters: ListPostsByCitizenRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<Array<object>>;
+  ): Promise<getListOfPostsByAdminResponse>;
 
   /**
    * 投稿を解決済みとしてマーク
@@ -572,7 +569,7 @@ export class PostProblemApi
   async listPostsByCitizenRaw(
     requestParameters: ListPostsByCitizenRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<runtime.ApiResponse<Array<object>>> {
+  ): Promise<runtime.ApiResponse<getListOfPostsByAdminResponse>> {
     const queryParameters: any = {};
 
     if (requestParameters.skip !== undefined) {
@@ -629,7 +626,7 @@ export class PostProblemApi
   async listPostsByCitizen(
     requestParameters: ListPostsByCitizenRequest = {},
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<Array<object>> {
+  ): Promise<getListOfPostsByAdminResponse> {
     const response = await this.listPostsByCitizenRaw(
       requestParameters,
       initOverrides,

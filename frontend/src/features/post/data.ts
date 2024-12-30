@@ -1,85 +1,64 @@
-import { post } from './types';
+import { getListOfPostsResponse } from './newType';
 
-export const posts: post[] = [
+export const posts: getListOfPostsResponse = [
   {
     coordinate: {
       latitude: 35.681236,
       longitude: 139.767125,
     },
-    customItems: [
-      {
-        itemName: '損傷の種類',
-        itemValue: 'ひび割れ',
-      },
-      {
-        itemName: '写真',
-        itemValue: '/image_cracked-road.webp',
-      },
-      {
-        itemName: '備考欄',
-        itemValue: 'ここに何か書いてください',
-      },
-    ],
-    id: 1,
+    id: '1',
     isOpen: true,
     isSolved: false,
-    postedAt: new Date(),
-    problemId: 1,
-    problemName: '道路',
-    userName: 'user1',
+    createdAt: new Date(),
+    problem: {
+      problemId: '1',
+      problemName: '道路',
+    },
+    user: {
+      userId: '1',
+      userName: 'user1',
+    },
+    updatedAt: new Date(),
+    updatedBy: 'user1',
   },
   {
     coordinate: {
       latitude: 35.681236,
       longitude: 139.767125,
     },
-    customItems: [
-      {
-        itemName: '動物の種類',
-        itemValue: '野良犬',
-      },
-      {
-        itemName: '大きさや特徴',
-        itemValue: '小型で茶色',
-      },
-      {
-        itemName: '行動の様子',
-        itemValue: 'かわいいです',
-      },
-    ],
-    id: 2,
-    isOpen: false,
-    isSolved: true,
-    postedAt: new Date(),
-    problemId: 2,
-    problemName: '動物',
-    userName: 'user2',
-  },
-  {
-    coordinate: {
-      latitude: 35.681236,
-      longitude: 139.767125,
-    },
-    customItems: [
-      {
-        itemName: '発生源の種類',
-        itemValue: '工場',
-      },
-      {
-        itemName: '時間帯',
-        itemValue: '夕方',
-      },
-      {
-        itemName: '頻度',
-        itemValue: '毎日',
-      },
-    ],
-    id: 3,
+    id: '2',
     isOpen: true,
-    isSolved: true,
-    postedAt: new Date(),
-    problemId: 3,
-    problemName: '騒音',
-    userName: 'user3',
+    isSolved: false,
+    createdAt: new Date(),
+    problem: {
+      problemId: '2',
+      problemName: 'ごみ',
+    },
+    user: {
+      userId: '1',
+      userName: 'user1',
+    },
+    updatedAt: new Date(),
+    updatedBy: 'user1',
+  },
+  {
+    coordinate: {
+      latitude: 35.681236,
+      longitude: 139.767125,
+    },
+    id: '2',
+    isOpen: true,
+    isSolved: false,
+    createdAt: new Date(),
+    problem: {
+      problemId: '3',
+      problemName: '動物',
+    },
+    user: {
+      userId: '1',
+      userName: 'user1',
+    },
+    updatedAt: new Date(),
+    updatedBy: 'user1',
   },
 ];
