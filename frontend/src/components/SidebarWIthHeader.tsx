@@ -349,7 +349,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
                   ml="2"
                   spacing="1px"
                 >
-                  <Text fontSize="sm">{userName ?? '  '}</Text>
+                  <Text fontSize="sm">{userName ?? 'ゲストユーザ'}</Text>
                   <Text color="gray.600" fontSize="xs">
                     {department ?? '  '}
                   </Text>
