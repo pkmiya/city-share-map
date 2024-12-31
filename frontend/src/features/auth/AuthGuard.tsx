@@ -28,8 +28,8 @@ export const AuthGuard = ({
   isPublic = false,
   debug = false,
 }: AuthGuardProps) => {
-  const { accessToken } = useAuth();
-  const role = accessToken?.user_type ?? null;
+  const { idToken } = useAuth();
+  const role = idToken?.roles?.[0] ?? null;
 
   const router = useRouter();
 

@@ -10,7 +10,7 @@ import {
 } from '../constants/localStoage';
 import { UserRoleType } from '../constants/role';
 
-type DecodedAccessToken = {
+export type DecodedAccessToken = {
   exp: number;
   user_id: string;
   user_type: UserRoleType;
@@ -19,12 +19,16 @@ type DecodedAccessToken = {
 export const decodeAccessToken = (
   accessToken: string,
 ): DecodedAccessToken | null => {
+  if (!accessToken) {
+    console.log('Access token not found.');
+    return null;
+  }
   try {
     const decoded: DecodedAccessToken = jwtDecode(accessToken);
 
     const currentTime = Math.floor(Date.now() / 1000);
     if (decoded.exp < currentTime) {
-      console.warn('Access token has expired.');
+      console.log('Access token has expired.');
       return null;
     }
 
@@ -32,17 +36,6 @@ export const decodeAccessToken = (
   } catch (error) {
     console.error('Failed to decode access token:', error);
     return null;
-  }
-};
-
-export const isTokenValid = (accessToken: string): boolean => {
-  try {
-    const decoded: DecodedAccessToken = jwtDecode(accessToken);
-
-    const currentTime = Math.floor(Date.now() / 1000);
-    return decoded.exp > currentTime;
-  } catch (error) {
-    return false;
   }
 };
 

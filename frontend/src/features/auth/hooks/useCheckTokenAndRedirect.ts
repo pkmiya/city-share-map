@@ -6,7 +6,7 @@ import { useCallback } from 'react';
 import { isClient } from '@/utils/render';
 
 import { LOCAL_STORAGE_KEYS } from '../constants/localStoage';
-import { isTokenValid } from '../utils/accessToken';
+import { isTokenValid } from '../utils/token';
 
 export const useCheckTokenAndRedirect = () => {
   const router = useRouter();
@@ -14,7 +14,9 @@ export const useCheckTokenAndRedirect = () => {
   return useCallback(() => {
     const accessToken =
       isClient && localStorage.getItem(LOCAL_STORAGE_KEYS.accessToken);
-    if (accessToken && isTokenValid(accessToken)) {
+    const idToken =
+      isClient && localStorage.getItem(LOCAL_STORAGE_KEYS.idToken);
+    if (accessToken && idToken && isTokenValid({ accessToken, idToken })) {
       console.log('Logged in only by checking token');
     } else {
       console.log('Session expired. Redirecting to login page');
