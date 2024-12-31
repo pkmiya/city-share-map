@@ -41,7 +41,7 @@ export const UserHome = () => {
             <Center mb={4}>
               <FiMap color="gray" size="40px" />
             </Center>
-            マップを見る
+            レポートマップ
           </Box>
           <Box
             bg="gray.200"
@@ -52,7 +52,7 @@ export const UserHome = () => {
             <Center mb={4}>
               <LuClipboardList color="gray" size="40px" />
             </Center>
-            自分のレポートを見る
+            マイレポート
           </Box>
         </HStack>
       </Box>
