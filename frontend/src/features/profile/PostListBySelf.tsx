@@ -1,13 +1,13 @@
+'use client';
+
 import { Box, HStack, Spacer, Tag, Text } from '@chakra-ui/react';
 
-import { posts } from '../post/data';
-import { getListOfPostsResponse } from '../post/newType';
+import { PostResponseBase } from '@/gen/api';
 
-const data: getListOfPostsResponse = posts;
+import { useGetPostsBySelf } from './hooks/useGetPostsBySelf';
 
 export const PostListBySelf = () => {
-  // TODO: APIつなぎこみ
-  // const { data } = useGetPostsBySelf({})
+  const { data } = useGetPostsBySelf({});
 
   return (
     <Box>
@@ -15,24 +15,25 @@ export const PostListBySelf = () => {
         マイレポート一覧
       </Text>
       <Text fontSize="sm" mb={4}>
-        投稿をタップすると編集・削除できます
+        投稿をタップすると編集・削除できるようになります（実装予定）
       </Text>
-      {data.map((post) => {
-        const { id, isSolved, createdAt, problem } = post;
-        return (
-          <Box key={id} border="1px" borderRadius={4} mb={4} p={4}>
-            <HStack>
-              <Text fontWeight="bold">{problem.problemName}</Text>
-              <Spacer />
-              <Tag colorScheme={isSolved ? 'green' : 'red'}>
-                {isSolved ? '解決済' : '対応中'}
-              </Tag>
-            </HStack>
+      {data &&
+        data.map((post: PostResponseBase) => {
+          const { id, isSolved, createdAt, problem } = post;
+          return (
+            <Box key={id} border="1px" borderRadius={4} mb={4} p={4}>
+              <HStack>
+                <Text fontWeight="bold">{problem.name}</Text>
+                <Spacer />
+                <Tag colorScheme={isSolved ? 'green' : 'red'}>
+                  {isSolved ? '解決済' : '対応中'}
+                </Tag>
+              </HStack>
 
-            <Text>投稿日：{createdAt.toLocaleDateString()}</Text>
-          </Box>
-        );
-      })}
+              <Text>投稿日：{createdAt.toLocaleDateString()}</Text>
+            </Box>
+          );
+        })}
     </Box>
   );
 };
