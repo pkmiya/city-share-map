@@ -26,6 +26,7 @@ export const DetailsForm = ({ onBack }: Props) => {
   const { mutate: createPost } = usePostPost();
 
   const problem = formData.selectedProblemDetail?.name;
+  const description = formData.selectedProblemDetail?.description;
   const address = formData.location?.address;
   const fields = formData.selectedProblemDetail?.items ?? [];
 
@@ -59,16 +60,14 @@ export const DetailsForm = ({ onBack }: Props) => {
   const onSubmit = async () => {
     const fieldValues = getValues();
 
+    const items = fields.reduce((acc: Record<string, any>, field) => {
+      acc[field.name] = parseValue(field.typeId ?? 0, fieldValues[field.name]);
+      return acc;
+    }, {});
+
     createPost({
       postCreate: {
-        // NOTE: convert from array to dictionary
-        items: fields.reduce((acc: Record<string, any>, field) => {
-          acc[field.name] = parseValue(
-            field.typeId ?? 0,
-            fieldValues[field.name],
-          );
-          return acc;
-        }, {}),
+        items,
         latitude: formData.location?.coordinates?.lat ?? 0,
         longitude: formData.location?.coordinates?.lng ?? 0,
       },
@@ -86,11 +85,18 @@ export const DetailsForm = ({ onBack }: Props) => {
   );
 
   const parseValue = (typeId: number, value: any) => {
-    // NOTE: nullを返すとAPIリクエスト時にエラーになるため、nullを返さない場合がある
     if (value === undefined || value === null || value === '') {
-      // NOTE: 数値の場合は未入力時に 0 を返す
       if (typeId === typeIdMap[ItemTypeName.Number]) {
-        return 0;
+        return 0; // 数値の場合は0を返す
+      }
+      if (typeId === typeIdMap[ItemTypeName.Text]) {
+        return ''; // テキストの場合は空文字列を返す
+      }
+      if (typeId === typeIdMap[ItemTypeName.Boolean]) {
+        return false; // 真偽値の場合はfalseを返す
+      }
+      if (typeId === typeIdMap[ItemTypeName.DateTime]) {
+        return new Date().toISOString().replace('T', ' ').split('.')[0]; // 日時の場合は現在の日時を返す
       }
       return null;
     }
@@ -116,6 +122,7 @@ export const DetailsForm = ({ onBack }: Props) => {
     <Box>
       <Box fontSize="sm" mt={4}>
         <Text>テーマ: {problem}</Text>
+        <Text>テーマ詳細: {description}</Text>
         <Text>住所: {address}</Text>
       </Box>
 
@@ -166,14 +173,16 @@ export const DetailsForm = ({ onBack }: Props) => {
                     required: isRequired
                       ? `${field.name}を選択してください`
                       : false,
-                    validate: (value) => {
-                      const selectedDate = new Date(value);
-                      const currentDate = new Date();
-                      return (
-                        selectedDate < currentDate ||
-                        `${field.name}には過去の日付を選択してください`
-                      );
-                    },
+                    validate: isRequired
+                      ? (value) => {
+                          const selectedDate = new Date(value);
+                          const currentDate = new Date();
+                          return (
+                            selectedDate < currentDate ||
+                            `${field.name}には過去の日付を選択してください`
+                          );
+                        }
+                      : undefined,
                   })}
                 />
               )}

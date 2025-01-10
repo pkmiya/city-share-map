@@ -12,13 +12,14 @@
  * Do not edit the class manually.
  */
 
-import { exists, mapValues } from '../runtime';
 /**
  *
  * @export
  * @interface Items
  */
-export interface Items {}
+export interface Items {
+  value: number | string | boolean | Date;
+}
 
 /**
  * Check if a given object implements the Items interface.
