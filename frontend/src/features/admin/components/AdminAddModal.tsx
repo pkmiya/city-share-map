@@ -107,10 +107,9 @@ export const AdminAddModal = ({
                 <FormErrorMessage>{errors.password?.message}</FormErrorMessage>
               </FormControl>
 
+              {/* TODO: BUG: isActiveをFalseにしても、Trueでデータが送信されてしまう */}
               <FormControl>
-                <Switch defaultChecked {...register('isActive')}>
-                  利用可能にする
-                </Switch>
+                <Switch {...register('isActive')}>利用可能にする</Switch>
               </FormControl>
 
               <FormControl>
