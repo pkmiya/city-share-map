@@ -16,7 +16,7 @@ export const usePostPost = () => {
   const mutation = useMutation({
     mutationFn: async (req: CreatePostRequest) => {
       const res = await postProblemApi.createPost(req);
-      return res;
+      return res.id;
     },
     onError: (error) => {
       console.error(error);

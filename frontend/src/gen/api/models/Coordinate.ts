@@ -16,52 +16,52 @@ import { exists, mapValues } from '../runtime';
 /**
  *
  * @export
- * @interface NewPassword
+ * @interface Coordinate
  */
-export interface NewPassword {
+export interface Coordinate {
   /**
    *
    * @type {string}
-   * @memberof NewPassword
+   * @memberof Coordinate
    */
-  newPassword: string;
+  latitude: string;
   /**
    *
    * @type {string}
-   * @memberof NewPassword
+   * @memberof Coordinate
    */
-  token: string;
+  longitude: string;
 }
 
 /**
- * Check if a given object implements the NewPassword interface.
+ * Check if a given object implements the Coordinate interface.
  */
-export function instanceOfNewPassword(value: object): boolean {
+export function instanceOfCoordinate(value: object): boolean {
   let isInstance = true;
-  isInstance = isInstance && 'newPassword' in value;
-  isInstance = isInstance && 'token' in value;
+  isInstance = isInstance && 'latitude' in value;
+  isInstance = isInstance && 'longitude' in value;
 
   return isInstance;
 }
 
-export function NewPasswordFromJSON(json: any): NewPassword {
-  return NewPasswordFromJSONTyped(json, false);
+export function CoordinateFromJSON(json: any): Coordinate {
+  return CoordinateFromJSONTyped(json, false);
 }
 
-export function NewPasswordFromJSONTyped(
+export function CoordinateFromJSONTyped(
   json: any,
   ignoreDiscriminator: boolean,
-): NewPassword {
+): Coordinate {
   if (json === undefined || json === null) {
     return json;
   }
   return {
-    newPassword: json['new_password'],
-    token: json['token'],
+    latitude: json['latitude'],
+    longitude: json['longitude'],
   };
 }
 
-export function NewPasswordToJSON(value?: NewPassword | null): any {
+export function CoordinateToJSON(value?: Coordinate | null): any {
   if (value === undefined) {
     return undefined;
   }
@@ -69,7 +69,7 @@ export function NewPasswordToJSON(value?: NewPassword | null): any {
     return null;
   }
   return {
-    new_password: value.newPassword,
-    token: value.token,
+    latitude: value.latitude,
+    longitude: value.longitude,
   };
 }

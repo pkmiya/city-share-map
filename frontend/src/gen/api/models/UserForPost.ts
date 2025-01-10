@@ -16,41 +16,52 @@ import { exists, mapValues } from '../runtime';
 /**
  *
  * @export
- * @interface Msg
+ * @interface UserForPost
  */
-export interface Msg {
+export interface UserForPost {
   /**
    *
    * @type {string}
-   * @memberof Msg
+   * @memberof UserForPost
    */
-  msg: string;
+  id: string;
+  /**
+   *
+   * @type {string}
+   * @memberof UserForPost
+   */
+  name: string;
 }
 
 /**
- * Check if a given object implements the Msg interface.
+ * Check if a given object implements the UserForPost interface.
  */
-export function instanceOfMsg(value: object): boolean {
+export function instanceOfUserForPost(value: object): boolean {
   let isInstance = true;
-  isInstance = isInstance && 'msg' in value;
+  isInstance = isInstance && 'id' in value;
+  isInstance = isInstance && 'name' in value;
 
   return isInstance;
 }
 
-export function MsgFromJSON(json: any): Msg {
-  return MsgFromJSONTyped(json, false);
+export function UserForPostFromJSON(json: any): UserForPost {
+  return UserForPostFromJSONTyped(json, false);
 }
 
-export function MsgFromJSONTyped(json: any, ignoreDiscriminator: boolean): Msg {
+export function UserForPostFromJSONTyped(
+  json: any,
+  ignoreDiscriminator: boolean,
+): UserForPost {
   if (json === undefined || json === null) {
     return json;
   }
   return {
-    msg: json['msg'],
+    id: json['id'],
+    name: json['name'],
   };
 }
 
-export function MsgToJSON(value?: Msg | null): any {
+export function UserForPostToJSON(value?: UserForPost | null): any {
   if (value === undefined) {
     return undefined;
   }
@@ -58,6 +69,7 @@ export function MsgToJSON(value?: Msg | null): any {
     return null;
   }
   return {
-    msg: value.msg,
+    id: value.id,
+    name: value.name,
   };
 }

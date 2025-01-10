@@ -16,60 +16,60 @@ import { exists, mapValues } from '../runtime';
 /**
  *
  * @export
- * @interface ProblemUpdate
+ * @interface ProblemForPost
  */
-export interface ProblemUpdate {
+export interface ProblemForPost {
   /**
    *
-   * @type {string}
-   * @memberof ProblemUpdate
+   * @type {number}
+   * @memberof ProblemForPost
    */
-  description: string | null;
+  id: number;
   /**
    *
    * @type {boolean}
-   * @memberof ProblemUpdate
+   * @memberof ProblemForPost
    */
-  isOpen: boolean | null;
+  isOpen: boolean;
   /**
    *
    * @type {string}
-   * @memberof ProblemUpdate
+   * @memberof ProblemForPost
    */
-  name: string | null;
+  name: string;
 }
 
 /**
- * Check if a given object implements the ProblemUpdate interface.
+ * Check if a given object implements the ProblemForPost interface.
  */
-export function instanceOfProblemUpdate(value: object): boolean {
+export function instanceOfProblemForPost(value: object): boolean {
   let isInstance = true;
-  isInstance = isInstance && 'description' in value;
+  isInstance = isInstance && 'id' in value;
   isInstance = isInstance && 'isOpen' in value;
   isInstance = isInstance && 'name' in value;
 
   return isInstance;
 }
 
-export function ProblemUpdateFromJSON(json: any): ProblemUpdate {
-  return ProblemUpdateFromJSONTyped(json, false);
+export function ProblemForPostFromJSON(json: any): ProblemForPost {
+  return ProblemForPostFromJSONTyped(json, false);
 }
 
-export function ProblemUpdateFromJSONTyped(
+export function ProblemForPostFromJSONTyped(
   json: any,
   ignoreDiscriminator: boolean,
-): ProblemUpdate {
+): ProblemForPost {
   if (json === undefined || json === null) {
     return json;
   }
   return {
-    description: json['description'],
+    id: json['id'],
     isOpen: json['is_open'],
     name: json['name'],
   };
 }
 
-export function ProblemUpdateToJSON(value?: ProblemUpdate | null): any {
+export function ProblemForPostToJSON(value?: ProblemForPost | null): any {
   if (value === undefined) {
     return undefined;
   }
@@ -77,7 +77,7 @@ export function ProblemUpdateToJSON(value?: ProblemUpdate | null): any {
     return null;
   }
   return {
-    description: value.description,
+    id: value.id,
     is_open: value.isOpen,
     name: value.name,
   };

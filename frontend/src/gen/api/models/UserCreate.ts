@@ -42,13 +42,13 @@ export interface UserCreate {
    * @type {boolean}
    * @memberof UserCreate
    */
-  isActive?: boolean | null;
+  isActive?: boolean;
   /**
    *
    * @type {boolean}
    * @memberof UserCreate
    */
-  isSuperuser?: boolean | null;
+  isSuperuser?: boolean;
   /**
    *
    * @type {string}

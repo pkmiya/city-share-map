@@ -1,5 +1,38 @@
 components:
   schemas:
+    Body_swagger_login:
+      properties:
+        client_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Client Id
+        client_secret:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Client Secret
+        grant_type:
+          anyOf:
+          - pattern: password
+            type: string
+          - type: 'null'
+          title: Grant Type
+        password:
+          title: Password
+          type: string
+        scope:
+          default: ''
+          title: Scope
+          type: string
+        username:
+          title: Username
+          type: string
+      required:
+      - username
+      - password
+      title: Body_swagger_login
+      type: object
     CitizenUser:
       properties:
         id:
@@ -7,11 +40,15 @@ components:
           title: Id
           type: string
         is_active:
-          anyOf:
-          - type: boolean
-          - type: 'null'
           default: true
           title: Is Active
+          type: boolean
+        last_login:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          title: Last Login
         line_id:
           anyOf:
           - type: string
@@ -22,6 +59,8 @@ components:
           - type: string
           - type: 'null'
           title: Name
+      required:
+      - id
       title: CitizenUser
       type: object
     CitizenUserRead:
@@ -31,15 +70,15 @@ components:
           title: Id
           type: string
         is_active:
-          anyOf:
-          - type: boolean
-          - type: 'null'
           default: true
           title: Is Active
+          type: boolean
         last_login:
-          format: date-time
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
           title: Last Login
-          type: string
         line_id:
           anyOf:
           - type: string
@@ -54,9 +93,22 @@ components:
           title: Post Count
           type: integer
       required:
-      - last_login
+      - id
       - post_count
       title: CitizenUserRead
+      type: object
+    Coordinate:
+      properties:
+        latitude:
+          title: Latitude
+          type: string
+        longitude:
+          title: Longitude
+          type: string
+      required:
+      - latitude
+      - longitude
+      title: Coordinate
       type: object
     HTTPValidationError:
       properties:
@@ -80,30 +132,6 @@ components:
       - password
       title: LoginRequest
       type: object
-    Msg:
-      properties:
-        msg:
-          title: Msg
-          type: string
-      required:
-      - msg
-      title: Msg
-      type: object
-    NewPassword:
-      properties:
-        new_password:
-          maxLength: 40
-          minLength: 8
-          title: New Password
-          type: string
-        token:
-          title: Token
-          type: string
-      required:
-      - token
-      - new_password
-      title: NewPassword
-      type: object
     PostCreate:
       properties:
         is_solved:
@@ -111,6 +139,13 @@ components:
           title: Is Solved
           type: boolean
         items:
+          additionalProperties:
+            anyOf:
+            - type: integer
+            - type: string
+            - type: boolean
+            - format: date-time
+              type: string
           title: Items
           type: object
         latitude:
@@ -129,11 +164,174 @@ components:
       - items
       title: PostCreate
       type: object
+    PostMapResponse:
+      properties:
+        coodinate:
+          $ref: '#/components/schemas/Coordinate'
+        created_at:
+          format: date-time
+          title: Created At
+          type: string
+        descriptions:
+          anyOf:
+          - $ref: '#/components/schemas/ProblemMapResponse'
+          - type: 'null'
+        id:
+          format: uuid
+          title: Id
+          type: string
+        is_solved:
+          title: Is Solved
+          type: boolean
+        photo_field:
+          anyOf:
+          - $ref: '#/components/schemas/ProblemMapResponse'
+          - type: 'null'
+        problem:
+          $ref: '#/components/schemas/ProblemForPost'
+        updated_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          title: Updated At
+        updated_by:
+          anyOf:
+          - type: integer
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Updated By
+        user:
+          anyOf:
+          - $ref: '#/components/schemas/UserForPost'
+          - type: 'null'
+      required:
+      - id
+      - is_solved
+      - problem
+      - coodinate
+      - user
+      - created_at
+      - updated_at
+      - updated_by
+      - photo_field
+      - descriptions
+      title: PostMapResponse
+      type: object
+    PostResponse:
+      properties:
+        coodinate:
+          $ref: '#/components/schemas/Coordinate'
+        created_at:
+          format: date-time
+          title: Created At
+          type: string
+        id:
+          format: uuid
+          title: Id
+          type: string
+        is_solved:
+          title: Is Solved
+          type: boolean
+        items:
+          additionalProperties:
+            anyOf:
+            - type: integer
+            - type: string
+            - type: boolean
+            - format: date-time
+              type: string
+          title: Items
+          type: object
+        problem:
+          $ref: '#/components/schemas/ProblemForPost'
+        updated_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          title: Updated At
+        updated_by:
+          anyOf:
+          - type: integer
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Updated By
+        user:
+          anyOf:
+          - $ref: '#/components/schemas/UserForPost'
+          - type: 'null'
+      required:
+      - id
+      - is_solved
+      - problem
+      - coodinate
+      - user
+      - created_at
+      - updated_at
+      - updated_by
+      - items
+      title: PostResponse
+      type: object
+    PostResponseBase:
+      properties:
+        coodinate:
+          $ref: '#/components/schemas/Coordinate'
+        created_at:
+          format: date-time
+          title: Created At
+          type: string
+        id:
+          format: uuid
+          title: Id
+          type: string
+        is_solved:
+          title: Is Solved
+          type: boolean
+        problem:
+          $ref: '#/components/schemas/ProblemForPost'
+        updated_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          title: Updated At
+        updated_by:
+          anyOf:
+          - type: integer
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Updated By
+        user:
+          anyOf:
+          - $ref: '#/components/schemas/UserForPost'
+          - type: 'null'
+      required:
+      - id
+      - is_solved
+      - problem
+      - coodinate
+      - user
+      - created_at
+      - updated_at
+      - updated_by
+      title: PostResponseBase
+      type: object
     PostUpdate:
       properties:
         items:
           anyOf:
-          - type: object
+          - additionalProperties:
+              anyOf:
+              - type: integer
+              - type: string
+              - type: boolean
+              - format: date-time
+                type: string
+            type: object
           - type: 'null'
           title: Items
         latitude:
@@ -196,6 +394,23 @@ components:
       - items
       title: ProblemCreate
       type: object
+    ProblemForPost:
+      properties:
+        id:
+          title: Id
+          type: integer
+        is_open:
+          title: Is Open
+          type: boolean
+        name:
+          title: Name
+          type: string
+      required:
+      - id
+      - name
+      - is_open
+      title: ProblemForPost
+      type: object
     ProblemItemBase:
       properties:
         name:
@@ -229,6 +444,19 @@ components:
       required:
       - name
       title: ProblemItemCreate
+      type: object
+    ProblemMapResponse:
+      properties:
+        name:
+          title: Name
+          type: string
+        value:
+          title: Value
+          type: string
+      required:
+      - name
+      - value
+      title: ProblemMapResponse
       type: object
     ProblemRead:
       properties:
@@ -323,6 +551,10 @@ components:
           - type: string
           - type: 'null'
           title: Name
+      required:
+      - name
+      - is_open
+      - description
       title: ProblemUpdate
       type: object
     Token:
@@ -384,6 +616,8 @@ components:
           - type: 'null'
           default: false
           title: Is Superuser
+      required:
+      - id
       title: User
       type: object
     UserCreate:
@@ -399,26 +633,36 @@ components:
           title: Full Name
           type: string
         is_active:
-          anyOf:
-          - type: boolean
-          - type: 'null'
           default: true
           title: Is Active
+          type: boolean
         is_superuser:
-          anyOf:
-          - type: boolean
-          - type: 'null'
           default: false
           title: Is Superuser
+          type: boolean
         password:
           title: Password
           type: string
       required:
       - email
-      - department
-      - full_name
       - password
+      - full_name
+      - department
       title: UserCreate
+      type: object
+    UserForPost:
+      properties:
+        id:
+          format: uuid
+          title: Id
+          type: string
+        name:
+          title: Name
+          type: string
+      required:
+      - id
+      - name
+      title: UserForPost
       type: object
     UserToken:
       properties:
@@ -504,7 +748,7 @@ components:
       flows:
         password:
           scopes: {}
-          tokenUrl: /api/v1/login/
+          tokenUrl: /api/v1/login/swagger/
       type: oauth2
 info:
   title: fk-mitou-2024
@@ -738,23 +982,56 @@ paths:
       summary: Login
       tags:
       - login
-  /api/v1/login/password-recovery/{email}:
+  /api/v1/login/swagger/:
     post:
-      description: Password Recovery
-      operationId: recover_password
+      description: Token login, get an access token for future requests
+      operationId: swagger_login
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Body_swagger_login'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserToken'
+          description: Successful Response
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Swagger Login
+      tags:
+      - login
+  /api/v1/post_problem/detail/{problem_id}/{post_id}:
+    delete:
+      description: 投稿を削除
+      operationId: delete_post
       parameters:
       - in: path
-        name: email
+        name: problem_id
         required: true
         schema:
-          title: Email
+          title: Problem Id
+          type: integer
+      - in: path
+        name: post_id
+        required: true
+        schema:
+          format: uuid
+          title: Post Id
           type: string
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Msg'
+                $ref: '#/components/schemas/PostResponse'
           description: Successful Response
         '400':
           content:
@@ -762,25 +1039,75 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
           description: Validation Error
-      summary: Recover Password
+      security:
+      - OAuth2PasswordBearer: []
+      summary: Delete Post
       tags:
-      - login
-  /api/v1/login/reset-password/:
-    post:
-      description: Reset password
-      operationId: reset_password
+      - post_problem
+    get:
+      description: IDによる投稿の取得
+      operationId: get_post_by_id
+      parameters:
+      - in: path
+        name: problem_id
+        required: true
+        schema:
+          title: Problem Id
+          type: integer
+      - in: path
+        name: post_id
+        required: true
+        schema:
+          format: uuid
+          title: Post Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+          description: Successful Response
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - OAuth2PasswordBearer: []
+      summary: Get Post By Id
+      tags:
+      - post_problem
+    put:
+      description: 投稿を更新
+      operationId: update_post
+      parameters:
+      - in: path
+        name: problem_id
+        required: true
+        schema:
+          title: Problem Id
+          type: integer
+      - in: path
+        name: post_id
+        required: true
+        schema:
+          format: uuid
+          title: Post Id
+          type: string
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewPassword'
+              $ref: '#/components/schemas/PostUpdate'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Msg'
+                $ref: '#/components/schemas/PostResponse'
           description: Successful Response
         '400':
           content:
@@ -788,15 +1115,89 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
           description: Validation Error
-      summary: Reset Password
+      security:
+      - OAuth2PasswordBearer: []
+      summary: Update Post
       tags:
-      - login
-  /api/v1/post_problem/:
+      - post_problem
+  /api/v1/post_problem/detail/{problem_id}/{post_id}/solve:
+    patch:
+      description: 投稿を解決済みとしてマーク
+      operationId: mark_as_solved
+      parameters:
+      - in: path
+        name: problem_id
+        required: true
+        schema:
+          title: Problem Id
+          type: integer
+      - in: path
+        name: post_id
+        required: true
+        schema:
+          format: uuid
+          title: Post Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+          description: Successful Response
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - OAuth2PasswordBearer: []
+      summary: Mark As Solved
+      tags:
+      - post_problem
+  /api/v1/post_problem/detail/{problem_id}/{post_id}/unsolve:
+    patch:
+      description: 投稿を未解決としてマーク
+      operationId: mark_as_unsolved
+      parameters:
+      - in: path
+        name: problem_id
+        required: true
+        schema:
+          title: Problem Id
+          type: integer
+      - in: path
+        name: post_id
+        required: true
+        schema:
+          format: uuid
+          title: Post Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+          description: Successful Response
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - OAuth2PasswordBearer: []
+      summary: Mark As Unsolved
+      tags:
+      - post_problem
+  /api/v1/post_problem/map:
     get:
       description: '投稿の一覧を取得
 
         フィルタリングとページネーションをサポート'
-      operationId: list_posts_by_citizen
+      operationId: get_posts_map
       parameters:
       - in: query
         name: skip
@@ -851,8 +1252,8 @@ paths:
             application/json:
               schema:
                 items:
-                  type: object
-                title: Response List Posts By Citizen
+                  $ref: '#/components/schemas/PostMapResponse'
+                title: Response Get Posts Map
                 type: array
           description: Successful Response
         '400':
@@ -863,7 +1264,7 @@ paths:
           description: Validation Error
       security:
       - OAuth2PasswordBearer: []
-      summary: List Posts By Citizen
+      summary: Get Posts Map
       tags:
       - post_problem
   /api/v1/post_problem/me:
@@ -871,7 +1272,7 @@ paths:
       description: 'Userが投稿したレポートの一覧を取得
 
         フィルタリングとページネーションをサポート'
-      operationId: get_posts_me
+      operationId: get_posts_summary_me
       parameters:
       - in: query
         name: skip
@@ -903,14 +1304,22 @@ paths:
           - type: boolean
           - type: 'null'
           title: Is Open
+      - in: query
+        name: problem_id
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Problem Id
       responses:
         '200':
           content:
             application/json:
               schema:
                 items:
-                  type: object
-                title: Response Get Posts Me
+                  $ref: '#/components/schemas/PostResponseBase'
+                title: Response Get Posts Summary Me
                 type: array
           description: Successful Response
         '400':
@@ -921,7 +1330,82 @@ paths:
           description: Validation Error
       security:
       - OAuth2PasswordBearer: []
-      summary: Get Posts Me
+      summary: Get Posts Summary Me
+      tags:
+      - post_problem
+  /api/v1/post_problem/summary:
+    get:
+      description: '投稿の一覧を取得
+
+        フィルタリングとページネーションをサポート'
+      operationId: get_posts_summary
+      parameters:
+      - in: query
+        name: skip
+        required: false
+        schema:
+          default: 0
+          title: Skip
+          type: integer
+      - in: query
+        name: limit
+        required: false
+        schema:
+          default: 100
+          title: Limit
+          type: integer
+      - in: query
+        name: is_solved
+        required: false
+        schema:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Solved
+      - in: query
+        name: is_open
+        required: false
+        schema:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Open
+      - in: query
+        name: problem_id
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Problem Id
+      - in: query
+        name: user_id
+        required: false
+        schema:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: User Id
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/PostResponseBase'
+                title: Response Get Posts Summary
+                type: array
+          description: Successful Response
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - OAuth2PasswordBearer: []
+      summary: Get Posts Summary
       tags:
       - post_problem
   /api/v1/post_problem/{problem_id}:
@@ -946,8 +1430,7 @@ paths:
           content:
             application/json:
               schema:
-                title: Response Create Post
-                type: string
+                $ref: '#/components/schemas/PostResponse'
           description: Successful Response
         '400':
           content:
@@ -958,193 +1441,6 @@ paths:
       security:
       - OAuth2PasswordBearer: []
       summary: Create Post
-      tags:
-      - post_problem
-  /api/v1/post_problem/{problem_id}/{post_id}:
-    delete:
-      description: 投稿を削除
-      operationId: delete_post
-      parameters:
-      - in: path
-        name: problem_id
-        required: true
-        schema:
-          title: Problem Id
-          type: integer
-      - in: path
-        name: post_id
-        required: true
-        schema:
-          format: uuid
-          title: Post Id
-          type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema: {}
-          description: Successful Response
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-          description: Validation Error
-      security:
-      - OAuth2PasswordBearer: []
-      summary: Delete Post
-      tags:
-      - post_problem
-    get:
-      description: IDによる投稿の取得
-      operationId: get_post_by_id
-      parameters:
-      - in: path
-        name: problem_id
-        required: true
-        schema:
-          title: Problem Id
-          type: integer
-      - in: path
-        name: post_id
-        required: true
-        schema:
-          format: uuid
-          title: Post Id
-          type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                title: Response Get Post By Id
-                type: object
-          description: Successful Response
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-          description: Validation Error
-      security:
-      - OAuth2PasswordBearer: []
-      summary: Get Post By Id
-      tags:
-      - post_problem
-    put:
-      description: 投稿を更新
-      operationId: update_post
-      parameters:
-      - in: path
-        name: problem_id
-        required: true
-        schema:
-          title: Problem Id
-          type: integer
-      - in: path
-        name: post_id
-        required: true
-        schema:
-          format: uuid
-          title: Post Id
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PostUpdate'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                title: Response Update Post
-                type: object
-          description: Successful Response
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-          description: Validation Error
-      security:
-      - OAuth2PasswordBearer: []
-      summary: Update Post
-      tags:
-      - post_problem
-  /api/v1/post_problem/{problem_id}/{post_id}/solve:
-    patch:
-      description: 投稿を解決済みとしてマーク
-      operationId: mark_as_solved
-      parameters:
-      - in: path
-        name: problem_id
-        required: true
-        schema:
-          title: Problem Id
-          type: integer
-      - in: path
-        name: post_id
-        required: true
-        schema:
-          format: uuid
-          title: Post Id
-          type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                title: Response Mark As Solved
-                type: object
-          description: Successful Response
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-          description: Validation Error
-      security:
-      - OAuth2PasswordBearer: []
-      summary: Mark As Solved
-      tags:
-      - post_problem
-  /api/v1/post_problem/{problem_id}/{post_id}/unsolve:
-    patch:
-      description: 投稿を未解決としてマーク
-      operationId: mark_as_unsolved
-      parameters:
-      - in: path
-        name: problem_id
-        required: true
-        schema:
-          title: Problem Id
-          type: integer
-      - in: path
-        name: post_id
-        required: true
-        schema:
-          format: uuid
-          title: Post Id
-          type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                title: Response Mark As Unsolved
-                type: object
-          description: Successful Response
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-          description: Validation Error
-      security:
-      - OAuth2PasswordBearer: []
-      summary: Mark As Unsolved
       tags:
       - post_problem
   /api/v1/problem/:

@@ -12,13 +12,29 @@
  * Do not edit the class manually.
  */
 
-import {
-  getListOfPostsByAdminResponse,
-  getListOfPostsByCitizenResponse,
-} from '@/features/post/types';
-import type { PostCreate, PostUpdate } from '../models';
-import { PostCreateToJSON, PostUpdateToJSON } from '../models';
 import * as runtime from '../runtime';
+import type {
+  HTTPValidationError,
+  PostCreate,
+  PostMapResponse,
+  PostResponse,
+  PostResponseBase,
+  PostUpdate,
+} from '../models';
+import {
+  HTTPValidationErrorFromJSON,
+  HTTPValidationErrorToJSON,
+  PostCreateFromJSON,
+  PostCreateToJSON,
+  PostMapResponseFromJSON,
+  PostMapResponseToJSON,
+  PostResponseFromJSON,
+  PostResponseToJSON,
+  PostResponseBaseFromJSON,
+  PostResponseBaseToJSON,
+  PostUpdateFromJSON,
+  PostUpdateToJSON,
+} from '../models';
 
 export interface CreatePostRequest {
   problemId: number;
@@ -35,20 +51,30 @@ export interface GetPostByIdRequest {
   postId: string;
 }
 
-export interface GetPostsMeRequest {
-  skip?: number;
-  limit?: number;
-  isSolved?: boolean | null;
-  isOpen?: boolean | null;
-}
-
-export interface ListPostsByCitizenRequest {
+export interface GetPostsMapRequest {
   skip?: number;
   limit?: number;
   isSolved?: boolean | null;
   isOpen?: boolean | null;
   problemId?: number | null;
   userId?: string | null;
+}
+
+export interface GetPostsSummaryRequest {
+  skip?: number;
+  limit?: number;
+  isSolved?: boolean | null;
+  isOpen?: boolean | null;
+  problemId?: number | null;
+  userId?: string | null;
+}
+
+export interface GetPostsSummaryMeRequest {
+  skip?: number;
+  limit?: number;
+  isSolved?: boolean | null;
+  isOpen?: boolean | null;
+  problemId?: number | null;
 }
 
 export interface MarkAsSolvedRequest {
@@ -86,7 +112,7 @@ export interface PostProblemApiInterface {
   createPostRaw(
     requestParameters: CreatePostRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<runtime.ApiResponse<string>>;
+  ): Promise<runtime.ApiResponse<PostResponse>>;
 
   /**
    * 新しい投稿を作成
@@ -95,7 +121,7 @@ export interface PostProblemApiInterface {
   createPost(
     requestParameters: CreatePostRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<string>;
+  ): Promise<PostResponse>;
 
   /**
    * 投稿を削除
@@ -109,7 +135,7 @@ export interface PostProblemApiInterface {
   deletePostRaw(
     requestParameters: DeletePostRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<runtime.ApiResponse<any>>;
+  ): Promise<runtime.ApiResponse<PostResponse>>;
 
   /**
    * 投稿を削除
@@ -118,7 +144,7 @@ export interface PostProblemApiInterface {
   deletePost(
     requestParameters: DeletePostRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<any>;
+  ): Promise<PostResponse>;
 
   /**
    * IDによる投稿の取得
@@ -132,7 +158,7 @@ export interface PostProblemApiInterface {
   getPostByIdRaw(
     requestParameters: GetPostByIdRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<runtime.ApiResponse<object>>;
+  ): Promise<runtime.ApiResponse<PostResponse>>;
 
   /**
    * IDによる投稿の取得
@@ -141,36 +167,11 @@ export interface PostProblemApiInterface {
   getPostById(
     requestParameters: GetPostByIdRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<object>;
-
-  /**
-   * Userが投稿したレポートの一覧を取得 フィルタリングとページネーションをサポート
-   * @summary Get Posts Me
-   * @param {number} [skip]
-   * @param {number} [limit]
-   * @param {boolean} [isSolved]
-   * @param {boolean} [isOpen]
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof PostProblemApiInterface
-   */
-  getPostsMeRaw(
-    requestParameters: GetPostsMeRequest,
-    initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<runtime.ApiResponse<Array<object>>>;
-
-  /**
-   * Userが投稿したレポートの一覧を取得 フィルタリングとページネーションをサポート
-   * Get Posts Me
-   */
-  getPostsMe(
-    requestParameters: GetPostsMeRequest,
-    initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<Array<object>>;
+  ): Promise<PostResponse>;
 
   /**
    * 投稿の一覧を取得 フィルタリングとページネーションをサポート
-   * @summary List Posts By Citizen
+   * @summary Get Posts Map
    * @param {number} [skip]
    * @param {number} [limit]
    * @param {boolean} [isSolved]
@@ -181,19 +182,72 @@ export interface PostProblemApiInterface {
    * @throws {RequiredError}
    * @memberof PostProblemApiInterface
    */
-  listPostsByCitizenRaw(
-    requestParameters: ListPostsByCitizenRequest,
+  getPostsMapRaw(
+    requestParameters: GetPostsMapRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<runtime.ApiResponse<getListOfPostsByAdminResponse>>;
+  ): Promise<runtime.ApiResponse<Array<PostMapResponse>>>;
 
   /**
    * 投稿の一覧を取得 フィルタリングとページネーションをサポート
-   * List Posts By Citizen
+   * Get Posts Map
    */
-  listPostsByCitizen(
-    requestParameters: ListPostsByCitizenRequest,
+  getPostsMap(
+    requestParameters: GetPostsMapRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<getListOfPostsByAdminResponse>;
+  ): Promise<Array<PostMapResponse>>;
+
+  /**
+   * 投稿の一覧を取得 フィルタリングとページネーションをサポート
+   * @summary Get Posts Summary
+   * @param {number} [skip]
+   * @param {number} [limit]
+   * @param {boolean} [isSolved]
+   * @param {boolean} [isOpen]
+   * @param {number} [problemId]
+   * @param {string} [userId]
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof PostProblemApiInterface
+   */
+  getPostsSummaryRaw(
+    requestParameters: GetPostsSummaryRequest,
+    initOverrides?: RequestInit | runtime.InitOverrideFunction,
+  ): Promise<runtime.ApiResponse<Array<PostResponseBase>>>;
+
+  /**
+   * 投稿の一覧を取得 フィルタリングとページネーションをサポート
+   * Get Posts Summary
+   */
+  getPostsSummary(
+    requestParameters: GetPostsSummaryRequest,
+    initOverrides?: RequestInit | runtime.InitOverrideFunction,
+  ): Promise<Array<PostResponseBase>>;
+
+  /**
+   * Userが投稿したレポートの一覧を取得 フィルタリングとページネーションをサポート
+   * @summary Get Posts Summary Me
+   * @param {number} [skip]
+   * @param {number} [limit]
+   * @param {boolean} [isSolved]
+   * @param {boolean} [isOpen]
+   * @param {number} [problemId]
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof PostProblemApiInterface
+   */
+  getPostsSummaryMeRaw(
+    requestParameters: GetPostsSummaryMeRequest,
+    initOverrides?: RequestInit | runtime.InitOverrideFunction,
+  ): Promise<runtime.ApiResponse<Array<PostResponseBase>>>;
+
+  /**
+   * Userが投稿したレポートの一覧を取得 フィルタリングとページネーションをサポート
+   * Get Posts Summary Me
+   */
+  getPostsSummaryMe(
+    requestParameters: GetPostsSummaryMeRequest,
+    initOverrides?: RequestInit | runtime.InitOverrideFunction,
+  ): Promise<Array<PostResponseBase>>;
 
   /**
    * 投稿を解決済みとしてマーク
@@ -207,7 +261,7 @@ export interface PostProblemApiInterface {
   markAsSolvedRaw(
     requestParameters: MarkAsSolvedRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<runtime.ApiResponse<object>>;
+  ): Promise<runtime.ApiResponse<PostResponse>>;
 
   /**
    * 投稿を解決済みとしてマーク
@@ -216,7 +270,7 @@ export interface PostProblemApiInterface {
   markAsSolved(
     requestParameters: MarkAsSolvedRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<object>;
+  ): Promise<PostResponse>;
 
   /**
    * 投稿を未解決としてマーク
@@ -230,7 +284,7 @@ export interface PostProblemApiInterface {
   markAsUnsolvedRaw(
     requestParameters: MarkAsUnsolvedRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<runtime.ApiResponse<object>>;
+  ): Promise<runtime.ApiResponse<PostResponse>>;
 
   /**
    * 投稿を未解決としてマーク
@@ -239,7 +293,7 @@ export interface PostProblemApiInterface {
   markAsUnsolved(
     requestParameters: MarkAsUnsolvedRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<object>;
+  ): Promise<PostResponse>;
 
   /**
    * 投稿を更新
@@ -254,7 +308,7 @@ export interface PostProblemApiInterface {
   updatePostRaw(
     requestParameters: UpdatePostRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<runtime.ApiResponse<object>>;
+  ): Promise<runtime.ApiResponse<PostResponse>>;
 
   /**
    * 投稿を更新
@@ -263,7 +317,7 @@ export interface PostProblemApiInterface {
   updatePost(
     requestParameters: UpdatePostRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<object>;
+  ): Promise<PostResponse>;
 }
 
 /**
@@ -280,7 +334,7 @@ export class PostProblemApi
   async createPostRaw(
     requestParameters: CreatePostRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<runtime.ApiResponse<string>> {
+  ): Promise<runtime.ApiResponse<PostResponse>> {
     if (
       requestParameters.problemId === null ||
       requestParameters.problemId === undefined
@@ -329,11 +383,9 @@ export class PostProblemApi
       initOverrides,
     );
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<string>(response);
-    } else {
-      return new runtime.TextApiResponse(response) as any;
-    }
+    return new runtime.JSONApiResponse(response, (jsonValue) =>
+      PostResponseFromJSON(jsonValue),
+    );
   }
 
   /**
@@ -343,7 +395,7 @@ export class PostProblemApi
   async createPost(
     requestParameters: CreatePostRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<string> {
+  ): Promise<PostResponse> {
     const response = await this.createPostRaw(requestParameters, initOverrides);
     return await response.value();
   }
@@ -355,7 +407,7 @@ export class PostProblemApi
   async deletePostRaw(
     requestParameters: DeletePostRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<runtime.ApiResponse<any>> {
+  ): Promise<runtime.ApiResponse<PostResponse>> {
     if (
       requestParameters.problemId === null ||
       requestParameters.problemId === undefined
@@ -390,7 +442,7 @@ export class PostProblemApi
 
     const response = await this.request(
       {
-        path: `/api/v1/post_problem/{problem_id}/{post_id}`
+        path: `/api/v1/post_problem/detail/{problem_id}/{post_id}`
           .replace(
             `{${'problem_id'}}`,
             encodeURIComponent(String(requestParameters.problemId)),
@@ -406,11 +458,9 @@ export class PostProblemApi
       initOverrides,
     );
 
-    if (this.isJsonMime(response.headers.get('content-type'))) {
-      return new runtime.JSONApiResponse<any>(response);
-    } else {
-      return new runtime.TextApiResponse(response) as any;
-    }
+    return new runtime.JSONApiResponse(response, (jsonValue) =>
+      PostResponseFromJSON(jsonValue),
+    );
   }
 
   /**
@@ -420,7 +470,7 @@ export class PostProblemApi
   async deletePost(
     requestParameters: DeletePostRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<any> {
+  ): Promise<PostResponse> {
     const response = await this.deletePostRaw(requestParameters, initOverrides);
     return await response.value();
   }
@@ -432,7 +482,7 @@ export class PostProblemApi
   async getPostByIdRaw(
     requestParameters: GetPostByIdRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<runtime.ApiResponse<object>> {
+  ): Promise<runtime.ApiResponse<PostResponse>> {
     if (
       requestParameters.problemId === null ||
       requestParameters.problemId === undefined
@@ -467,7 +517,7 @@ export class PostProblemApi
 
     const response = await this.request(
       {
-        path: `/api/v1/post_problem/{problem_id}/{post_id}`
+        path: `/api/v1/post_problem/detail/{problem_id}/{post_id}`
           .replace(
             `{${'problem_id'}}`,
             encodeURIComponent(String(requestParameters.problemId)),
@@ -483,7 +533,9 @@ export class PostProblemApi
       initOverrides,
     );
 
-    return new runtime.JSONApiResponse<any>(response);
+    return new runtime.JSONApiResponse(response, (jsonValue) =>
+      PostResponseFromJSON(jsonValue),
+    );
   }
 
   /**
@@ -493,7 +545,7 @@ export class PostProblemApi
   async getPostById(
     requestParameters: GetPostByIdRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<object> {
+  ): Promise<PostResponse> {
     const response = await this.getPostByIdRaw(
       requestParameters,
       initOverrides,
@@ -502,74 +554,13 @@ export class PostProblemApi
   }
 
   /**
-   * Userが投稿したレポートの一覧を取得 フィルタリングとページネーションをサポート
-   * Get Posts Me
-   */
-  async getPostsMeRaw(
-    requestParameters: GetPostsMeRequest,
-    initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<runtime.ApiResponse<Array<object>>> {
-    const queryParameters: any = {};
-
-    if (requestParameters.skip !== undefined) {
-      queryParameters['skip'] = requestParameters.skip;
-    }
-
-    if (requestParameters.limit !== undefined) {
-      queryParameters['limit'] = requestParameters.limit;
-    }
-
-    if (requestParameters.isSolved !== undefined) {
-      queryParameters['is_solved'] = requestParameters.isSolved;
-    }
-
-    if (requestParameters.isOpen !== undefined) {
-      queryParameters['is_open'] = requestParameters.isOpen;
-    }
-
-    const headerParameters: runtime.HTTPHeaders = {};
-
-    if (this.configuration && this.configuration.accessToken) {
-      // oauth required
-      headerParameters['Authorization'] = await this.configuration.accessToken(
-        'OAuth2PasswordBearer',
-        [],
-      );
-    }
-
-    const response = await this.request(
-      {
-        path: `/api/v1/post_problem/me`,
-        method: 'GET',
-        headers: headerParameters,
-        query: queryParameters,
-      },
-      initOverrides,
-    );
-
-    return new runtime.JSONApiResponse<any>(response);
-  }
-
-  /**
-   * Userが投稿したレポートの一覧を取得 フィルタリングとページネーションをサポート
-   * Get Posts Me
-   */
-  async getPostsMe(
-    requestParameters: GetPostsMeRequest = {},
-    initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<Array<object>> {
-    const response = await this.getPostsMeRaw(requestParameters, initOverrides);
-    return await response.value();
-  }
-
-  /**
    * 投稿の一覧を取得 フィルタリングとページネーションをサポート
-   * List Posts By Citizen
+   * Get Posts Map
    */
-  async listPostsByCitizenRaw(
-    requestParameters: ListPostsByCitizenRequest,
+  async getPostsMapRaw(
+    requestParameters: GetPostsMapRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<runtime.ApiResponse<getListOfPostsByAdminResponse>> {
+  ): Promise<runtime.ApiResponse<Array<PostMapResponse>>> {
     const queryParameters: any = {};
 
     if (requestParameters.skip !== undefined) {
@@ -608,7 +599,7 @@ export class PostProblemApi
 
     const response = await this.request(
       {
-        path: `/api/v1/post_problem/`,
+        path: `/api/v1/post_problem/map`,
         method: 'GET',
         headers: headerParameters,
         query: queryParameters,
@@ -616,18 +607,164 @@ export class PostProblemApi
       initOverrides,
     );
 
-    return new runtime.JSONApiResponse<any>(response);
+    return new runtime.JSONApiResponse(response, (jsonValue) =>
+      jsonValue.map(PostMapResponseFromJSON),
+    );
   }
 
   /**
    * 投稿の一覧を取得 フィルタリングとページネーションをサポート
-   * List Posts By Citizen
+   * Get Posts Map
    */
-  async listPostsByCitizen(
-    requestParameters: ListPostsByCitizenRequest = {},
+  async getPostsMap(
+    requestParameters: GetPostsMapRequest = {},
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<getListOfPostsByAdminResponse> {
-    const response = await this.listPostsByCitizenRaw(
+  ): Promise<Array<PostMapResponse>> {
+    const response = await this.getPostsMapRaw(
+      requestParameters,
+      initOverrides,
+    );
+    return await response.value();
+  }
+
+  /**
+   * 投稿の一覧を取得 フィルタリングとページネーションをサポート
+   * Get Posts Summary
+   */
+  async getPostsSummaryRaw(
+    requestParameters: GetPostsSummaryRequest,
+    initOverrides?: RequestInit | runtime.InitOverrideFunction,
+  ): Promise<runtime.ApiResponse<Array<PostResponseBase>>> {
+    const queryParameters: any = {};
+
+    if (requestParameters.skip !== undefined) {
+      queryParameters['skip'] = requestParameters.skip;
+    }
+
+    if (requestParameters.limit !== undefined) {
+      queryParameters['limit'] = requestParameters.limit;
+    }
+
+    if (requestParameters.isSolved !== undefined) {
+      queryParameters['is_solved'] = requestParameters.isSolved;
+    }
+
+    if (requestParameters.isOpen !== undefined) {
+      queryParameters['is_open'] = requestParameters.isOpen;
+    }
+
+    if (requestParameters.problemId !== undefined) {
+      queryParameters['problem_id'] = requestParameters.problemId;
+    }
+
+    if (requestParameters.userId !== undefined) {
+      queryParameters['user_id'] = requestParameters.userId;
+    }
+
+    const headerParameters: runtime.HTTPHeaders = {};
+
+    if (this.configuration && this.configuration.accessToken) {
+      // oauth required
+      headerParameters['Authorization'] = await this.configuration.accessToken(
+        'OAuth2PasswordBearer',
+        [],
+      );
+    }
+
+    const response = await this.request(
+      {
+        path: `/api/v1/post_problem/summary`,
+        method: 'GET',
+        headers: headerParameters,
+        query: queryParameters,
+      },
+      initOverrides,
+    );
+
+    return new runtime.JSONApiResponse(response, (jsonValue) =>
+      jsonValue.map(PostResponseBaseFromJSON),
+    );
+  }
+
+  /**
+   * 投稿の一覧を取得 フィルタリングとページネーションをサポート
+   * Get Posts Summary
+   */
+  async getPostsSummary(
+    requestParameters: GetPostsSummaryRequest = {},
+    initOverrides?: RequestInit | runtime.InitOverrideFunction,
+  ): Promise<Array<PostResponseBase>> {
+    const response = await this.getPostsSummaryRaw(
+      requestParameters,
+      initOverrides,
+    );
+    return await response.value();
+  }
+
+  /**
+   * Userが投稿したレポートの一覧を取得 フィルタリングとページネーションをサポート
+   * Get Posts Summary Me
+   */
+  async getPostsSummaryMeRaw(
+    requestParameters: GetPostsSummaryMeRequest,
+    initOverrides?: RequestInit | runtime.InitOverrideFunction,
+  ): Promise<runtime.ApiResponse<Array<PostResponseBase>>> {
+    const queryParameters: any = {};
+
+    if (requestParameters.skip !== undefined) {
+      queryParameters['skip'] = requestParameters.skip;
+    }
+
+    if (requestParameters.limit !== undefined) {
+      queryParameters['limit'] = requestParameters.limit;
+    }
+
+    if (requestParameters.isSolved !== undefined) {
+      queryParameters['is_solved'] = requestParameters.isSolved;
+    }
+
+    if (requestParameters.isOpen !== undefined) {
+      queryParameters['is_open'] = requestParameters.isOpen;
+    }
+
+    if (requestParameters.problemId !== undefined) {
+      queryParameters['problem_id'] = requestParameters.problemId;
+    }
+
+    const headerParameters: runtime.HTTPHeaders = {};
+
+    if (this.configuration && this.configuration.accessToken) {
+      // oauth required
+      headerParameters['Authorization'] = await this.configuration.accessToken(
+        'OAuth2PasswordBearer',
+        [],
+      );
+    }
+
+    const response = await this.request(
+      {
+        path: `/api/v1/post_problem/me`,
+        method: 'GET',
+        headers: headerParameters,
+        query: queryParameters,
+      },
+      initOverrides,
+    );
+
+    return new runtime.JSONApiResponse(response, (jsonValue) =>
+      jsonValue.map(PostResponseBaseFromJSON),
+    );
+  }
+
+  /**
+   * Userが投稿したレポートの一覧を取得 フィルタリングとページネーションをサポート
+   * Get Posts Summary Me
+   */
+  async getPostsSummaryMe(
+    requestParameters: GetPostsSummaryMeRequest = {},
+    initOverrides?: RequestInit | runtime.InitOverrideFunction,
+  ): Promise<Array<PostResponseBase>> {
+    const response = await this.getPostsSummaryMeRaw(
       requestParameters,
       initOverrides,
     );
@@ -641,7 +778,7 @@ export class PostProblemApi
   async markAsSolvedRaw(
     requestParameters: MarkAsSolvedRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<runtime.ApiResponse<object>> {
+  ): Promise<runtime.ApiResponse<PostResponse>> {
     if (
       requestParameters.problemId === null ||
       requestParameters.problemId === undefined
@@ -676,7 +813,7 @@ export class PostProblemApi
 
     const response = await this.request(
       {
-        path: `/api/v1/post_problem/{problem_id}/{post_id}/solve`
+        path: `/api/v1/post_problem/detail/{problem_id}/{post_id}/solve`
           .replace(
             `{${'problem_id'}}`,
             encodeURIComponent(String(requestParameters.problemId)),
@@ -692,7 +829,9 @@ export class PostProblemApi
       initOverrides,
     );
 
-    return new runtime.JSONApiResponse<any>(response);
+    return new runtime.JSONApiResponse(response, (jsonValue) =>
+      PostResponseFromJSON(jsonValue),
+    );
   }
 
   /**
@@ -702,7 +841,7 @@ export class PostProblemApi
   async markAsSolved(
     requestParameters: MarkAsSolvedRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<object> {
+  ): Promise<PostResponse> {
     const response = await this.markAsSolvedRaw(
       requestParameters,
       initOverrides,
@@ -717,7 +856,7 @@ export class PostProblemApi
   async markAsUnsolvedRaw(
     requestParameters: MarkAsUnsolvedRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<runtime.ApiResponse<object>> {
+  ): Promise<runtime.ApiResponse<PostResponse>> {
     if (
       requestParameters.problemId === null ||
       requestParameters.problemId === undefined
@@ -752,7 +891,7 @@ export class PostProblemApi
 
     const response = await this.request(
       {
-        path: `/api/v1/post_problem/{problem_id}/{post_id}/unsolve`
+        path: `/api/v1/post_problem/detail/{problem_id}/{post_id}/unsolve`
           .replace(
             `{${'problem_id'}}`,
             encodeURIComponent(String(requestParameters.problemId)),
@@ -768,7 +907,9 @@ export class PostProblemApi
       initOverrides,
     );
 
-    return new runtime.JSONApiResponse<any>(response);
+    return new runtime.JSONApiResponse(response, (jsonValue) =>
+      PostResponseFromJSON(jsonValue),
+    );
   }
 
   /**
@@ -778,7 +919,7 @@ export class PostProblemApi
   async markAsUnsolved(
     requestParameters: MarkAsUnsolvedRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<object> {
+  ): Promise<PostResponse> {
     const response = await this.markAsUnsolvedRaw(
       requestParameters,
       initOverrides,
@@ -793,7 +934,7 @@ export class PostProblemApi
   async updatePostRaw(
     requestParameters: UpdatePostRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<runtime.ApiResponse<object>> {
+  ): Promise<runtime.ApiResponse<PostResponse>> {
     if (
       requestParameters.problemId === null ||
       requestParameters.problemId === undefined
@@ -840,7 +981,7 @@ export class PostProblemApi
 
     const response = await this.request(
       {
-        path: `/api/v1/post_problem/{problem_id}/{post_id}`
+        path: `/api/v1/post_problem/detail/{problem_id}/{post_id}`
           .replace(
             `{${'problem_id'}}`,
             encodeURIComponent(String(requestParameters.problemId)),
@@ -857,7 +998,9 @@ export class PostProblemApi
       initOverrides,
     );
 
-    return new runtime.JSONApiResponse<any>(response);
+    return new runtime.JSONApiResponse(response, (jsonValue) =>
+      PostResponseFromJSON(jsonValue),
+    );
   }
 
   /**
@@ -867,7 +1010,7 @@ export class PostProblemApi
   async updatePost(
     requestParameters: UpdatePostRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<object> {
+  ): Promise<PostResponse> {
     const response = await this.updatePostRaw(requestParameters, initOverrides);
     return await response.value();
   }
