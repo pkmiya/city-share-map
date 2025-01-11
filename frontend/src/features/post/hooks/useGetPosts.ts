@@ -8,7 +8,7 @@ import { getListOfPostsRequest } from '../types';
 export const useGetPosts = (req: getListOfPostsRequest) => {
   const query = useQuery({
     queryFn: async () => {
-      const res = await postProblemApi.listPostsByCitizen(req);
+      const res = await postProblemApi.getPostsSummary(req);
       return res;
     },
     queryKey: [postKeys.posts, req],

@@ -13,18 +13,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import type { Items } from './Items';
+import { ItemsFromJSON, ItemsToJSON } from './Items';
 import type { Latitude } from './Latitude';
-import {
-  LatitudeFromJSON,
-  LatitudeFromJSONTyped,
-  LatitudeToJSON,
-} from './Latitude';
+import { LatitudeFromJSON, LatitudeToJSON } from './Latitude';
 import type { Longitude } from './Longitude';
-import {
-  LongitudeFromJSON,
-  LongitudeFromJSONTyped,
-  LongitudeToJSON,
-} from './Longitude';
+import { LongitudeFromJSON, LongitudeToJSON } from './Longitude';
 
 /**
  *
@@ -40,10 +34,10 @@ export interface PostCreate {
   isSolved?: boolean;
   /**
    *
-   * @type {object}
+   * @type {{ [key: string]: Items; }}
    * @memberof PostCreate
    */
-  items: object;
+  items: { [key: string]: Items } | null;
   /**
    *
    * @type {Latitude}
@@ -83,7 +77,7 @@ export function PostCreateFromJSONTyped(
   }
   return {
     isSolved: !exists(json, 'is_solved') ? undefined : json['is_solved'],
-    items: json['items'],
+    items: mapValues(json['items'], ItemsFromJSON),
     latitude: LatitudeFromJSON(json['latitude']),
     longitude: LongitudeFromJSON(json['longitude']),
   };
@@ -98,7 +92,7 @@ export function PostCreateToJSON(value?: PostCreate | null): any {
   }
   return {
     is_solved: value.isSolved,
-    items: value.items,
+    items: mapValues(value.items, ItemsToJSON),
     latitude: LatitudeToJSON(value.latitude),
     longitude: LongitudeToJSON(value.longitude),
   };

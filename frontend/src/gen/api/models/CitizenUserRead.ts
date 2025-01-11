@@ -24,19 +24,19 @@ export interface CitizenUserRead {
    * @type {string}
    * @memberof CitizenUserRead
    */
-  id?: string;
+  id: string;
   /**
    *
    * @type {boolean}
    * @memberof CitizenUserRead
    */
-  isActive?: boolean | null;
+  isActive?: boolean;
   /**
    *
    * @type {Date}
    * @memberof CitizenUserRead
    */
-  lastLogin: Date;
+  lastLogin?: Date | null;
   /**
    *
    * @type {string}
@@ -62,7 +62,7 @@ export interface CitizenUserRead {
  */
 export function instanceOfCitizenUserRead(value: object): boolean {
   let isInstance = true;
-  isInstance = isInstance && 'lastLogin' in value;
+  isInstance = isInstance && 'id' in value;
   isInstance = isInstance && 'postCount' in value;
 
   return isInstance;
@@ -80,9 +80,13 @@ export function CitizenUserReadFromJSONTyped(
     return json;
   }
   return {
-    id: !exists(json, 'id') ? undefined : json['id'],
+    id: json['id'],
     isActive: !exists(json, 'is_active') ? undefined : json['is_active'],
-    lastLogin: new Date(json['last_login']),
+    lastLogin: !exists(json, 'last_login')
+      ? undefined
+      : json['last_login'] === null
+        ? null
+        : new Date(json['last_login']),
     lineId: !exists(json, 'line_id') ? undefined : json['line_id'],
     name: !exists(json, 'name') ? undefined : json['name'],
     postCount: json['post_count'],
@@ -99,7 +103,12 @@ export function CitizenUserReadToJSON(value?: CitizenUserRead | null): any {
   return {
     id: value.id,
     is_active: value.isActive,
-    last_login: value.lastLogin.toISOString(),
+    last_login:
+      value.lastLogin === undefined
+        ? undefined
+        : value.lastLogin === null
+          ? null
+          : value.lastLogin.toISOString(),
     line_id: value.lineId,
     name: value.name,
     post_count: value.postCount,

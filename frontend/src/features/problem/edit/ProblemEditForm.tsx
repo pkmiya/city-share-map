@@ -65,7 +65,15 @@ export const EditProblemForm = ({
         <Text fontSize="x-large" fontWeight="bold" mb={4}>
           課題の編集
         </Text>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form
+          onSubmit={handleSubmit((data) =>
+            onSubmit({
+              ...data,
+              description: data.description ?? null,
+              isOpen: data.isOpen ?? false,
+            }),
+          )}
+        >
           <VStack align="stretch" spacing={4}>
             <FormControl isInvalid={!!errors.name}>
               <FormLabel fontWeight="bold">課題の名前</FormLabel>

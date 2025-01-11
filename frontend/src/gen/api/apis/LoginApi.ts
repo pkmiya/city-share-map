@@ -13,22 +13,12 @@
  */
 
 import * as runtime from '../runtime';
-import type {
-  HTTPValidationError,
-  LoginRequest,
-  Msg,
-  NewPassword,
-  UserToken,
-} from '../models';
+import type { HTTPValidationError, LoginRequest, UserToken } from '../models';
 import {
   HTTPValidationErrorFromJSON,
   HTTPValidationErrorToJSON,
   LoginRequestFromJSON,
   LoginRequestToJSON,
-  MsgFromJSON,
-  MsgToJSON,
-  NewPasswordFromJSON,
-  NewPasswordToJSON,
   UserTokenFromJSON,
   UserTokenToJSON,
 } from '../models';
@@ -37,12 +27,13 @@ export interface LoginOperationRequest {
   loginRequest: LoginRequest;
 }
 
-export interface RecoverPasswordRequest {
-  email: string;
-}
-
-export interface ResetPasswordRequest {
-  newPassword: NewPassword;
+export interface SwaggerLoginRequest {
+  password: string;
+  username: string;
+  clientId?: string | null;
+  clientSecret?: string | null;
+  grantType?: string | null;
+  scope?: string;
 }
 
 /**
@@ -75,48 +66,31 @@ export interface LoginApiInterface {
   ): Promise<UserToken>;
 
   /**
-   * Password Recovery
-   * @summary Recover Password
-   * @param {string} email
+   * Token login, get an access token for future requests
+   * @summary Swagger Login
+   * @param {string} password
+   * @param {string} username
+   * @param {string} [clientId]
+   * @param {string} [clientSecret]
+   * @param {string} [grantType]
+   * @param {string} [scope]
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof LoginApiInterface
    */
-  recoverPasswordRaw(
-    requestParameters: RecoverPasswordRequest,
+  swaggerLoginRaw(
+    requestParameters: SwaggerLoginRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<runtime.ApiResponse<Msg>>;
+  ): Promise<runtime.ApiResponse<UserToken>>;
 
   /**
-   * Password Recovery
-   * Recover Password
+   * Token login, get an access token for future requests
+   * Swagger Login
    */
-  recoverPassword(
-    requestParameters: RecoverPasswordRequest,
+  swaggerLogin(
+    requestParameters: SwaggerLoginRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<Msg>;
-
-  /**
-   * Reset password
-   * @summary Reset Password
-   * @param {NewPassword} newPassword
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof LoginApiInterface
-   */
-  resetPasswordRaw(
-    requestParameters: ResetPasswordRequest,
-    initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<runtime.ApiResponse<Msg>>;
-
-  /**
-   * Reset password
-   * Reset Password
-   */
-  resetPassword(
-    requestParameters: ResetPasswordRequest,
-    initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<Msg>;
+  ): Promise<UserToken>;
 }
 
 /**
@@ -176,20 +150,30 @@ export class LoginApi extends runtime.BaseAPI implements LoginApiInterface {
   }
 
   /**
-   * Password Recovery
-   * Recover Password
+   * Token login, get an access token for future requests
+   * Swagger Login
    */
-  async recoverPasswordRaw(
-    requestParameters: RecoverPasswordRequest,
+  async swaggerLoginRaw(
+    requestParameters: SwaggerLoginRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<runtime.ApiResponse<Msg>> {
+  ): Promise<runtime.ApiResponse<UserToken>> {
     if (
-      requestParameters.email === null ||
-      requestParameters.email === undefined
+      requestParameters.password === null ||
+      requestParameters.password === undefined
     ) {
       throw new runtime.RequiredError(
-        'email',
-        'Required parameter requestParameters.email was null or undefined when calling recoverPassword.',
+        'password',
+        'Required parameter requestParameters.password was null or undefined when calling swaggerLogin.',
+      );
+    }
+
+    if (
+      requestParameters.username === null ||
+      requestParameters.username === undefined
+    ) {
+      throw new runtime.RequiredError(
+        'username',
+        'Required parameter requestParameters.username was null or undefined when calling swaggerLogin.',
       );
     }
 
@@ -197,88 +181,69 @@ export class LoginApi extends runtime.BaseAPI implements LoginApiInterface {
 
     const headerParameters: runtime.HTTPHeaders = {};
 
-    const response = await this.request(
-      {
-        path: `/api/v1/login/password-recovery/{email}`.replace(
-          `{${'email'}}`,
-          encodeURIComponent(String(requestParameters.email)),
-        ),
-        method: 'POST',
-        headers: headerParameters,
-        query: queryParameters,
-      },
-      initOverrides,
-    );
+    const consumes: runtime.Consume[] = [
+      { contentType: 'application/x-www-form-urlencoded' },
+    ];
+    // @ts-ignore: canConsumeForm may be unused
+    const canConsumeForm = runtime.canConsumeForm(consumes);
 
-    return new runtime.JSONApiResponse(response, (jsonValue) =>
-      MsgFromJSON(jsonValue),
-    );
-  }
-
-  /**
-   * Password Recovery
-   * Recover Password
-   */
-  async recoverPassword(
-    requestParameters: RecoverPasswordRequest,
-    initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<Msg> {
-    const response = await this.recoverPasswordRaw(
-      requestParameters,
-      initOverrides,
-    );
-    return await response.value();
-  }
-
-  /**
-   * Reset password
-   * Reset Password
-   */
-  async resetPasswordRaw(
-    requestParameters: ResetPasswordRequest,
-    initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<runtime.ApiResponse<Msg>> {
-    if (
-      requestParameters.newPassword === null ||
-      requestParameters.newPassword === undefined
-    ) {
-      throw new runtime.RequiredError(
-        'newPassword',
-        'Required parameter requestParameters.newPassword was null or undefined when calling resetPassword.',
-      );
+    let formParams: { append(param: string, value: any): any };
+    let useForm = false;
+    if (useForm) {
+      formParams = new FormData();
+    } else {
+      formParams = new URLSearchParams();
     }
 
-    const queryParameters: any = {};
+    if (requestParameters.clientId !== undefined) {
+      formParams.append('client_id', requestParameters.clientId as any);
+    }
 
-    const headerParameters: runtime.HTTPHeaders = {};
+    if (requestParameters.clientSecret !== undefined) {
+      formParams.append('client_secret', requestParameters.clientSecret as any);
+    }
 
-    headerParameters['Content-Type'] = 'application/json';
+    if (requestParameters.grantType !== undefined) {
+      formParams.append('grant_type', requestParameters.grantType as any);
+    }
+
+    if (requestParameters.password !== undefined) {
+      formParams.append('password', requestParameters.password as any);
+    }
+
+    if (requestParameters.scope !== undefined) {
+      formParams.append('scope', requestParameters.scope as any);
+    }
+
+    if (requestParameters.username !== undefined) {
+      formParams.append('username', requestParameters.username as any);
+    }
 
     const response = await this.request(
       {
-        path: `/api/v1/login/reset-password/`,
+        path: `/api/v1/login/swagger/`,
         method: 'POST',
         headers: headerParameters,
         query: queryParameters,
-        body: NewPasswordToJSON(requestParameters.newPassword),
+        body: formParams,
       },
       initOverrides,
     );
 
     return new runtime.JSONApiResponse(response, (jsonValue) =>
-      MsgFromJSON(jsonValue),
+      UserTokenFromJSON(jsonValue),
     );
   }
 
   /**
-   * Reset password
-   * Reset Password
+   * Token login, get an access token for future requests
+   * Swagger Login
    */
-  async resetPassword(
-    requestParameters: ResetPasswordRequest,
+  async swaggerLogin(
+    requestParameters: SwaggerLoginRequest,
     initOverrides?: RequestInit | runtime.InitOverrideFunction,
-  ): Promise<Msg> {
-    const response = await this.resetPasswordRaw(
+  ): Promise<UserToken> {
+    const response = await this.swaggerLoginRaw(
       requestParameters,
       initOverrides,
     );

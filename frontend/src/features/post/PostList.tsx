@@ -18,8 +18,9 @@ import {
 import { FiMap } from 'react-icons/fi';
 import { MdEdit, MdOpenInNew } from 'react-icons/md';
 
+import { PostResponseBase } from '@/gen/api';
+
 import { useGetPosts } from './hooks/useGetPosts';
-import { postByAdmin } from './types';
 
 export const PostList = () => {
   // TODO: APIつなぎこみ
@@ -54,15 +55,8 @@ export const PostList = () => {
             <Tbody>
               {data &&
                 data.length > 0 &&
-                data.map((post: postByAdmin) => {
-                  const {
-                    id,
-                    problemName,
-                    userName,
-                    // isOpen,
-                    is_solved: isSolved,
-                    createdAt,
-                  } = post;
+                data.map((post: PostResponseBase) => {
+                  const { id, problem, user, isSolved, createdAt } = post;
                   return (
                     <Tr key={id}>
                       <Td>
@@ -101,7 +95,7 @@ export const PostList = () => {
                           </Tooltip>
                         </Stack>
                       </Td>
-                      <Td>{problemName}</Td>
+                      <Td>{problem.name}</Td>
                       {/* TODO: 今後対応 */}
                       {/* <Td>
                         <Tag colorScheme={isOpen ? 'blue' : 'red'}>
@@ -113,7 +107,7 @@ export const PostList = () => {
                           {isSolved ? '解決済' : '未解決'}
                         </Tag>
                       </Td>
-                      <Td>{userName}</Td>
+                      <Td>{user?.name}</Td>
                       <Td>{new Date(createdAt).toLocaleDateString()}</Td>
                       <Td>{id}</Td>
                     </Tr>

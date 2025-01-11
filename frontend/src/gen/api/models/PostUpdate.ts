@@ -12,19 +12,12 @@
  * Do not edit the class manually.
  */
 
-import { exists, mapValues } from '../runtime';
+import { exists } from '../runtime';
+import { Items, ItemsFromJSON, ItemsToJSON } from './Items';
 import type { Latitude1 } from './Latitude1';
-import {
-  Latitude1FromJSON,
-  Latitude1FromJSONTyped,
-  Latitude1ToJSON,
-} from './Latitude1';
+import { Latitude1FromJSON, Latitude1ToJSON } from './Latitude1';
 import type { Longitude1 } from './Longitude1';
-import {
-  Longitude1FromJSON,
-  Longitude1FromJSONTyped,
-  Longitude1ToJSON,
-} from './Longitude1';
+import { Longitude1FromJSON, Longitude1ToJSON } from './Longitude1';
 
 /**
  *
@@ -34,10 +27,10 @@ import {
 export interface PostUpdate {
   /**
    *
-   * @type {object}
+   * @type {}
    * @memberof PostUpdate
    */
-  items?: object | null;
+  items?: Items | null;
   /**
    *
    * @type {Latitude1}
@@ -73,7 +66,7 @@ export function PostUpdateFromJSONTyped(
     return json;
   }
   return {
-    items: !exists(json, 'items') ? undefined : json['items'],
+    items: !exists(json, 'items') ? undefined : ItemsFromJSON(json['items']),
     latitude: !exists(json, 'latitude')
       ? undefined
       : Latitude1FromJSON(json['latitude']),
@@ -91,7 +84,7 @@ export function PostUpdateToJSON(value?: PostUpdate | null): any {
     return null;
   }
   return {
-    items: value.items,
+    items: ItemsToJSON(value.items),
     latitude: Latitude1ToJSON(value.latitude),
     longitude: Longitude1ToJSON(value.longitude),
   };

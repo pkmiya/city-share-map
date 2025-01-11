@@ -24,13 +24,19 @@ export interface CitizenUser {
    * @type {string}
    * @memberof CitizenUser
    */
-  id?: string;
+  id: string;
   /**
    *
    * @type {boolean}
    * @memberof CitizenUser
    */
-  isActive?: boolean | null;
+  isActive?: boolean;
+  /**
+   *
+   * @type {Date}
+   * @memberof CitizenUser
+   */
+  lastLogin?: Date | null;
   /**
    *
    * @type {string}
@@ -50,6 +56,7 @@ export interface CitizenUser {
  */
 export function instanceOfCitizenUser(value: object): boolean {
   let isInstance = true;
+  isInstance = isInstance && 'id' in value;
 
   return isInstance;
 }
@@ -66,8 +73,13 @@ export function CitizenUserFromJSONTyped(
     return json;
   }
   return {
-    id: !exists(json, 'id') ? undefined : json['id'],
+    id: json['id'],
     isActive: !exists(json, 'is_active') ? undefined : json['is_active'],
+    lastLogin: !exists(json, 'last_login')
+      ? undefined
+      : json['last_login'] === null
+        ? null
+        : new Date(json['last_login']),
     lineId: !exists(json, 'line_id') ? undefined : json['line_id'],
     name: !exists(json, 'name') ? undefined : json['name'],
   };
@@ -83,6 +95,12 @@ export function CitizenUserToJSON(value?: CitizenUser | null): any {
   return {
     id: value.id,
     is_active: value.isActive,
+    last_login:
+      value.lastLogin === undefined
+        ? undefined
+        : value.lastLogin === null
+          ? null
+          : value.lastLogin.toISOString(),
     line_id: value.lineId,
     name: value.name,
   };

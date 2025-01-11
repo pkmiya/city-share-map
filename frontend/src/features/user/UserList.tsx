@@ -91,7 +91,9 @@ export const UserList = () => {
                           {isActive ? '有効' : '停止'}
                         </Tag>
                       </Td>
-                      <Td>{formatDate(lastLogin)}</Td>
+                      <Td>
+                        {lastLogin ? formatDate(lastLogin) : 'データなし'}
+                      </Td>
                       <Td>{postCount}</Td>
                     </Tr>
                   );

@@ -42,7 +42,7 @@ export interface User {
    * @type {number}
    * @memberof User
    */
-  id?: number;
+  id: number;
   /**
    *
    * @type {boolean}
@@ -62,6 +62,7 @@ export interface User {
  */
 export function instanceOfUser(value: object): boolean {
   let isInstance = true;
+  isInstance = isInstance && 'id' in value;
 
   return isInstance;
 }
@@ -81,7 +82,7 @@ export function UserFromJSONTyped(
     department: !exists(json, 'department') ? undefined : json['department'],
     email: !exists(json, 'email') ? undefined : json['email'],
     fullName: !exists(json, 'full_name') ? undefined : json['full_name'],
-    id: !exists(json, 'id') ? undefined : json['id'],
+    id: json['id'],
     isActive: !exists(json, 'is_active') ? undefined : json['is_active'],
     isSuperuser: !exists(json, 'is_superuser')
       ? undefined
