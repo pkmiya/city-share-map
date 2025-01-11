@@ -30,7 +30,7 @@ export const usePostPost = () => {
     },
     onSuccess: async (res: string) => {
       queryClient.invalidateQueries({
-        queryKey: postKeys.posts,
+        queryKey: [postKeys.posts],
       });
       queryClient.invalidateQueries({
         queryKey: [postKeys.post, res],
