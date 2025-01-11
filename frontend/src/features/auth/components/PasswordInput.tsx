@@ -8,19 +8,34 @@ import {
   InputRightElement,
 } from '@chakra-ui/react';
 import { useState } from 'react';
-import { UseFormRegister } from 'react-hook-form';
+import { FieldValues, Path, UseFormRegister } from 'react-hook-form';
 import { IoMdEye, IoMdEyeOff } from 'react-icons/io';
 
-import { LoginRequest } from '@/gen/api';
-
-type PasswordInputProps = {
+type PasswordInputProps<T extends FieldValues> = {
   error?: string;
-  register: UseFormRegister<LoginRequest>;
+  minLength?: number;
+  name: Path<T>;
+  register: UseFormRegister<T>;
 };
 
-export const PasswordInput = ({ error, register }: PasswordInputProps) => {
+export const PasswordInput = <T extends FieldValues>({
+  error,
+  register,
+  minLength,
+  name,
+}: PasswordInputProps<T>) => {
   const [show, setShow] = useState(false);
   const handleClick = () => setShow(!show);
+
+  const validationRules = {
+    required: 'パスワードは必須項目です。',
+    ...(minLength && {
+      minLength: {
+        message: `パスワードは${minLength}文字以上である必要があります。`,
+        value: minLength,
+      },
+    }),
+  };
 
   return (
     <FormControl isInvalid={!!error}>
@@ -31,9 +46,7 @@ export const PasswordInput = ({ error, register }: PasswordInputProps) => {
           placeholder="パスワードを入力"
           pr="4.5rem"
           type={show ? 'text' : 'password'}
-          {...register('password', {
-            required: 'パスワードは必須項目です',
-          })}
+          {...register(name, validationRules)}
         />
         <InputRightElement width="4.5rem">
           <IconButton

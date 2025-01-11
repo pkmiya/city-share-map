@@ -16,6 +16,7 @@ import {
 } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 
+import { PasswordInput } from '@/features/auth/components/PasswordInput';
 import { UserCreate } from '@/gen/api';
 
 type AdminAddModalProps = {
@@ -91,21 +92,12 @@ export const AdminAddModal = ({
                 <FormErrorMessage>{errors.email?.message}</FormErrorMessage>
               </FormControl>
 
-              <FormControl isInvalid={!!errors.password}>
-                <FormLabel>パスワード</FormLabel>
-                <Input
-                  placeholder="パスワードを入力"
-                  type="password"
-                  {...register('password', {
-                    minLength: {
-                      message: 'パスワードは6文字以上である必要があります。',
-                      value: 6,
-                    },
-                    required: 'パスワードは必須項目です。',
-                  })}
-                />
-                <FormErrorMessage>{errors.password?.message}</FormErrorMessage>
-              </FormControl>
+              <PasswordInput<UserCreate>
+                error={errors.password?.message}
+                minLength={8}
+                name="password"
+                register={register}
+              />
 
               {/* TODO: BUG: isActiveをFalseにしても、Trueでデータが送信されてしまう */}
               <FormControl>
