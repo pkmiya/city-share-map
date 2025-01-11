@@ -14,17 +14,24 @@ import {
   Thead,
   Tooltip,
   Tr,
+  useDisclosure,
 } from '@chakra-ui/react';
+import { useState } from 'react';
 import { FaCheck } from 'react-icons/fa';
 import { FiMap } from 'react-icons/fi';
 import { MdOpenInNew } from 'react-icons/md';
 
 import {
+  DeletePostRequest,
+  GetPostByIdRequest,
   MarkAsSolvedRequest,
   MarkAsUnsolvedRequest,
   PostResponseBase,
 } from '@/gen/api';
 
+import { PostDetailModal } from './components/PostDetailModal';
+import { useDeletePost } from './hooks/useDeletePost';
+import { useGetPostById } from './hooks/useGetPostById';
 import { useGetPosts } from './hooks/useGetPosts';
 import { usePutPostAsResolved } from './hooks/usePutPostAsResolved';
 import { usePutPostAsUnsolved } from './hooks/usePutPostAsUnsolved';
@@ -47,11 +54,40 @@ export const PostList = () => {
     markAsUnsolved({ postId, problemId });
   };
 
+  const { isOpen, onClose, onOpen } = useDisclosure();
+  const [selectedPost, setSelectedPost] = useState<GetPostByIdRequest | null>(
+    null,
+  );
+  const { data: postDetails, refetch } = useGetPostById({
+    postId: selectedPost?.postId ?? '',
+    problemId: selectedPost?.problemId ?? 0,
+  });
+  const { mutate: deletePost } = useDeletePost();
+
+  const handleOpenModal = async (post: GetPostByIdRequest) => {
+    setSelectedPost(post);
+    await refetch();
+    onOpen();
+  };
+
+  const handleDeleteAdmin = (req: DeletePostRequest) => {
+    if (!confirm('この投稿を削除しますか？')) return;
+    deletePost({ postId: req.postId, problemId: req.problemId });
+  };
+
   return (
     <Box w="full">
       <Text fontSize="x-large" fontWeight="bold">
         投稿一覧
       </Text>
+
+      <PostDetailModal
+        data={postDetails ?? null}
+        isOpen={isOpen}
+        onClose={onClose}
+        onDelete={handleDeleteAdmin}
+      />
+
       <Box>
         <TableContainer>
           <Table maxW="40%" variant="simple">
@@ -108,6 +144,12 @@ export const PostList = () => {
                               leftIcon={<MdOpenInNew />}
                               size="sm"
                               variant="outline"
+                              onClick={() =>
+                                handleOpenModal({
+                                  postId: id,
+                                  problemId: problem.id,
+                                })
+                              }
                             >
                               詳細
                             </Button>

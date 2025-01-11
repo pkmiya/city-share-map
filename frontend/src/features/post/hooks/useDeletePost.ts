@@ -5,17 +5,17 @@ import { useRouter } from 'next/navigation';
 import { postProblemApi } from '@/api/client';
 import { postKeys } from '@/features/auth/constants/queryKey';
 import { pagesPath } from '@/gen/$path';
-import { CreatePostRequest } from '@/gen/api';
+import { DeletePostRequest } from '@/gen/api';
 import queryClient from '@/lib/react-query';
 import { getErrorStatus } from '@/utils/error';
 
-export const usePostPost = () => {
+export const useDeletePost = () => {
   const toast = useToast();
   const router = useRouter();
 
   const mutation = useMutation({
-    mutationFn: async (req: CreatePostRequest) => {
-      const res = await postProblemApi.createPost(req);
+    mutationFn: async (req: DeletePostRequest) => {
+      const res = await postProblemApi.deletePost(req);
       return res.id;
     },
     onError: (error) => {
@@ -25,7 +25,7 @@ export const usePostPost = () => {
         duration: 2000,
         position: 'bottom-right',
         status: 'error',
-        title: 'レポートの作成に失敗しました',
+        title: 'レポートの削除に失敗しました',
       });
     },
     onSuccess: async (res: string) => {
@@ -40,7 +40,7 @@ export const usePostPost = () => {
         duration: 2000,
         position: 'bottom-right',
         status: 'success',
-        title: 'レポートの作成に成功しました',
+        title: 'レポートの削除に成功しました',
       });
     },
   });
