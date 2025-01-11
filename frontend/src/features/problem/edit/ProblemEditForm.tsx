@@ -21,6 +21,7 @@ import { pagesPath } from '@/gen/$path';
 import { ProblemReadByID, ProblemUpdate } from '@/gen/api';
 
 import { useDeleteProblem } from '../hooks/useDeleteProblem';
+import { useGetItemType } from '../hooks/useGetItemType';
 import { usePutProblem } from '../hooks/usePutProblem';
 
 export const EditProblemForm = ({
@@ -38,6 +39,7 @@ export const EditProblemForm = ({
 
   const { mutate: putProblem } = usePutProblem();
   const { mutate: deleteProblem } = useDeleteProblem();
+  const { data: ItemType } = useGetItemType();
 
   const onSubmit = async (data: ProblemUpdate) => {
     putProblem({
@@ -137,29 +139,34 @@ export const EditProblemForm = ({
                 <Text w="50px">必須</Text>
               </HStack>
               <Stack spacing={4}>
-                {initialData.items.map((field, index) => (
-                  <HStack key={index}>
-                    <Input
-                      isReadOnly
-                      placeholder="項目名"
-                      value={field.name}
-                      w="200px"
-                    />
-                    <Select
-                      isReadOnly
-                      placeholder={field.typeId?.toString()}
-                      pointerEvents="none"
-                      value={field.typeId}
-                      w="200px"
-                    />
-                    <Switch
-                      isDisabled
-                      isReadOnly
-                      id="required"
-                      {...register(`items.${index}.required`)}
-                    />
-                  </HStack>
-                ))}
+                {initialData.items.map((field, index) => {
+                  const typeName = ItemType?.find(
+                    (type) => type.id === field.typeId,
+                  )?.name;
+                  return (
+                    <HStack key={index}>
+                      <Input
+                        isReadOnly
+                        placeholder="項目名"
+                        value={field.name}
+                        w="200px"
+                      />
+                      <Select
+                        isReadOnly
+                        placeholder={typeName}
+                        pointerEvents="none"
+                        value={field.typeId}
+                        w="200px"
+                      />
+                      <Switch
+                        isDisabled
+                        isReadOnly
+                        id="required"
+                        {...register(`items.${index}.required`)}
+                      />
+                    </HStack>
+                  );
+                })}
               </Stack>
             </Box>
 
