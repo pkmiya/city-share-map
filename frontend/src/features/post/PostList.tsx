@@ -15,18 +15,37 @@ import {
   Tooltip,
   Tr,
 } from '@chakra-ui/react';
+import { FaCheck } from 'react-icons/fa';
 import { FiMap } from 'react-icons/fi';
-import { MdEdit, MdOpenInNew } from 'react-icons/md';
+import { MdOpenInNew } from 'react-icons/md';
 
-import { PostResponseBase } from '@/gen/api';
+import {
+  MarkAsSolvedRequest,
+  MarkAsUnsolvedRequest,
+  PostResponseBase,
+} from '@/gen/api';
 
 import { useGetPosts } from './hooks/useGetPosts';
+import { usePutPostAsResolved } from './hooks/usePutPostAsResolved';
+import { usePutPostAsUnsolved } from './hooks/usePutPostAsUnsolved';
 
 export const PostList = () => {
-  // TODO: APIつなぎこみ
-  // NOTE: 型の事故が起こっているが、一旦放置
   const { data } = useGetPosts({});
-  console.log('data:', data);
+  const { mutate: markAsReSolved } = usePutPostAsResolved();
+  const { mutate: markAsUnsolved } = usePutPostAsUnsolved();
+
+  const handleMarkAsResolved = ({ problemId, postId }: MarkAsSolvedRequest) => {
+    if (!confirm('この投稿を解決済にしますか？')) return;
+    markAsReSolved({ postId, problemId });
+  };
+
+  const handleMarkAsUnsolved = ({
+    problemId,
+    postId,
+  }: MarkAsUnsolvedRequest) => {
+    if (!confirm('この投稿を未解決にしますか？')) return;
+    markAsUnsolved({ postId, problemId });
+  };
 
   return (
     <Box w="full">
@@ -63,12 +82,23 @@ export const PostList = () => {
                         <Stack direction="row" spacing={4}>
                           <Tooltip label="対応状況を編集できます">
                             <Button
-                              colorScheme="teal"
-                              leftIcon={<MdEdit />}
+                              colorScheme="blue"
+                              leftIcon={<FaCheck />}
                               size="sm"
-                              variant="solid"
+                              variant={isSolved ? 'solid' : 'outline'}
+                              onClick={() =>
+                                isSolved
+                                  ? handleMarkAsUnsolved({
+                                      postId: id,
+                                      problemId: problem.id,
+                                    })
+                                  : handleMarkAsResolved({
+                                      postId: id,
+                                      problemId: problem.id,
+                                    })
+                              }
                             >
-                              編集
+                              {isSolved ? '未解決にする' : '解決済にする'}
                             </Button>
                           </Tooltip>
 
