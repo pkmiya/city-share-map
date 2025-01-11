@@ -9,7 +9,7 @@ import {
   Switch,
   Text,
 } from '@chakra-ui/react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 
 import { usePostContext } from '@/context/postProvider';
 import { ItemType, ItemTypeName } from '@/features/problem/new/data';
@@ -35,6 +35,7 @@ export const DetailsForm = ({ onBack }: Props) => {
     handleSubmit,
     setValue,
     getValues,
+    control,
     formState: { errors },
   } = useForm<{ [key: string]: string }>({
     defaultValues: formData.fieldValues,
@@ -49,7 +50,13 @@ export const DetailsForm = ({ onBack }: Props) => {
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        setValue(fieldName, reader.result as string); // Base64エンコード結果をフォームに設定
+        const base64Result = reader.result as string;
+        console.log(base64Result);
+        setValue(fieldName, base64Result, { shouldValidate: true });
+      };
+      reader.onerror = () => {
+        console.error('Failed to read file:', reader.error);
+        setValue(fieldName, '', { shouldValidate: true });
       };
       reader.readAsDataURL(file); // Base64エンコード
     } else {
@@ -155,15 +162,21 @@ export const DetailsForm = ({ onBack }: Props) => {
                 />
               )}
               {field.typeId === typeIdMap[ItemTypeName.Photo] && (
-                <Input
-                  accept="image/*"
-                  type="file"
-                  {...register(field.name, {
+                <Controller
+                  control={control}
+                  name={field.name}
+                  render={({ field }) => (
+                    <Input
+                      accept="image/*"
+                      type="file"
+                      onChange={(e) => handleFileChange(e, field.name)}
+                    />
+                  )}
+                  rules={{
                     required: isRequired
                       ? `${field.name}をアップロードしてください`
                       : false,
-                  })}
-                  onChange={(e) => handleFileChange(e, field.name)}
+                  }}
                 />
               )}
               {field.typeId === typeIdMap[ItemTypeName.DateTime] && (
