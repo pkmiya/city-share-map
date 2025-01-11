@@ -15,23 +15,16 @@ import { IoMdClose } from 'react-icons/io';
 import Map, { Marker, NavigationControl, Popup } from 'react-map-gl';
 
 import { Env } from '@/config/env';
-import { markers } from '@/features/map/data';
-import { marker } from '@/features/map/types';
+import { PostMapResponse } from '@/gen/api';
 
-type MyMapProps = BoxProps;
+import { useGetPostsForMap } from './hooks/useGetPostsForMap';
+import { initialViewState } from './view';
 
-export const MyMap = ({ ...props }: MyMapProps) => {
-  const lat = 33.58991071526741;
-  const lon = 130.42066302703546;
-  const zoom = 14.5;
-  const initialViewState = {
-    latitude: lat,
-    longitude: lon,
-    zoom: zoom,
-  };
+type AdminMapProps = BoxProps;
 
+export const AdminMap = ({ ...props }: AdminMapProps) => {
   const accessToken = Env.mapboxAccessToken;
-  const [popupInfo, setPopupInfo] = useState<marker>();
+  const [popupInfo, setPopupInfo] = useState<PostMapResponse>();
   const [viewState, setViewState] = useState(initialViewState);
 
   const viewStyle = {
@@ -40,32 +33,41 @@ export const MyMap = ({ ...props }: MyMapProps) => {
     width: props.w ?? '60vw',
   } as React.CSSProperties;
 
+  const { data } = useGetPostsForMap({});
+
   const pins = useMemo(
     () =>
-      markers.map((data, index) => (
-        <Marker
-          key={`marker-${index}`}
-          anchor="bottom"
-          color={data.color}
-          latitude={data.latitude}
-          longitude={data.longitude}
-          onClick={(e) => {
-            e.originalEvent.stopPropagation();
-            setPopupInfo(data);
-            setViewState((prevState) => ({
-              ...prevState,
-              latitude: data.latitude,
-              longitude: data.longitude,
-              transitionDuration: 500,
-            }));
-          }}
-        ></Marker>
-      )),
-    [],
+      data &&
+      data.map((post) => {
+        const { coodinate, id } = post;
+        return (
+          <Marker
+            key={`marker-${id}`}
+            anchor="bottom"
+            color={post.isSolved ? 'green' : 'red'}
+            latitude={Number(coodinate.latitude)}
+            longitude={Number(coodinate.longitude)}
+            onClick={(e) => {
+              e.originalEvent.stopPropagation();
+              setPopupInfo(post);
+              setViewState((prevState) => ({
+                ...prevState,
+                latitude: Number(coodinate.latitude),
+                longitude: Number(coodinate.longitude),
+                transitionDuration: 500,
+              }));
+            }}
+          ></Marker>
+        );
+      }),
+    [data],
   );
 
   return (
     <Box {...props}>
+      <Text fontSize="xl" fontWeight="bold" mb={4}>
+        可視化マップ
+      </Text>
       <Map
         initialViewState={viewState}
         mapboxAccessToken={accessToken}
@@ -81,8 +83,8 @@ export const MyMap = ({ ...props }: MyMapProps) => {
             <Popup
               anchor="top"
               closeButton={false}
-              latitude={Number(popupInfo.latitude)}
-              longitude={Number(popupInfo.longitude)}
+              latitude={Number(popupInfo.coodinate.latitude)}
+              longitude={Number(popupInfo.coodinate.longitude)}
               onClose={() => setPopupInfo(undefined)}
             >
               <Box p={2} w="300px">
@@ -97,25 +99,25 @@ export const MyMap = ({ ...props }: MyMapProps) => {
                   top={3}
                   onClick={() => setPopupInfo(undefined)}
                 />
-                <Text fontWeight="bold">{popupInfo.problemName}</Text>
+                <Text fontWeight="bold">{popupInfo.problem.name}</Text>
 
                 <Box mt={2} />
 
                 <Box w="200px">
                   <HStack justifyContent="space-between">
-                    <Text>{popupInfo.postedBy}</Text>
-                    <Text>{popupInfo.postedAt.toLocaleDateString()}</Text>
+                    <Text>{popupInfo.user?.name}</Text>
+                    <Text>{popupInfo.createdAt.toLocaleDateString()}</Text>
                   </HStack>
 
                   <Box mt={2}>
-                    <Text>{popupInfo.description ?? ''}</Text>
+                    <Text>{popupInfo.descriptions?.value ?? ''}</Text>
                   </Box>
-                  {popupInfo.imgUrl && (
+                  {popupInfo.photoField && popupInfo.photoField.value && (
                     <Image
                       alt="image"
                       borderRadius="md"
                       mt={2}
-                      src={popupInfo.imgUrl}
+                      src={popupInfo.photoField.value}
                     />
                   )}
                 </Box>

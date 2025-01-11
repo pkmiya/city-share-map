@@ -4,8 +4,9 @@ import Map, { Marker } from 'react-map-gl';
 
 import { Env } from '@/config/env';
 import { usePostContext } from '@/context/postProvider';
-
+import { initialViewState } from '@/features/map/view';
 import 'mapbox-gl/dist/mapbox-gl.css';
+
 import { useGetAddress } from '../hooks/useGetAddress';
 
 type Props = {
@@ -22,12 +23,6 @@ export const LocationPick = ({ onNext, onBack }: Props) => {
   const accessToken = Env.mapboxAccessToken;
 
   const { error, isLoading: loading, fetchAddress } = useGetAddress();
-
-  const initialViewState = {
-    latitude: 35.6895,
-    longitude: 139.6917,
-    zoom: 14,
-  };
 
   const handleMapClick = async (event: mapboxgl.MapMouseEvent) => {
     const { lng, lat } = event.lngLat;
