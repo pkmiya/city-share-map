@@ -24,7 +24,9 @@ export const ProblemSelect = ({ onNext }: Props) => {
   const [problemId, setProblemId] = useState<number | null>(null);
   const { formData, setFormData } = usePostContext();
   const { refetch } = useGetProblemById(problemId ?? problemIdDefaultValue);
-  const { data: problems } = useGetProblems({});
+  const { data } = useGetProblems({});
+  // NOTE: BackendがisOpenによらず全ての課題を返すため、isOpenでフィルタリングしている
+  const problems = data ? data.filter((p) => p.isOpen) : [];
 
   const {
     register,

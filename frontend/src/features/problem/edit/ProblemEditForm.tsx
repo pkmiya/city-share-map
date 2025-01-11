@@ -76,7 +76,14 @@ export const EditProblemForm = ({
         >
           <VStack align="stretch" spacing={4}>
             <FormControl isInvalid={!!errors.name}>
-              <FormLabel fontWeight="bold">課題の名前</FormLabel>
+              <FormLabel fontWeight="bold">
+                課題の名前
+                {
+                  <Text as="span" color="red.500">
+                    *
+                  </Text>
+                }
+              </FormLabel>
               <Input
                 placeholder="課題名を入力"
                 {...register('name', { required: '課題の名前は必須です' })}
@@ -101,7 +108,14 @@ export const EditProblemForm = ({
             </FormControl>
 
             <FormControl isInvalid={!!errors.description}>
-              <FormLabel fontWeight="bold">課題の説明</FormLabel>
+              <FormLabel fontWeight="bold">
+                課題の説明
+                {
+                  <Text as="span" color="red.500">
+                    *
+                  </Text>
+                }
+              </FormLabel>
               <Input
                 placeholder="例：ごみの不法投棄など"
                 {...register('description', {
