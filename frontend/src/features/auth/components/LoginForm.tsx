@@ -70,7 +70,11 @@ export const LoginForm: React.FC = () => {
             </FormErrorMessage>
           </FormControl>
 
-          <PasswordInput error={errors.password?.message} register={register} />
+          <PasswordInput<LoginRequest>
+            error={errors.password?.message}
+            name="password"
+            register={register}
+          />
 
           <Button colorScheme="teal" type="submit" width="full">
             ログイン
