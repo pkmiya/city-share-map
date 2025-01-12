@@ -33,7 +33,7 @@ export const UserList = () => {
       <Text fontSize="x-large" fontWeight="bold">
         市民ユーザ一覧
       </Text>
-      <Text my={4} textAlign="right" mr={2}>
+      <Text mr={2} my={4} textAlign="right">
         合計ユーザ数：{data ? data.length : 0}人
       </Text>
       <Box m="auto" w="80vw">

@@ -55,8 +55,8 @@ export const FilterOptionsForCitizen = ({
             </Stack>
           </RadioGroup>
           <Checkbox
-            w="18%"
             isChecked={filters.userId !== null}
+            w="18%"
             onChange={(e) =>
               onFilterChange('userId', e.target.checked ? myUserId : null)
             }
@@ -65,8 +65,8 @@ export const FilterOptionsForCitizen = ({
           </Checkbox>
           <Select
             placeholder="課題を選択"
-            w="40%"
             value={filters.problemId || ''}
+            w="40%"
             onChange={(e) =>
               onFilterChange(
                 'problemId',

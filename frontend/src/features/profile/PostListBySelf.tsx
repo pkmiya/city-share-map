@@ -9,12 +9,14 @@ import {
   Tag,
   Text,
 } from '@chakra-ui/react';
-
-import { PostResponseBase } from '@/gen/api';
+import { useRouter } from 'next/navigation';
 
 import { pagesPath } from '@/gen/$path';
-import { useRouter } from 'next/navigation';
+import { PostResponseBase } from '@/gen/api';
+
+
 import { useAuth } from '../auth/hooks/useAuth';
+
 import { useGetPostsBySelf } from './hooks/useGetPostsBySelf';
 
 export const PostListBySelf = () => {
@@ -34,6 +36,7 @@ export const PostListBySelf = () => {
       </Text>
       <Center mb={4}>
         <Button
+          colorScheme="blue"
           onClick={() =>
             router.push(
               pagesPath.map.$url({
@@ -43,7 +46,6 @@ export const PostListBySelf = () => {
               }).path,
             )
           }
-          colorScheme="blue"
         >
           マイレポートを地図で見る
         </Button>

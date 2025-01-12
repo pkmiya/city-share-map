@@ -23,6 +23,7 @@ import { FaCheck } from 'react-icons/fa';
 import { FiMap } from 'react-icons/fi';
 import { MdOpenInNew } from 'react-icons/md';
 
+import { pagesPath } from '@/gen/$path';
 import {
   DeletePostRequest,
   GetPostByIdRequest,
@@ -32,7 +33,6 @@ import {
   PostResponseBase,
 } from '@/gen/api';
 
-import { pagesPath } from '@/gen/$path';
 import { FilterOptions } from './FilterOptions';
 import { PostDetailModal } from './components/PostDetailModal';
 import { useDeletePost } from './hooks/useDeletePost';

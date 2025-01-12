@@ -11,6 +11,7 @@ import {
 } from '@chakra-ui/react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { IoMdClose } from 'react-icons/io';
 import Map, { Marker, NavigationControl, Popup } from 'react-map-gl';
@@ -18,9 +19,8 @@ import Map, { Marker, NavigationControl, Popup } from 'react-map-gl';
 import { Env } from '@/config/env';
 import { GetPostsMapRequest, PostMapResponse } from '@/gen/api';
 
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuth } from '../auth/hooks/useAuth';
 import { FilterOptionsForCitizen } from '../post/FilterOptionsForCitizen';
+
 import { useGetPostsForMap } from './hooks/useGetPostsForMap';
 import { initialViewState } from './view';
 
@@ -58,7 +58,7 @@ export const CitizenMap = ({ ...props }: CitizenMapProps) => {
     value: GetPostsMapRequest[K],
   ) => {
     // NOTE: 市民ユーザは公開された投稿のみ閲覧可能
-    const newFilters = { ...filters, [key]: value, isOpen: true };
+    const newFilters = { ...filters, isOpen: true, [key]: value };
     setFilters(newFilters);
 
     // NOTE: クエリパラメータを更新
