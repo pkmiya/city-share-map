@@ -6,6 +6,7 @@ import { GetPostByIdRequest } from '@/gen/api';
 
 export const useGetPostById = (req: GetPostByIdRequest) => {
   const query = useQuery({
+    enabled: !!req.postId && !!req.problemId,
     queryFn: async () => {
       const res = await postProblemApi.getPostById(req);
       return res;
