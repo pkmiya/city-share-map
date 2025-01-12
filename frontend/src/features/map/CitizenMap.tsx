@@ -114,9 +114,9 @@ export const CitizenMap = ({ ...props }: CitizenMapProps) => {
         <Spacer />
         <Text fontWeight="bold">地図テーマ</Text>
         <Select
-          w="20%"
           mr={12}
           value={mapStyle}
+          w="20%"
           onChange={(e) => setMapStyle(e.target.value)}
         >
           {MapboxStyles.map((style: MapboxStyle) => (
