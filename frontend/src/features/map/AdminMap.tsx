@@ -6,6 +6,8 @@ import {
   HStack,
   IconButton,
   Image,
+  Select,
+  Spacer,
   Text,
   useMediaQuery,
 } from '@chakra-ui/react';
@@ -22,6 +24,7 @@ import { GetPostsMapRequest, PostMapResponse } from '@/gen/api';
 import { FilterOptions } from '../post/FilterOptions';
 
 import { useGetPostsForMap } from './hooks/useGetPostsForMap';
+import { MapboxStyle, MapboxStyles } from './theme';
 import { initialViewState } from './view';
 
 type AdminMapProps = BoxProps;
@@ -30,6 +33,7 @@ export const AdminMap = ({ ...props }: AdminMapProps) => {
   const accessToken = Env.mapboxAccessToken;
   const [popupInfo, setPopupInfo] = useState<PostMapResponse>();
   const [viewState, setViewState] = useState(initialViewState);
+  const [mapStyle, setMapStyle] = useState(MapboxStyles[0].value);
 
   const [isLargerThanXL] = useMediaQuery('(min-width: 1280px)');
   const viewStyle = {
@@ -121,9 +125,25 @@ export const AdminMap = ({ ...props }: AdminMapProps) => {
 
   return (
     <Box {...props}>
-      <Text fontSize="2xl" fontWeight="bold" mb={4}>
-        可視化マップ
-      </Text>
+      <HStack my={4}>
+        <Text fontSize="xl" fontWeight="bold">
+          可視化マップ
+        </Text>
+        <Spacer />
+        <Text fontWeight="bold">地図テーマ</Text>
+        <Select
+          w="20%"
+          mr={12}
+          value={mapStyle}
+          onChange={(e) => setMapStyle(e.target.value)}
+        >
+          {MapboxStyles.map((style: MapboxStyle) => (
+            <option key={style.value} value={style.value}>
+              {style.description}
+            </option>
+          ))}
+        </Select>
+      </HStack>
 
       <FilterOptions filters={filters} onFilterChange={handleFilterChange} />
 
@@ -131,7 +151,7 @@ export const AdminMap = ({ ...props }: AdminMapProps) => {
         initialViewState={viewState}
         mapboxAccessToken={accessToken}
         mapLib={mapboxgl as any}
-        mapStyle="mapbox://styles/mapbox/light-v11"
+        mapStyle={mapStyle}
         style={viewStyle}
         {...viewState}
         onMove={(evt) => setViewState(evt.viewState)}
