@@ -1,3 +1,5 @@
+// c.f. https://docs.mapbox.com/api/maps/styles/
+
 export type MapboxStyle = {
   description: string;
   name: string;
