@@ -126,7 +126,7 @@ const LinkItems: Array<LinkItemProps> = [
   {
     href: pagesPath.profile.$url().pathname,
     icon: FaList,
-    name: 'マイレポート一覧',
+    name: 'マイレポート',
   },
 ];
 
