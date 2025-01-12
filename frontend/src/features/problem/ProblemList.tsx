@@ -93,7 +93,7 @@ export const ProblemList = () => {
                             onClick={() =>
                               router.push(
                                 pagesPath.staff.post.$url({
-                                  query: { problemId: id },
+                                  query: { problemId: String(id) },
                                 }).path,
                               )
                             }
@@ -108,7 +108,7 @@ export const ProblemList = () => {
                             onClick={() =>
                               router.push(
                                 pagesPath.staff.map.$url({
-                                  query: { problemId: problem.id },
+                                  query: { problemId: String(problem.id) },
                                 }).path,
                               )
                             }

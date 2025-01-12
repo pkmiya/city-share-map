@@ -14,7 +14,6 @@ import { useRouter } from 'next/navigation';
 import { pagesPath } from '@/gen/$path';
 import { PostResponseBase } from '@/gen/api';
 
-
 import { useAuth } from '../auth/hooks/useAuth';
 
 import { useGetPostsBySelf } from './hooks/useGetPostsBySelf';

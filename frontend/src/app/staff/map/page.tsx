@@ -1,14 +1,19 @@
+import { Suspense } from 'react';
+
 import { SidebarWithHeader } from '@/components/SidebarWIthHeader';
 import { AdminMap } from '@/features/map/AdminMap';
 import { GetPostsMapRequest } from '@/gen/api';
 
-export type OptionalQuery = GetPostsMapRequest;
+type OptionalQueryBase = GetPostsMapRequest;
+export type OptionalQuery = Partial<Record<keyof OptionalQueryBase, string>>;
 
 export default function Home() {
   return (
     <>
       <SidebarWithHeader>
-        <AdminMap h="65vh" p={4} />
+        <Suspense fallback={<div>Loading...</div>}>
+          <AdminMap h="65vh" p={4} />
+        </Suspense>
       </SidebarWithHeader>
     </>
   );

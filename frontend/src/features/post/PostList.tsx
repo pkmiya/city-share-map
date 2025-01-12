@@ -230,7 +230,7 @@ export const PostList = () => {
                               onClick={() =>
                                 router.push(
                                   pagesPath.staff.map.$url({
-                                    query: { problemId: problem.id },
+                                    query: { problemId: String(problem.id) },
                                   }).path,
                                 )
                               }
