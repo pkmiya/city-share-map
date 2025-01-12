@@ -15,14 +15,17 @@ import {
   Tooltip,
   Tr,
 } from '@chakra-ui/react';
+import { useRouter } from 'next/navigation';
 import { IoWarningOutline } from 'react-icons/io5';
 import { MdEdit } from 'react-icons/md';
 
+import { pagesPath } from '@/gen/$path';
 import { formatDate } from '@/utils/date';
 
 import { useGetUsers } from './hooks/useGetUsers';
 
 export const UserList = () => {
+  const router = useRouter();
   const { data } = useGetUsers();
 
   return (
@@ -30,7 +33,10 @@ export const UserList = () => {
       <Text fontSize="x-large" fontWeight="bold">
         市民ユーザ一覧
       </Text>
-      <Box>
+      <Text my={4} textAlign="right" mr={2}>
+        合計ユーザ数：{data ? data.length : 0}人
+      </Text>
+      <Box m="auto" w="80vw">
         {data && data.length > 0 && (
           <TableContainer>
             <Table variant="simple">
@@ -59,13 +65,13 @@ export const UserList = () => {
                               leftIcon={<MdEdit />}
                               size="sm"
                               variant="solid"
-                              // TODO: APIつなぎこみ
-                              // onClick={() =>
-                              //   router.push(
-                              //     pagesPath.staff.post._userId(userId).$url()
-                              //       .path,
-                              //   )
-                              // }
+                              onClick={() =>
+                                router.push(
+                                  pagesPath.staff.post.$url({
+                                    query: { userId: id },
+                                  }).path,
+                                )
+                              }
                             >
                               投稿一覧
                             </Button>
