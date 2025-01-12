@@ -7,15 +7,19 @@ import {
   IconButton,
   Image,
   Text,
+  useMediaQuery,
 } from '@chakra-ui/react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 import { IoMdClose } from 'react-icons/io';
 import Map, { Marker, NavigationControl, Popup } from 'react-map-gl';
 
 import { Env } from '@/config/env';
-import { PostMapResponse } from '@/gen/api';
+import { GetPostsMapRequest, PostMapResponse } from '@/gen/api';
+
+import { FilterOptions } from '../post/FilterOptions';
 
 import { useGetPostsForMap } from './hooks/useGetPostsForMap';
 import { initialViewState } from './view';
@@ -27,13 +31,65 @@ export const AdminMap = ({ ...props }: AdminMapProps) => {
   const [popupInfo, setPopupInfo] = useState<PostMapResponse>();
   const [viewState, setViewState] = useState(initialViewState);
 
+  const [isLargerThanXL] = useMediaQuery('(min-width: 1280px)');
   const viewStyle = {
     height: props.h ?? '60vh',
     position: 'absolute' as 'absolute',
-    width: props.w ?? '60vw',
+    width: isLargerThanXL ? 'calc(95vw - 240px)' : '95vw',
   } as React.CSSProperties;
 
-  const { data } = useGetPostsForMap({});
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const [filters, setFilters] = useState<GetPostsMapRequest>({
+    isOpen: searchParams.get('isOpen')
+      ? searchParams.get('isOpen') === 'true'
+      : null,
+    isSolved: searchParams.get('isSolved')
+      ? searchParams.get('isSolved') === 'true'
+      : null,
+    problemId: searchParams.get('problemId')
+      ? Number(searchParams.get('problemId'))
+      : null,
+    userId: searchParams.get('userId') || null,
+  });
+  const { data, refetch: getPosts } = useGetPostsForMap(filters);
+
+  const handleFilterChange = <K extends keyof GetPostsMapRequest>(
+    key: K,
+    value: GetPostsMapRequest[K],
+  ) => {
+    const newFilters = { ...filters, [key]: value };
+    setFilters(newFilters);
+
+    // NOTE: クエリパラメータを更新
+    const params = new URLSearchParams(searchParams.toString());
+    if (value === null || value === undefined) {
+      params.delete(key);
+    } else {
+      params.set(key, value.toString());
+    }
+    router.replace(`?${params.toString()}`);
+
+    getPosts();
+  };
+
+  useEffect(() => {
+    // NOTE: クエリ変更時にフィルタを同期
+    const newFilters = {
+      isOpen: searchParams.get('isOpen')
+        ? searchParams.get('isOpen') === 'true'
+        : null,
+      isSolved: searchParams.get('isSolved')
+        ? searchParams.get('isSolved') === 'true'
+        : null,
+      problemId: searchParams.get('problemId')
+        ? Number(searchParams.get('problemId'))
+        : null,
+      userId: searchParams.get('userId') || null,
+    };
+    setFilters(newFilters);
+  }, [searchParams]);
 
   const pins = useMemo(
     () =>
@@ -65,9 +121,12 @@ export const AdminMap = ({ ...props }: AdminMapProps) => {
 
   return (
     <Box {...props}>
-      <Text fontSize="xl" fontWeight="bold" mb={4}>
+      <Text fontSize="2xl" fontWeight="bold" mb={4}>
         可視化マップ
       </Text>
+
+      <FilterOptions filters={filters} onFilterChange={handleFilterChange} />
+
       <Map
         initialViewState={viewState}
         mapboxAccessToken={accessToken}

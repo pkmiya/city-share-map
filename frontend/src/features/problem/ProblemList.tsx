@@ -56,11 +56,11 @@ export const ProblemList = () => {
                 <Tr>
                   <Th>操作</Th>
                   <Th>課題名</Th>
+                  <Th>課題ID</Th>
                   <Th>公開状態</Th>
                   {/* NOTE: updatedAt型が追加されたら対応 */}
                   {/* <Th w="1%">更新日時</Th> */}
                   <Th>投稿数</Th>
-                  <Th>課題ID</Th>
                 </Tr>
               </Thead>
               <Tbody>
@@ -90,6 +90,13 @@ export const ProblemList = () => {
                             leftIcon={<FaList />}
                             size="sm"
                             variant="outline"
+                            onClick={() =>
+                              router.push(
+                                pagesPath.staff.post.$url({
+                                  query: { problemId: String(id) },
+                                }).path,
+                              )
+                            }
                           >
                             投稿
                           </Button>
@@ -98,12 +105,20 @@ export const ProblemList = () => {
                             leftIcon={<FiMap />}
                             size="sm"
                             variant="outline"
+                            onClick={() =>
+                              router.push(
+                                pagesPath.staff.map.$url({
+                                  query: { problemId: String(problem.id) },
+                                }).path,
+                              )
+                            }
                           >
                             マップ
                           </Button>
                         </Stack>
                       </Td>
                       <Td>{name}</Td>
+                      <Td isNumeric>{id}</Td>
                       <Td>
                         <Tag colorScheme={isOpen ? 'blue' : 'red'}>
                           {isOpen ? '公開' : '非公開'}
@@ -112,7 +127,6 @@ export const ProblemList = () => {
                       {/* NOTE: updatedAt型が追加されたら対応 */}
                       {/* <Td>{updatedAt.toLocaleDateString()}</Td> */}
                       <Td isNumeric>{postCount}</Td>
-                      <Td isNumeric>{id}</Td>
                     </Tr>
                   );
                 })}

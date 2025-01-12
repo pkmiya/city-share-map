@@ -3,6 +3,7 @@
 import {
   Box,
   Button,
+  Divider,
   Stack,
   Table,
   TableContainer,
@@ -16,19 +17,23 @@ import {
   Tr,
   useDisclosure,
 } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { FaCheck } from 'react-icons/fa';
 import { FiMap } from 'react-icons/fi';
 import { MdOpenInNew } from 'react-icons/md';
 
+import { pagesPath } from '@/gen/$path';
 import {
   DeletePostRequest,
   GetPostByIdRequest,
+  GetPostsSummaryRequest,
   MarkAsSolvedRequest,
   MarkAsUnsolvedRequest,
   PostResponseBase,
 } from '@/gen/api';
 
+import { FilterOptions } from './FilterOptions';
 import { PostDetailModal } from './components/PostDetailModal';
 import { useDeletePost } from './hooks/useDeletePost';
 import { useGetPostById } from './hooks/useGetPostById';
@@ -37,7 +42,59 @@ import { usePutPostAsResolved } from './hooks/usePutPostAsResolved';
 import { usePutPostAsUnsolved } from './hooks/usePutPostAsUnsolved';
 
 export const PostList = () => {
-  const { data } = useGetPosts({});
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const [filters, setFilters] = useState<GetPostsSummaryRequest>({
+    isOpen: searchParams.get('isOpen')
+      ? searchParams.get('isOpen') === 'true'
+      : null,
+    isSolved: searchParams.get('isSolved')
+      ? searchParams.get('isSolved') === 'true'
+      : null,
+    problemId: searchParams.get('problemId')
+      ? Number(searchParams.get('problemId'))
+      : null,
+    userId: searchParams.get('userId') || null,
+  });
+  const { data, refetch: getPosts } = useGetPosts(filters);
+
+  const handleFilterChange = <K extends keyof GetPostsSummaryRequest>(
+    key: K,
+    value: GetPostsSummaryRequest[K],
+  ) => {
+    const newFilters = { ...filters, [key]: value };
+    setFilters(newFilters);
+
+    // NOTE: クエリパラメータを更新
+    const params = new URLSearchParams(searchParams.toString());
+    if (value === null || value === undefined) {
+      params.delete(key);
+    } else {
+      params.set(key, value.toString());
+    }
+    router.replace(`?${params.toString()}`);
+
+    getPosts();
+  };
+
+  useEffect(() => {
+    // NOTE: クエリ変更時にフィルタを同期
+    const newFilters = {
+      isOpen: searchParams.get('isOpen')
+        ? searchParams.get('isOpen') === 'true'
+        : null,
+      isSolved: searchParams.get('isSolved')
+        ? searchParams.get('isSolved') === 'true'
+        : null,
+      problemId: searchParams.get('problemId')
+        ? Number(searchParams.get('problemId'))
+        : null,
+      userId: searchParams.get('userId') || null,
+    };
+    setFilters(newFilters);
+  }, [searchParams]);
+
   const { mutate: markAsReSolved } = usePutPostAsResolved();
   const { mutate: markAsUnsolved } = usePutPostAsUnsolved();
 
@@ -58,7 +115,7 @@ export const PostList = () => {
   const [selectedPost, setSelectedPost] = useState<GetPostByIdRequest | null>(
     null,
   );
-  const { data: postDetails, refetch } = useGetPostById({
+  const { data: postDetails, refetch: getPostDetail } = useGetPostById({
     postId: selectedPost?.postId ?? '',
     problemId: selectedPost?.problemId ?? 0,
   });
@@ -66,7 +123,7 @@ export const PostList = () => {
 
   const handleOpenModal = async (post: GetPostByIdRequest) => {
     setSelectedPost(post);
-    await refetch();
+    await getPostDetail();
     onOpen();
   };
 
@@ -81,6 +138,8 @@ export const PostList = () => {
         投稿一覧
       </Text>
 
+      <FilterOptions filters={filters} onFilterChange={handleFilterChange} />
+
       <PostDetailModal
         data={postDetails ?? null}
         isOpen={isOpen}
@@ -88,7 +147,12 @@ export const PostList = () => {
         onDelete={handleDeleteAdmin}
       />
 
+      <Divider />
+
       <Box>
+        <Text fontSize="lg" fontWeight="bold" my={4}>
+          検索結果
+        </Text>
         <TableContainer>
           <Table maxW="40%" variant="simple">
             <Thead>
@@ -97,10 +161,12 @@ export const PostList = () => {
                 <Th minW="10%" width="auto">
                   課題名
                 </Th>
+                <Th>課題ID</Th>
                 {/* TODO: 今後対応 */}
                 {/* <Th w="1%">公開状態</Th> */}
                 <Th w="1%">対応状況</Th>
                 <Th w="1%">投稿ユーザ</Th>
+                <Th w="1%">投稿ユーザID</Th>
                 <Th w="1%">投稿日時</Th>
                 <Th isNumeric w="1%">
                   投稿ID
@@ -161,6 +227,13 @@ export const PostList = () => {
                               leftIcon={<FiMap />}
                               size="sm"
                               variant="outline"
+                              onClick={() =>
+                                router.push(
+                                  pagesPath.staff.map.$url({
+                                    query: { problemId: String(problem.id) },
+                                  }).path,
+                                )
+                              }
                             >
                               マップ
                             </Button>
@@ -168,6 +241,7 @@ export const PostList = () => {
                         </Stack>
                       </Td>
                       <Td>{problem.name}</Td>
+                      <Td>{problem.id}</Td>
                       {/* TODO: 今後対応 */}
                       {/* <Td>
                         <Tag colorScheme={isOpen ? 'blue' : 'red'}>
@@ -180,6 +254,7 @@ export const PostList = () => {
                         </Tag>
                       </Td>
                       <Td>{user?.name}</Td>
+                      <Td>{user?.id}</Td>
                       <Td>{new Date(createdAt).toLocaleDateString()}</Td>
                       <Td>{id}</Td>
                     </Tr>
