@@ -99,6 +99,9 @@ export const DetailsForm = ({ onBack }: Props) => {
       if (typeId === typeIdMap[ItemTypeName.Text]) {
         return ''; // テキストの場合は空文字列を返す
       }
+      if (typeId === typeIdMap[ItemTypeName.Photo]) {
+        return ''; // 写真の場合は空文字列を返す
+      }
       if (typeId === typeIdMap[ItemTypeName.Boolean]) {
         return false; // 真偽値の場合はfalseを返す
       }
@@ -213,11 +216,7 @@ export const DetailsForm = ({ onBack }: Props) => {
               )}
               {field.typeId === typeIdMap[ItemTypeName.Boolean] && (
                 // NOTE: isRequired == trueだとcheckedでないとリクエスト時にエラーになるため、readOnlyで常にcheckedにして対応
-                <Switch
-                  isReadOnly
-                  defaultChecked={isRequired}
-                  {...register(field.name)}
-                />
+                <Switch defaultChecked={isRequired} {...register(field.name)} />
               )}
               <FormErrorMessage>
                 {errors[field.name] && errors[field.name]?.message}

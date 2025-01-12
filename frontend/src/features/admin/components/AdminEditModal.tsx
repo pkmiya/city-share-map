@@ -110,12 +110,20 @@ export const AdminEditModal = ({
                 <FormErrorMessage>{errors.email?.message}</FormErrorMessage>
               </FormControl>
               <FormControl>
-                <Switch defaultChecked {...register('isActive')}>
+                <Switch
+                  isChecked={defaultValues.isActive ?? false}
+                  {...register('isActive')}
+                >
                   利用可能にする
                 </Switch>
               </FormControl>
               <FormControl>
-                <Switch {...register('isSuperuser')}>高度な管理者権限</Switch>
+                <Switch
+                  isChecked={defaultValues.isSuperuser ?? false}
+                  {...register('isSuperuser')}
+                >
+                  高度な管理者権限
+                </Switch>
               </FormControl>
             </VStack>
           </form>
