@@ -32,7 +32,7 @@ export const FilterOptions = ({
       <Text fontSize="lg" fontWeight="bold" my={4}>
         検索オプション
       </Text>
-      <Box ml={4}>
+      <Box ml={4} mr={12}>
         <HStack>
           <RadioGroup
             value={
