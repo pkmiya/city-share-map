@@ -30,7 +30,7 @@ jobs:
         uses: appleboy/scp-action@v0.1.3
         with:
           host: ${{ secrets.EC2_IP }}
-          username: ubuntu
+          username: ec2-user
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "."
           target: "~/app"
