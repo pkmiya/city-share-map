@@ -131,10 +131,11 @@ const LinkItems: Array<LinkItemProps> = [
 ];
 
 const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
-  const { userRole } = useLiff();
+  const { accessToken } = useAuth();
+  const role = accessToken?.user_type ?? null;
 
   let redirectPath: string;
-  switch (userRole) {
+  switch (role) {
     case UserRole.Staff:
     case UserRole.Admin:
       redirectPath = pagesPath.staff.home.$url().pathname;
@@ -168,50 +169,50 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
         </Link>
         <CloseButton display={{ base: 'flex', xl: 'none' }} onClick={onClose} />
       </Flex>
-      {LinkItems.slice(0, 5).map((link) => (
-        <NavItem
-          key={link.name}
-          href={link.href ?? ''}
-          icon={link.icon}
-          onClick={onClose}
-        >
-          <Text>{link.name}</Text>
-        </NavItem>
-      ))}
-      <Divider my={6} />
-      <Text fontSize="sm" fontWeight="bold" mb={2} ml={4}>
-        ユーザ管理
-      </Text>
-      {
-        // NOTE: ここから下は管理者ユーザのみ表示
-        LinkItems.slice(5, 7).map((link: LinkItemProps) => (
-          <NavItem
-            key={link.name}
-            href={link.href ?? ''}
-            icon={link.icon}
-            onClick={onClose}
-          >
-            <Text>{link.name}</Text>
-          </NavItem>
-        ))
-      }
-      <Divider my={6} />
-      <Text fontSize="sm" fontWeight="bold" mb={2} ml={4}>
-        市民ユーザ向け機能
-      </Text>
-      {
-        // NOTE: 自治体職員ユーザには表示しない
-        LinkItems.slice(7).map((link: LinkItemProps) => (
-          <NavItem
-            key={link.name}
-            href={link.href ?? ''}
-            icon={link.icon}
-            onClick={onClose}
-          >
-            <Text>{link.name}</Text>
-          </NavItem>
-        ))
-      }
+
+      {role === UserRole.Staff || role === UserRole.Admin ? (
+        // NOTE: 管理者ユーザの場合
+        <>
+          {LinkItems.slice(0, 5).map((link) => (
+            <NavItem
+              key={link.name}
+              href={link.href ?? ''}
+              icon={link.icon}
+              onClick={onClose}
+            >
+              <Text>{link.name}</Text>
+            </NavItem>
+          ))}
+          <Divider my={6} />
+          <Text fontSize="sm" fontWeight="bold" mb={2} ml={4}>
+            ユーザ管理
+          </Text>
+          {LinkItems.slice(5, 7).map((link: LinkItemProps) => (
+            <NavItem
+              key={link.name}
+              href={link.href ?? ''}
+              icon={link.icon}
+              onClick={onClose}
+            >
+              <Text>{link.name}</Text>
+            </NavItem>
+          ))}
+        </>
+      ) : (
+        // NOTE: 市民ユーザの場合
+        <>
+          {LinkItems.slice(7).map((link: LinkItemProps) => (
+            <NavItem
+              key={link.name}
+              href={link.href ?? ''}
+              icon={link.icon}
+              onClick={onClose}
+            >
+              <Text>{link.name}</Text>
+            </NavItem>
+          ))}
+        </>
+      )}
     </Box>
   );
 };
