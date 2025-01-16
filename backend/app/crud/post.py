@@ -528,7 +528,8 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
         *,
         problem_id: int,
         post_id: uuid.UUID,
-        user_id: uuid.UUID,
+        user_id: Union[uuid.UUID, int],
+        user_type: str,
     ) -> PostResponse:
         """
         投稿を削除
@@ -537,7 +538,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
             dynamic_table = self.get_dynamic_table(db_session, problem_id)
             post = self._get_post(db_session, dynamic_table, post_id)
 
-            if post.user_id != user_id:
+            if user_type == "citizen" and post.user_id != user_id:
                 raise HTTPException(
                     status_code=403, detail="この投稿を削除する権限がありません"
                 )

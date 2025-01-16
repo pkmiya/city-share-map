@@ -2,7 +2,7 @@ import uuid
 from typing import Dict, List, Optional, Union
 from uuid import UUID
 
-from app.api.deps import CurrentAllUser, CurrentStaffUser, SessionDep
+from app.api.deps import CurrentAllUser, CurrentStaffUser, CurrentCitizenUser, SessionDep
 from app.crud.post import crud_post
 from app.schemas.post import (
     PostCreate,
@@ -14,7 +14,6 @@ from app.schemas.post import (
 from fastapi import APIRouter
 
 router = APIRouter()
-mock_id = UUID("00000000-0000-0000-0000-000000000000")  # モック用のID
 
 
 @router.post("/{problem_id}", response_model=PostResponse)
@@ -22,15 +21,15 @@ def create_post(
     *,
     db: SessionDep,
     problem_id: int,
-    # current_user: CurrentCitizenUser,
-    current_user: CurrentStaffUser,
+    current_user: CurrentCitizenUser,
+    # current_user: CurrentStaffUser,
     post_in: PostCreate
 ) -> PostResponse:
     """
     新しい投稿を作成
     """
     return crud_post.create_post(
-        db_session=db, problem_id=problem_id, user_id=mock_id, post_in=post_in
+        db_session=db, problem_id=problem_id, user_id=current_user.id, post_in=post_in
     )
 
 
@@ -113,8 +112,8 @@ def get_posts_summary(
 @router.get("/me", response_model=List[PostResponseBase])
 def get_posts_summary_me(
     db: SessionDep,
-    # current_user: CurrentCitizenUser,
-    current_user: CurrentStaffUser,
+    current_user: CurrentCitizenUser,
+    # current_user: CurrentStaffUser,
     skip: int = 0,
     limit: int = 100,
     is_solved: Optional[bool] = None,
@@ -135,8 +134,8 @@ def get_posts_summary_me(
     if problem_id is not None:
         filters["problem_id"] = problem_id
 
-    # filters["user_id"] = current_user.id
-    filters["user_id"] = mock_id
+    filters["user_id"] = current_user.id
+    # filters["user_id"] = mock_id
 
     return crud_post.get_post_summary(
         db_session=db,
@@ -154,7 +153,6 @@ def get_posts_summary_me(
 def get_post_by_id(
     problem_id: int,
     db: SessionDep,
-    # current_user: CurrentCitizenUser,
     current_user: CurrentAllUser,
     post_id: uuid.UUID,
 ) -> PostResponse:
@@ -165,8 +163,6 @@ def get_post_by_id(
         user_type = "staff"
     else:
         user_type = "citizen"
-
-    user_type = "citizen"
 
     return crud_post.get_by_id(
         db_session=db, problem_id=problem_id, post_id=post_id, user_type=user_type
@@ -179,8 +175,8 @@ def update_post(
     post_id: uuid.UUID,
     *,
     db: SessionDep,
-    # current_user: CurrentCitizenUser,
-    current_user: CurrentStaffUser,
+    current_user: CurrentCitizenUser,
+    # current_user: CurrentStaffUser,
     update_data: PostUpdate
 ) -> PostResponse:
     """
@@ -191,7 +187,7 @@ def update_post(
         db_session=db,
         problem_id=problem_id,
         post_id=post_id,
-        user_id=mock_id,
+        user_id=current_user.id,
         update_data=update_data,
     )
 
@@ -206,9 +202,13 @@ def delete_post(
     """
     投稿を削除
     """
+    if isinstance(current_user.id, int):
+        user_type = "staff"
+    else:
+        user_type = "citizen"
 
     return crud_post.delete_post(
-        db_session=db, problem_id=problem_id, post_id=post_id, user_id=mock_id
+        db_session=db, problem_id=problem_id, post_id=post_id, user_id=current_user.id, user_type=user_type
     )
 
 
