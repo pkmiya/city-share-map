@@ -12,7 +12,7 @@ export default function Home() {
     <>
       <SidebarWithHeader>
         <Suspense fallback={<div>Loading...</div>}>
-          <CitizenMap h="65vh" p={4} />
+          <CitizenMap />
         </Suspense>
       </SidebarWithHeader>
     </>
