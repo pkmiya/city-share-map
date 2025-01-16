@@ -21,6 +21,7 @@ import {
 import { useState } from 'react';
 import { MdEdit } from 'react-icons/md';
 
+import { LoadingScreen } from '@/components/LoadingScreen';
 import { DeleteUserRequest, User, UserCreate, UserUpdate } from '@/gen/api';
 
 import { AdminAddModal } from './components/AdminAddModal';
@@ -43,7 +44,7 @@ export const AdminList = () => {
   } = useDisclosure();
   const [selectedAdmin, setSelectedAdmin] = useState<User | null>(null);
 
-  const { data } = useGetAdmins();
+  const { data, isLoading } = useGetAdmins();
   const { mutate: addAdmin } = usePostAdmin();
   const { mutate: editAdmin } = usePutAdminById();
   const { mutate: deleteAdmin } = useDeleteAdmin();
@@ -96,6 +97,12 @@ export const AdminList = () => {
           />
         )}
 
+        {isLoading && <LoadingScreen />}
+        {data?.length == 0 && (
+          <Text fontSize="large" textAlign="center">
+            管理者ユーザが見つかりませんでした
+          </Text>
+        )}
         {data && data.length > 0 && (
           <TableContainer>
             <Table variant="simple">

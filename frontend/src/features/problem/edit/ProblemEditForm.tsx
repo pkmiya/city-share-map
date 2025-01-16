@@ -32,7 +32,7 @@ export const EditProblemForm = ({
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<ProblemReadByID>({
     defaultValues: initialData,
   });
@@ -179,7 +179,12 @@ export const EditProblemForm = ({
               >
                 削除する
               </Button>
-              <Button colorScheme="blue" type="submit" w="fit-content">
+              <Button
+                colorScheme="blue"
+                isLoading={isSubmitting}
+                type="submit"
+                w="fit-content"
+              >
                 更新する
               </Button>
             </HStack>

@@ -15,6 +15,7 @@ import {
   Switch,
   VStack,
 } from '@chakra-ui/react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { DeleteUserRequest, User, UserUpdate } from '@/gen/api';
@@ -39,12 +40,29 @@ export const AdminEditModal = ({
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
+    watch,
+    setValue,
   } = useForm<User>({
     defaultValues,
   });
 
+  useEffect(() => {
+    if (defaultValues) {
+      reset(defaultValues);
+    }
+  }, [defaultValues, reset]);
+
+  const watchFields = watch();
+
   const handleFormSubmit = (data: UserUpdate) => {
-    console.log(data);
+    const hasChanges = (
+      Object.keys(defaultValues) as (keyof UserUpdate)[]
+    ).some((key) => defaultValues[key as keyof User] !== data[key]);
+    if (!hasChanges) {
+      onClose();
+      return;
+    }
+
     onSubmit(data);
     reset();
     onClose();
@@ -111,16 +129,16 @@ export const AdminEditModal = ({
               </FormControl>
               <FormControl>
                 <Switch
-                  isChecked={defaultValues.isActive ?? false}
-                  {...register('isActive')}
+                  isChecked={watchFields.isActive ?? false}
+                  onChange={(e) => setValue('isActive', e.target.checked)}
                 >
                   利用可能にする
                 </Switch>
               </FormControl>
               <FormControl>
                 <Switch
-                  isChecked={defaultValues.isSuperuser ?? false}
-                  {...register('isSuperuser')}
+                  isChecked={watchFields.isSuperuser ?? false}
+                  onChange={(e) => setValue('isSuperuser', e.target.checked)}
                 >
                   高度な管理者権限
                 </Switch>

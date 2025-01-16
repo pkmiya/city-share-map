@@ -254,7 +254,7 @@ const NavItem = ({ icon, href, onClick, children, ...rest }: NavItemProps) => {
 };
 
 const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
-  const { userRole } = useLiff();
+  const { userRole, liffLogout } = useLiff();
 
   let redirectPath: string;
   switch (userRole) {
@@ -371,7 +371,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
               <MenuDivider />
               <MenuItem
                 onClick={() => {
-                  logout();
+                  liffObject ? liffLogout() : logout();
                 }}
               >
                 ログアウト

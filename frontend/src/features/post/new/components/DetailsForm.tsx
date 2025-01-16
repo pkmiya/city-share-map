@@ -36,7 +36,7 @@ export const DetailsForm = ({ onBack }: Props) => {
     setValue,
     getValues,
     control,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<{ [key: string]: string }>({
     defaultValues: formData.fieldValues,
   });
@@ -228,7 +228,12 @@ export const DetailsForm = ({ onBack }: Props) => {
           <Button mt="4" onClick={onBack}>
             戻る
           </Button>
-          <Button colorScheme="teal" mt="4" type="submit">
+          <Button
+            colorScheme="teal"
+            isLoading={isSubmitting}
+            mt="4"
+            type="submit"
+          >
             送信
           </Button>
         </Center>
