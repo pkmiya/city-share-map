@@ -21,6 +21,7 @@ import { FaList } from 'react-icons/fa';
 import { FiMap } from 'react-icons/fi';
 import { MdEdit } from 'react-icons/md';
 
+import { LoadingScreen } from '@/components/LoadingScreen';
 import { pagesPath } from '@/gen/$path';
 
 import { useGetProblems } from './hooks/useGetProblems';
@@ -28,7 +29,7 @@ import { useGetProblems } from './hooks/useGetProblems';
 export const ProblemList = () => {
   const router = useRouter();
 
-  const { data } = useGetProblems({});
+  const { data, isLoading } = useGetProblems({});
 
   return (
     <Box w="full">
@@ -48,6 +49,13 @@ export const ProblemList = () => {
             新規課題
           </Button>
         </HStack>
+
+        {isLoading && <LoadingScreen />}
+        {data?.length == 0 && (
+          <Text fontSize="large" textAlign="center">
+            課題がありません
+          </Text>
+        )}
 
         {data && data.length > 0 && (
           <TableContainer>
