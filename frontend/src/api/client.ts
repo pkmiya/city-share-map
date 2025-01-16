@@ -14,6 +14,7 @@ const config = new api.Configuration({
   accessToken,
   basePath,
   headers,
+  credentials: 'include'
 });
 
 export const loginApi = new api.LoginApi(config);

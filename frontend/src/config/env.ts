@@ -5,7 +5,7 @@ export const Env = {
 };
 
 export const MockEnv = {
-  apiBaseUrl: 'http://localhost:8000',
+  apiBaseUrl: 'https://city-share-map.com:8000',
   envLiffId: 'dummyId',
   mapboxAccessToken: 'dummyToken',
 };
