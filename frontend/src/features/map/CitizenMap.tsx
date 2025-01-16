@@ -2,6 +2,7 @@
 
 import {
   Box,
+  Button,
   HStack,
   IconButton,
   Image,
@@ -19,6 +20,7 @@ import { IoMdClose } from 'react-icons/io';
 import Map, { Marker, NavigationControl, Popup } from 'react-map-gl';
 
 import { Env } from '@/config/env';
+import { pagesPath } from '@/gen/$path';
 import { GetPostsMapRequest, PostMapResponse } from '@/gen/api';
 
 import { FilterOptionsForCitizen } from '../post/FilterOptionsForCitizen';
@@ -116,10 +118,20 @@ export const CitizenMap = () => {
         }}
         my={4}
       >
-        <Text fontSize="xl" fontWeight="bold" w="400px">
-          可視化マップ
-        </Text>
-        <Spacer />
+        <HStack mb={2}>
+          <Text fontSize="xl" fontWeight="bold" w="120px">
+            可視化マップ
+          </Text>
+          <Spacer />
+          <Button
+            colorScheme="blue"
+            w="fit-content"
+            onClick={() => router.push(pagesPath.post.new.$url().path)}
+          >
+            レポートを投稿
+          </Button>
+        </HStack>
+
         <HStack
           justifyContent={{
             base: 'flex-start',
