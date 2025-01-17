@@ -41,10 +41,14 @@ import { GrUserAdmin } from 'react-icons/gr';
 
 import { appMetadata } from '@/config/metadata';
 import { useLiff } from '@/context/liffProvider';
+import { AdminSelfEditModal } from '@/features/admin/components/AdminSelfEditModal';
+import { useGetAdminSelf } from '@/features/admin/hooks/useGetAdminSelf';
+import { usePutAdminBySelf } from '@/features/admin/hooks/usePutAdminSelf';
 import { UserRole } from '@/features/auth/constants/role';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useLogout } from '@/features/auth/hooks/useLogout';
 import { pagesPath } from '@/gen/$path';
+import { UserUpdateMe } from '@/gen/api';
 import { removeTrailingSlash } from '@/utils/url';
 
 interface LinkItemProps {
@@ -254,11 +258,16 @@ const NavItem = ({ icon, href, onClick, children, ...rest }: NavItemProps) => {
   );
 };
 
-const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
-  const { userRole, liffLogout } = useLiff();
+const MobileNav = ({
+  onOpen,
+  onEditOpen,
+  ...rest
+}: MobileProps & { onEditOpen: () => void }) => {
+  const { accessToken } = useAuth();
+  const role = accessToken?.user_type ?? null;
 
   let redirectPath: string;
-  switch (userRole) {
+  switch (role) {
     case UserRole.Staff:
     case UserRole.Admin:
       redirectPath = pagesPath.staff.home.$url().pathname;
@@ -271,7 +280,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
       break;
   }
 
-  const { liffObject } = useLiff();
+  const { liffObject, liffLogout } = useLiff();
   const logout = useLogout();
   const [userName, setUserName] = useState<string | null>(null);
   const [department, setDepartment] = useState<string | null>(null);
@@ -367,10 +376,15 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
               <Text fontSize="sm" fontWeight="bold" mx={3} my={2}>
                 {userName ?? 'ゲストユーザ'}
               </Text>
-              <MenuItem>プロフィール</MenuItem>
-              <MenuItem>設定</MenuItem>
+              {role === UserRole.Staff || role === UserRole.Admin ? (
+                <MenuItem onClick={onEditOpen}>登録情報変更</MenuItem>
+              ) : (
+                <></>
+              )}
               <MenuDivider />
               <MenuItem
+                color="red.400"
+                fontWeight="bold"
                 onClick={() => {
                   liffObject ? liffLogout() : logout();
                 }}
@@ -389,6 +403,25 @@ export const SidebarWithHeader: React.FC<SidebarWithHeaderProps> = ({
   children,
 }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isEditOpen,
+    onClose: onEditClose,
+    onOpen: onEditOpen,
+  } = useDisclosure();
+  const { data: userInfo, refetch: getAdminInfo } = useGetAdminSelf();
+  const { mutate: editAdminSelf } = usePutAdminBySelf();
+  const handleEditOpen = async () => {
+    await getAdminInfo();
+    onEditOpen();
+  };
+
+  const handleEditClose = () => {
+    onEditClose();
+  };
+
+  const handleUserSelfUpdate = (data: UserUpdateMe) => {
+    editAdminSelf({ userUpdateMe: data });
+  };
 
   return (
     <Box bg={useColorModeValue('white', 'gray.900')} minH="100vh">
@@ -408,10 +441,18 @@ export const SidebarWithHeader: React.FC<SidebarWithHeaderProps> = ({
           <SidebarContent onClose={onClose} />
         </DrawerContent>
       </Drawer>
-      <MobileNav onOpen={onOpen} />
+      <MobileNav onEditOpen={handleEditOpen} onOpen={onOpen} />
       <Box ml={{ base: 0, xl: 60 }} p="4">
         {children}
       </Box>
+      {userInfo && (
+        <AdminSelfEditModal
+          defaultValues={userInfo}
+          isOpen={isEditOpen}
+          onClose={handleEditClose}
+          onSubmit={handleUserSelfUpdate}
+        />
+      )}
     </Box>
   );
 };
