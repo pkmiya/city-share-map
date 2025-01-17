@@ -59,6 +59,9 @@ def get_posts_map(
     if problem_id is not None:
         filters["problem_id"] = problem_id
 
+    if user_id is not None:
+        filters["user_id"] = user_id
+
     if isinstance(current_user.id, int):
         user_type = "staff"
     else:
