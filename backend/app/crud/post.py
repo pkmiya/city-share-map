@@ -388,7 +388,12 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                     query = query.filter(
                         getattr(dynamic_table, "user_id") == filters["user_id"]
                     )
-                posts = query.offset(skip).limit(limit).all()
+                posts = (
+                    query.order_by(dynamic_table.created_at.desc())
+                    .offset(skip)
+                    .limit(limit)
+                    .all()
+                )
                 if "user_id" in filters and not posts and idx == len(open_problem) - 1:
                     raise HTTPException(
                         status_code=404,
