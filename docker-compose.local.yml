@@ -1,4 +1,8 @@
 services:
+  frontend:
+    deploy:
+      replicas: 0
+
   db:
     restart: "no"
     ports:

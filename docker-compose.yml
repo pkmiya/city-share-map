@@ -1,7 +1,11 @@
 services:
   # ONLY FOR PRODUCTIONs
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        BUILD_ENV: ${BUILD_ENV}
     container_name: frontend
     ports:
       - "3000:3000"
@@ -10,8 +14,6 @@ services:
       - NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
       - NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=${NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
       - NEXT_PUBLIC_LIFF_ID=${NEXT_PUBLIC_LIFF_ID}
-    profiles:
-      - production
 
   db:
     image: postgres:12
