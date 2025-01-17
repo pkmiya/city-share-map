@@ -1,9 +1,11 @@
-import { Box, Button, Center, Text } from '@chakra-ui/react';
+import { Box, Button, Center, HStack, Select, Text } from '@chakra-ui/react';
 import mapboxgl from 'mapbox-gl';
+import { useState } from 'react';
 import Map, { Marker } from 'react-map-gl';
 
 import { Env } from '@/config/env';
 import { usePostContext } from '@/context/postProvider';
+import { MapboxStyle, MapboxStyles } from '@/features/map/theme';
 import { initialViewState } from '@/features/map/view';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -21,6 +23,7 @@ export const LocationPick = ({ onNext, onBack }: Props) => {
   const address = formData.location?.address;
 
   const accessToken = Env.mapboxAccessToken;
+  const [mapStyle, setMapStyle] = useState(MapboxStyles[3].value);
 
   const { error, isLoading: loading, fetchAddress } = useGetAddress();
 
@@ -42,11 +45,38 @@ export const LocationPick = ({ onNext, onBack }: Props) => {
 
   return (
     <Box>
-      <Text>地図上で、該当する位置をタップしてしてください</Text>
+      <Text>地図上で、該当する位置をタップしてください</Text>
+      <HStack
+        justifyContent={{
+          base: 'flex-start',
+          md: 'flex-end',
+        }}
+        my={3}
+      >
+        <Text fontWeight="bold" w="140px">
+          地図テーマ
+        </Text>
+        <Select
+          alignSelf="flex-end"
+          maxW={{
+            base: 'full',
+            md: '300px',
+          }}
+          value={mapStyle}
+          onChange={(e) => setMapStyle(e.target.value)}
+        >
+          {MapboxStyles.map((style: MapboxStyle) => (
+            <option key={style.value} value={style.value}>
+              {style.description}
+            </option>
+          ))}
+        </Select>
+      </HStack>
+
       <Box
         border="1px solid lightgray"
         borderRadius="md"
-        height="400px"
+        height="70vh"
         mt="4"
         width="100%"
       >
@@ -54,7 +84,7 @@ export const LocationPick = ({ onNext, onBack }: Props) => {
           initialViewState={initialViewState}
           mapboxAccessToken={accessToken}
           mapLib={mapboxgl as any}
-          mapStyle="mapbox://styles/mapbox/light-v11"
+          mapStyle={mapStyle}
           style={{ height: '100%', width: '100%' }}
           onClick={handleMapClick}
         >

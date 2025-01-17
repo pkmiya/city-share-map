@@ -2,14 +2,13 @@
 
 import {
   Box,
-  BoxProps,
   HStack,
   IconButton,
   Image,
   Select,
   Spacer,
+  Stack,
   Text,
-  useMediaQuery,
 } from '@chakra-ui/react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -27,20 +26,11 @@ import { useGetPostsForMap } from './hooks/useGetPostsForMap';
 import { MapboxStyle, MapboxStyles } from './theme';
 import { initialViewState } from './view';
 
-type CitizenMapProps = BoxProps;
-
-export const CitizenMap = ({ ...props }: CitizenMapProps) => {
+export const CitizenMap = () => {
   const accessToken = Env.mapboxAccessToken;
   const [popupInfo, setPopupInfo] = useState<PostMapResponse>();
   const [viewState, setViewState] = useState(initialViewState);
-  const [mapStyle, setMapStyle] = useState(MapboxStyles[0].value);
-
-  const [isLargerThanXL] = useMediaQuery('(min-width: 1280px)');
-  const viewStyle = {
-    height: props.h ?? '60vh',
-    position: 'absolute' as 'absolute',
-    width: isLargerThanXL ? 'calc(95vw - 240px)' : '95vw',
-  } as React.CSSProperties;
+  const [mapStyle, setMapStyle] = useState(MapboxStyles[3].value);
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -106,26 +96,42 @@ export const CitizenMap = ({ ...props }: CitizenMapProps) => {
   );
 
   return (
-    <Box {...props}>
-      <HStack my={4}>
-        <Text fontSize="xl" fontWeight="bold">
+    <Box h="100vh">
+      <Stack
+        direction={{
+          base: 'column',
+          md: 'row',
+        }}
+        my={4}
+      >
+        <Text fontSize="xl" fontWeight="bold" w="400px">
           可視化マップ
         </Text>
         <Spacer />
-        <Text fontWeight="bold">地図テーマ</Text>
-        <Select
-          mr={12}
-          value={mapStyle}
-          w="20%"
-          onChange={(e) => setMapStyle(e.target.value)}
+        <HStack
+          justifyContent={{
+            base: 'flex-start',
+            md: 'flex-end',
+          }}
         >
-          {MapboxStyles.map((style: MapboxStyle) => (
-            <option key={style.value} value={style.value}>
-              {style.description}
-            </option>
-          ))}
-        </Select>
-      </HStack>
+          <Text w="140px">地図テーマ</Text>
+          <Select
+            alignSelf="flex-end"
+            maxW={{
+              base: 'full',
+              md: '300px',
+            }}
+            value={mapStyle}
+            onChange={(e) => setMapStyle(e.target.value)}
+          >
+            {MapboxStyles.map((style: MapboxStyle) => (
+              <option key={style.value} value={style.value}>
+                {style.description}
+              </option>
+            ))}
+          </Select>
+        </HStack>
+      </Stack>
 
       <FilterOptionsForCitizen
         filters={filters}
@@ -137,7 +143,7 @@ export const CitizenMap = ({ ...props }: CitizenMapProps) => {
         mapboxAccessToken={accessToken}
         mapLib={mapboxgl as any}
         mapStyle={mapStyle}
-        style={viewStyle}
+        style={{ height: '56vh', width: '100%' }}
         {...viewState}
         onMove={(evt) => setViewState(evt.viewState)}
       >
@@ -191,6 +197,7 @@ export const CitizenMap = ({ ...props }: CitizenMapProps) => {
         )}
         <NavigationControl />
       </Map>
+      <Box h="40px" />
     </Box>
   );
 };

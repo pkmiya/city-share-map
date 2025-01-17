@@ -80,6 +80,7 @@ export const ProblemSelect = ({ onNext }: Props) => {
           <FormLabel>どのテーマに対してレポートしますか？</FormLabel>
           <Select
             placeholder="テーマを選択"
+            w="80vw"
             {...register('problem', {
               required: 'テーマを選択してください',
             })}
