@@ -52,7 +52,7 @@ def update_user_me(
     """
     if user_in.email:
         existing_user = crud_user.get_by_email(session, email=user_in.email)
-        if existing_user:
+        if existing_user and existing_user.id != current_user.id:
             raise HTTPException(
                 status_code=400, detail="そのメールアドレスは既に登録されています"
             )
