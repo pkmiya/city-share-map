@@ -7,6 +7,7 @@ import {
   Image,
   Select,
   Spacer,
+  Spinner,
   Stack,
   Text,
 } from '@chakra-ui/react';
@@ -45,7 +46,7 @@ export const CitizenMap = () => {
       : null,
     userId: searchParams.get('userId') || null,
   });
-  const { data, refetch: getPosts } = useGetPostsForMap(filters);
+  const { data, refetch: getPosts, isLoading } = useGetPostsForMap(filters);
 
   const handleFilterChange = <K extends keyof GetPostsMapRequest>(
     key: K,
@@ -97,6 +98,17 @@ export const CitizenMap = () => {
 
   return (
     <Box h="100vh">
+      {isLoading && (
+        <Box
+          left="calc(50% + 112px)"
+          position="absolute"
+          top="50%"
+          transform="translate(-50%, -50%)"
+          zIndex="overlay"
+        >
+          <Spinner size="xl" />
+        </Box>
+      )}
       <Stack
         direction={{
           base: 'column',

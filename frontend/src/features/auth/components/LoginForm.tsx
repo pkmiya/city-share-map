@@ -7,7 +7,6 @@ import {
   FormErrorMessage,
   FormLabel,
   Input,
-  Link,
   Text,
   VStack,
 } from '@chakra-ui/react';
@@ -15,7 +14,6 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 
 import { appMetadata } from '@/config/metadata';
-import { pagesPath } from '@/gen/$path';
 import { LoginRequest } from '@/gen/api';
 
 import { useLoginByAdmin } from '../hooks/useLoginByAdmin';
@@ -27,7 +25,7 @@ export const LoginForm: React.FC = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<LoginRequest>();
 
   const onSubmit = (data: LoginRequest) => {
@@ -76,14 +74,16 @@ export const LoginForm: React.FC = () => {
             register={register}
           />
 
-          <Button colorScheme="teal" type="submit" width="full">
+          <Button
+            colorScheme="teal"
+            isLoading={isSubmitting}
+            type="submit"
+            width="full"
+          >
             ログイン
           </Button>
         </VStack>
       </form>
-      <Link href={pagesPath.map.$url().pathname}>
-        市民ユーザ向けホーム画面へ
-      </Link>
     </Box>
   );
 };

@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 
+import { LoadingText } from '@/components/LoadingText';
 import { SidebarWithHeader } from '@/components/SidebarWIthHeader';
 import { CitizenMap } from '@/features/map/CitizenMap';
 import { GetPostsMapRequest } from '@/gen/api';
@@ -11,7 +12,7 @@ export default function Home() {
   return (
     <>
       <SidebarWithHeader>
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<LoadingText />}>
           <CitizenMap />
         </Suspense>
       </SidebarWithHeader>

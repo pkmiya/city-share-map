@@ -11,6 +11,7 @@ import {
 } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 
+import { LoadingScreen } from '@/components/LoadingScreen';
 import { pagesPath } from '@/gen/$path';
 import { PostResponseBase } from '@/gen/api';
 
@@ -19,7 +20,7 @@ import { useAuth } from '../auth/hooks/useAuth';
 import { useGetPostsBySelf } from './hooks/useGetPostsBySelf';
 
 export const PostListBySelf = () => {
-  const { data } = useGetPostsBySelf({});
+  const { data, isLoading } = useGetPostsBySelf({});
   const router = useRouter();
 
   const { accessToken } = useAuth();
@@ -49,6 +50,22 @@ export const PostListBySelf = () => {
           マイレポートを地図で見る
         </Button>
       </Center>
+      {isLoading && <LoadingScreen />}
+      {data?.length == 0 && (
+        <Box>
+          <Text fontSize="large" textAlign="center">
+            投稿がありません。ぜひ投稿してみましょう！
+          </Text>
+          <Center mb={4}>
+            <Button
+              colorScheme="blue"
+              onClick={() => router.push(pagesPath.post.new.$url().path)}
+            >
+              レポートを投稿する
+            </Button>
+          </Center>
+        </Box>
+      )}
       {data &&
         data.map((post: PostResponseBase) => {
           const { id, isSolved, createdAt, problem } = post;
