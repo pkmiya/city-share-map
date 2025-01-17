@@ -551,6 +551,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
         problem_id: int,
         post_id: uuid.UUID,
         user_id: uuid.UUID,
+        user_type: str,
     ) -> PostResponse:
         """
         投稿を削除
