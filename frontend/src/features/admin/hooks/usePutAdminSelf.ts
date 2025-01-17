@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 
 import { adminUserApi } from '@/api/client';
 import { adminKeys } from '@/features/auth/constants/queryKey';
-import { UpdateUserRequest, User } from '@/gen/api';
+import { UpdateUserMeRequest, User } from '@/gen/api';
 import queryClient from '@/lib/react-query';
 import { getErrorStatus } from '@/utils/error';
 
@@ -11,8 +11,8 @@ export const usePutAdminBySelf = () => {
   const toast = useToast();
 
   const mutation = useMutation({
-    mutationFn: async (req: UpdateUserRequest) => {
-      const res = await adminUserApi.updateUser(req);
+    mutationFn: async (req: UpdateUserMeRequest) => {
+      const res = await adminUserApi.updateUserMe(req);
       return res;
     },
     onError: (error) => {
@@ -22,7 +22,7 @@ export const usePutAdminBySelf = () => {
         duration: 2000,
         position: 'bottom-right',
         status: 'error',
-        title: '管理者ユーザの編集に失敗しました',
+        title: '登録情報の更新に失敗しました',
       });
     },
     onSuccess: async (res: User) => {
@@ -33,7 +33,7 @@ export const usePutAdminBySelf = () => {
         duration: 2000,
         position: 'bottom-right',
         status: 'success',
-        title: '管理者ユーザの編集に成功しました',
+        title: '登録情報の更新に成功しました',
       });
     },
   });
