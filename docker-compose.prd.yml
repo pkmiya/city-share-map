@@ -3,14 +3,8 @@ services:
     build:
       args:
         BUILD_ENV: "prd"
-    container_name: frontend
-    ports:
-      - "3000:3000"
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
-      - NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=${NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
-      - NEXT_PUBLIC_LIFF_ID=${NEXT_PUBLIC_LIFF_ID}
     command: >
       sh -c "yarn build:prd && yarn start"
     env_file:

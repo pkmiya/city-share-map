@@ -7,7 +7,8 @@ FROM base AS builder
 WORKDIR /app
 
 # 必要なファイルのみコピー
-COPY package.json yarn.lock* ./
+RUN ls -la
+COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 
 COPY src ./src
@@ -20,12 +21,13 @@ ENV BUILD_ENV=${BUILD_ENV}
 RUN yarn build:${BUILD_ENV}
 
 # 実行フェーズ
-FROM base AS runner
+# NOTE: 消してみる
+# FROM base AS runner
 
-WORKDIR /app
+# WORKDIR /app
 
-# 必要なファイルのみコピー
-COPY --from=builder /app/.next/ ./.next/
-COPY --from=builder /app/public ./public
+# # 必要なファイルのみコピー
+# COPY --from=builder /app/.next/ ./.next/
+# COPY --from=builder /app/public ./public
 
 CMD ["yarn", "start"]
