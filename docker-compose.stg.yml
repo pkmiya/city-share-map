@@ -1,4 +1,15 @@
 services:
+  frontend:
+    build:
+      args:
+        BUILD_ENV: "stg"
+    environment:
+      - NODE_ENV=staging
+    command: >
+      sh -c "yarn build:stg && yarn start"
+    env_file:
+      - ./frontend/.env.stg
+
   db:
     restart: "no"
     ports:

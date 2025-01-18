@@ -3,7 +3,7 @@ from uuid import UUID, uuid4
 
 from app.models.base import Base, CommonColumns
 from sqlalchemy import UUID as DBUUID
-from sqlalchemy import Boolean, DateTime, Integer, String
+from sqlalchemy import Boolean, DateTime, Integer, String, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 
@@ -31,7 +31,7 @@ class CitizenUser(Base, CommonColumns):
     line_id: Mapped[str] = mapped_column(String)
     name: Mapped[str] = mapped_column(String, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    last_login: Mapped[datetime] = mapped_column(DateTime)
+    last_login: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
 
     # posts = relationship("PostBase", back_populates="citizen_user")
     # post_likes = relationship("PostLikeBase", back_populates="user")
