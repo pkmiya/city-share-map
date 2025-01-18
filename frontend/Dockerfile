@@ -15,7 +15,7 @@ COPY public ./public
 COPY next.config.mjs tsconfig.json ./
 
 # 環境変数をビルド時に指定
-ARG BUILD_ENV
+ARG BUILD_ENV=stg
 ENV BUILD_ENV=${BUILD_ENV}
 RUN yarn build:${BUILD_ENV}
 
