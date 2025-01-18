@@ -13,6 +13,7 @@ import {
 import React from 'react';
 import { useForm } from 'react-hook-form';
 
+import { ReloadText } from '@/components/ReloadText';
 import { appMetadata } from '@/config/metadata';
 import { LoginRequest } from '@/gen/api';
 
@@ -45,6 +46,7 @@ export const LoginForm: React.FC = () => {
       p="6"
       w="100%"
     >
+      <ReloadText />
       <Text mb={2} textAlign="center">
         {String(appMetadata.title)}
       </Text>
