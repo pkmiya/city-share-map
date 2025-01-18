@@ -2,7 +2,12 @@ import uuid
 from typing import Dict, List, Optional, Union
 from uuid import UUID
 
-from app.api.deps import CurrentAllUser, CurrentStaffUser, CurrentCitizenUser, SessionDep
+from app.api.deps import (
+    CurrentAllUser,
+    CurrentCitizenUser,
+    CurrentStaffUser,
+    SessionDep,
+)
 from app.crud.post import crud_post
 from app.schemas.post import (
     PostCreate,
@@ -57,6 +62,9 @@ def get_posts_map(
 
     if problem_id is not None:
         filters["problem_id"] = problem_id
+
+    if user_id is not None:
+        filters["user_id"] = user_id
 
     if isinstance(current_user.id, int):
         user_type = "staff"
@@ -208,7 +216,11 @@ def delete_post(
         user_type = "citizen"
 
     return crud_post.delete_post(
-        db_session=db, problem_id=problem_id, post_id=post_id, user_id=current_user.id, user_type=user_type
+        db_session=db,
+        problem_id=problem_id,
+        post_id=post_id,
+        user_id=current_user.id,
+        user_type=user_type,
     )
 
 

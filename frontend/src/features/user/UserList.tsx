@@ -19,6 +19,7 @@ import { useRouter } from 'next/navigation';
 import { IoWarningOutline } from 'react-icons/io5';
 import { MdEdit } from 'react-icons/md';
 
+import { LoadingScreen } from '@/components/LoadingScreen';
 import { pagesPath } from '@/gen/$path';
 import { formatDate } from '@/utils/date';
 
@@ -26,7 +27,7 @@ import { useGetUsers } from './hooks/useGetUsers';
 
 export const UserList = () => {
   const router = useRouter();
-  const { data } = useGetUsers();
+  const { data, isLoading } = useGetUsers();
 
   return (
     <Box w="full">
@@ -37,6 +38,12 @@ export const UserList = () => {
         合計ユーザ数：{data ? data.length : 0}人
       </Text>
       <Box m="auto" w="80vw">
+        {isLoading && <LoadingScreen />}
+        {data?.length == 0 && (
+          <Text fontSize="large" textAlign="center">
+            ユーザが見つかりませんでした
+          </Text>
+        )}
         {data && data.length > 0 && (
           <TableContainer>
             <Table variant="simple">

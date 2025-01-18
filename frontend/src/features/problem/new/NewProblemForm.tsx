@@ -31,7 +31,7 @@ export const NewProblemForm = () => {
     register,
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<ProblemCreate>({
     defaultValues: {
       description: '',
@@ -207,6 +207,7 @@ export const NewProblemForm = () => {
             <Button
               alignSelf="center"
               colorScheme="blue"
+              isLoading={isSubmitting}
               mt={8}
               type="submit"
               w="fit-content"

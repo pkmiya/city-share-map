@@ -1,6 +1,6 @@
 import {
   Box,
-  HStack,
+  Flex,
   Input,
   Radio,
   RadioGroup,
@@ -32,45 +32,92 @@ export const FilterOptions = ({
       <Text fontSize="lg" fontWeight="bold" my={4}>
         検索オプション
       </Text>
-      <Box ml={4} mr={12}>
-        <HStack>
-          <RadioGroup
-            value={
-              filters.isSolved === null ? '1' : filters.isSolved ? '2' : '3'
-            }
-            w="50%"
-            onChange={(value) =>
-              onFilterChange('isSolved', value === '1' ? null : value === '2')
-            }
+      <Stack
+        direction={{
+          base: 'column',
+          xl: 'row',
+        }}
+        wrap="wrap"
+      >
+        <Flex
+          align="start"
+          direction={{
+            base: 'column',
+            lg: 'row',
+          }}
+          justify="start"
+        >
+          <Flex
+            align="start"
+            direction={{
+              base: 'column',
+              lg: 'row',
+            }}
+            justify="start"
           >
-            <Stack direction="row" spacing={4}>
-              <Text fontWeight="bold">対応状況</Text>
-              <Radio value="1">すべて表示</Radio>
-              <Radio value="2">解決済</Radio>
-              <Radio value="3">未解決</Radio>
-            </Stack>
-          </RadioGroup>
+            <RadioGroup
+              mr={12}
+              mt={2}
+              value={
+                filters.isSolved === null ? '1' : filters.isSolved ? '2' : '3'
+              }
+              onChange={(value) =>
+                onFilterChange('isSolved', value === '1' ? null : value === '2')
+              }
+            >
+              <Stack
+                direction={{
+                  base: 'column',
+                  sm: 'row',
+                }}
+                spacing={4}
+              >
+                <Text fontWeight="bold">対応状況</Text>
+                <Radio value="1">すべて表示</Radio>
+                <Radio value="2">解決済</Radio>
+                <Radio value="3">未解決</Radio>
+              </Stack>
+            </RadioGroup>
 
-          <RadioGroup
-            value={filters.isOpen === null ? '1' : filters.isOpen ? '2' : '3'}
-            onChange={(value) =>
-              onFilterChange('isOpen', value === '1' ? null : value === '2')
-            }
-          >
-            <Stack direction="row" spacing={4}>
-              <Text fontWeight="bold">公開状態</Text>
-              <Radio value="1">公開/非公開 全て</Radio>
-              <Radio value="2">公開中</Radio>
-              <Radio value="3">非公開</Radio>
-            </Stack>
-          </RadioGroup>
-        </HStack>
-
-        <HStack spacing={4}>
+            <RadioGroup
+              mr={12}
+              mt={2}
+              value={filters.isOpen === null ? '1' : filters.isOpen ? '2' : '3'}
+              onChange={(value) =>
+                onFilterChange('isOpen', value === '1' ? null : value === '2')
+              }
+            >
+              <Stack
+                direction={{
+                  base: 'column',
+                  sm: 'row',
+                }}
+                spacing={4}
+              >
+                <Text fontWeight="bold">公開状態</Text>
+                <Radio value="1">公開/非公開 全て</Radio>
+                <Radio value="2">公開中</Radio>
+                <Radio value="3">非公開</Radio>
+              </Stack>
+            </RadioGroup>
+          </Flex>
+        </Flex>
+        <Flex
+          align="start"
+          direction={{
+            base: 'column',
+            lg: 'row',
+          }}
+          gap={4}
+          justify="start"
+        >
           <Select
-            mt={4}
             placeholder="課題を選択"
             value={filters.problemId || ''}
+            w={{
+              base: 'full',
+              xl: 'fit-content',
+            }}
             onChange={(e) =>
               onFilterChange(
                 'problemId',
@@ -86,13 +133,16 @@ export const FilterOptions = ({
           </Select>
 
           <Input
-            mt={4}
             placeholder="投稿ユーザーID"
             value={filters.userId || ''}
+            w={{
+              base: 'full',
+              xl: 'fit-content',
+            }}
             onChange={(e) => onFilterChange('userId', e.target.value || null)}
           />
-        </HStack>
-      </Box>
+        </Flex>
+      </Stack>
     </Box>
   );
 };
