@@ -1,7 +1,20 @@
 services:
   frontend:
-    deploy:
-      replicas: 0
+    build:
+      args:
+        BUILD_ENV: "local"
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=staging
+      - NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
+      - NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=${NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
+      - NEXT_PUBLIC_LIFF_ID=${NEXT_PUBLIC_LIFF_ID}
+    command: >
+      sh -c "yarn build:local && yarn start"
+    env_file:
+      - ./frontend/.env.local
 
   db:
     restart: "no"
@@ -20,14 +33,3 @@ services:
       - run
       - --reload
       - "app/main.py"
-    develop:
-      watch:
-        - path: ./backend
-          action: sync
-          target: /app
-          ignore:
-            - ./backend/.venv
-            - .venv
-        - path: ./backend/pyproject.toml
-          action: rebuild
-    # TODO: remove once coverage is done locally

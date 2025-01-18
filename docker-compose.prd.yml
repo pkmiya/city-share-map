@@ -1,6 +1,8 @@
 services:
   frontend:
-    build: ./frontend
+    build:
+      args:
+        BUILD_ENV: "prd"
     container_name: frontend
     ports:
       - "3000:3000"
