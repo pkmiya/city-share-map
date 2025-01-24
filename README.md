@@ -7,7 +7,7 @@
 まず、以下のコマンドを実行し、バックエンドとデータベースを起動してください。イメージを再ビルドする場合、末尾に `--build` オプションを追加します。
 
 ```
-$ docker compose -f docker-compose.yml -f docker-compose.stg.yml up -d
+$ docker compose -f docker-compose.yml -f docker-compose.local.yml up -d
 ```
 
 次に、以下のコマンドを実行し、フロントエンドの開発サーバーを起動してください。
