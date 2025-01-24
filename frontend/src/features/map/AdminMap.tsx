@@ -27,6 +27,8 @@ import { useGetPostsForMap } from './hooks/useGetPostsForMap';
 import { MapboxStyle, MapboxStyles } from './theme';
 import { initialViewState } from './view';
 
+const OFFSET_BASE = 75;
+
 export const AdminMap = () => {
   const accessToken = Env.mapboxAccessToken;
   const [popupInfo, setPopupInfo] = useState<PostMapResponse>();
@@ -101,12 +103,16 @@ export const AdminMap = () => {
             onClick={(e) => {
               e.originalEvent.stopPropagation();
               setPopupInfo(post);
-              setViewState((prevState) => ({
-                ...prevState,
-                latitude: Number(coodinate.latitude),
-                longitude: Number(coodinate.longitude),
-                transitionDuration: 500,
-              }));
+              setViewState((prevState) => {
+                const zoomFactor = Math.pow(2, -prevState.zoom);
+                const offset = OFFSET_BASE * zoomFactor;
+                return {
+                  ...prevState,
+                  latitude: Number(coodinate.latitude) - offset,
+                  longitude: Number(coodinate.longitude),
+                  transitionDuration: 500,
+                };
+              });
             }}
           ></Marker>
         );
