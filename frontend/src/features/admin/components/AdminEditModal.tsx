@@ -23,6 +23,8 @@ import { DeleteUserRequest, User, UserUpdate } from '@/gen/api';
 type AdminEditModalProps = {
   defaultValues: User;
   isOpen: boolean;
+  isPendingDelete: boolean;
+  isPendingPut: boolean;
   onClose: () => void;
   onDelete: (userId: DeleteUserRequest) => void;
   onSubmit: (data: UserUpdate) => void;
@@ -34,6 +36,8 @@ export const AdminEditModal = ({
   onDelete,
   onSubmit,
   defaultValues,
+  isPendingDelete,
+  isPendingPut,
 }: AdminEditModalProps) => {
   const {
     register,
@@ -147,14 +151,18 @@ export const AdminEditModal = ({
           </form>
         </ModalBody>
         <ModalFooter>
-          <Button colorScheme="red" onClick={handleDelete}>
+          <Button
+            colorScheme="red"
+            isLoading={isPendingDelete}
+            onClick={handleDelete}
+          >
             削除
           </Button>
           <Spacer />
           <Button
             colorScheme="teal"
             form="admin-edit-form"
-            isLoading={isSubmitting}
+            isLoading={isPendingPut}
             mr={3}
             type="submit"
           >
