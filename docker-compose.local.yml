@@ -1,4 +1,9 @@
 services:
+  # Do not deploy frontend service in local development
+  frontend:
+    deploy:
+      replicas: 0
+
   db:
     restart: "no"
     ports:
@@ -16,14 +21,3 @@ services:
       - run
       - --reload
       - "app/main.py"
-    develop:
-      watch:
-        - path: ./backend
-          action: sync
-          target: /app
-          ignore:
-            - ./backend/.venv
-            - .venv
-        - path: ./backend/pyproject.toml
-          action: rebuild
-    # TODO: remove once coverage is done locally

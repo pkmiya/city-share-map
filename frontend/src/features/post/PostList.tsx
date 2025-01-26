@@ -23,6 +23,7 @@ import { FaCheck } from 'react-icons/fa';
 import { FiMap } from 'react-icons/fi';
 import { MdOpenInNew } from 'react-icons/md';
 
+import { LoadingScreen } from '@/components/LoadingScreen';
 import { pagesPath } from '@/gen/$path';
 import {
   DeletePostRequest,
@@ -57,7 +58,7 @@ export const PostList = () => {
       : null,
     userId: searchParams.get('userId') || null,
   });
-  const { data, refetch: getPosts } = useGetPosts(filters);
+  const { data, refetch: getPosts, isLoading } = useGetPosts(filters);
 
   const handleFilterChange = <K extends keyof GetPostsSummaryRequest>(
     key: K,
@@ -153,30 +154,35 @@ export const PostList = () => {
         <Text fontSize="lg" fontWeight="bold" my={4}>
           検索結果
         </Text>
-        <TableContainer>
-          <Table maxW="40%" variant="simple">
-            <Thead>
-              <Tr>
-                <Th w="1%">操作</Th>
-                <Th minW="10%" width="auto">
-                  課題名
-                </Th>
-                <Th>課題ID</Th>
-                {/* TODO: 今後対応 */}
-                {/* <Th w="1%">公開状態</Th> */}
-                <Th w="1%">対応状況</Th>
-                <Th w="1%">投稿ユーザ</Th>
-                <Th w="1%">投稿ユーザID</Th>
-                <Th w="1%">投稿日時</Th>
-                <Th isNumeric w="1%">
-                  投稿ID
-                </Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {data &&
-                data.length > 0 &&
-                data.map((post: PostResponseBase) => {
+        {isLoading && <LoadingScreen />}
+        {data?.length == 0 && (
+          <Text fontSize="large" textAlign="center">
+            投稿がありません
+          </Text>
+        )}
+        {data && data.length > 0 && (
+          <TableContainer>
+            <Table maxW="40%" variant="simple">
+              <Thead>
+                <Tr>
+                  <Th w="1%">操作</Th>
+                  <Th minW="10%" width="auto">
+                    課題名
+                  </Th>
+                  <Th>課題ID</Th>
+                  {/* TODO: 今後対応 */}
+                  {/* <Th w="1%">公開状態</Th> */}
+                  <Th w="1%">対応状況</Th>
+                  <Th w="1%">投稿ユーザ</Th>
+                  <Th w="1%">投稿ユーザID</Th>
+                  <Th w="1%">投稿日時</Th>
+                  <Th isNumeric w="1%">
+                    投稿ID
+                  </Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {data.map((post: PostResponseBase) => {
                   const { id, problem, user, isSolved, createdAt } = post;
                   return (
                     <Tr key={id}>
@@ -260,9 +266,10 @@ export const PostList = () => {
                     </Tr>
                   );
                 })}
-            </Tbody>
-          </Table>
-        </TableContainer>
+              </Tbody>
+            </Table>
+          </TableContainer>
+        )}
       </Box>
     </Box>
   );

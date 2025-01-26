@@ -46,7 +46,7 @@ export const NewProblemForm = () => {
     name: 'items',
   });
 
-  const { mutate } = usePostProblem();
+  const { mutate, isPending } = usePostProblem();
   const { data: ItemType } = useGetItemType();
 
   const onSubmit = async (data: ProblemCreate) => {
@@ -207,6 +207,7 @@ export const NewProblemForm = () => {
             <Button
               alignSelf="center"
               colorScheme="blue"
+              isLoading={isPending}
               mt={8}
               type="submit"
               w="fit-content"

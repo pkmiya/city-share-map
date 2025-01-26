@@ -37,8 +37,9 @@ export const EditProblemForm = ({
     defaultValues: initialData,
   });
 
-  const { mutate: putProblem } = usePutProblem();
-  const { mutate: deleteProblem } = useDeleteProblem();
+  const { mutate: putProblem, isPending: isPendingPut } = usePutProblem();
+  const { mutate: deleteProblem, isPending: isPendingDelete } =
+    useDeleteProblem();
   const { data: ItemType } = useGetItemType();
 
   const onSubmit = async (data: ProblemUpdate) => {
@@ -173,13 +174,19 @@ export const EditProblemForm = ({
             <HStack alignSelf="center" mt={8}>
               <Button
                 colorScheme="red"
+                isLoading={isPendingDelete}
                 variant="outline"
                 w="fit-content"
                 onClick={onDelete}
               >
                 削除する
               </Button>
-              <Button colorScheme="blue" type="submit" w="fit-content">
+              <Button
+                colorScheme="blue"
+                isLoading={isPendingPut}
+                type="submit"
+                w="fit-content"
+              >
                 更新する
               </Button>
             </HStack>

@@ -293,7 +293,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                 open_problem = [problem.id for problem in problems]
 
             response = []
-            for problem_id in open_problem:
+            for idx, problem_id in enumerate(open_problem):
                 dynamic_table = self.get_dynamic_table(db_session, problem_id)
 
                 if user_type == "staff":
@@ -302,7 +302,20 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                         query = query.filter(
                             getattr(dynamic_table, "is_solved") == filters["is_solved"]
                         )
+                    if "user_id" in filters:
+                        query = query.filter(
+                            getattr(dynamic_table, "user_id") == filters["user_id"]
+                        )
                     posts = query.offset(skip).limit(limit).all()
+                    if (
+                        "user_id" in filters
+                        and not posts
+                        and idx == len(open_problem) - 1
+                    ):
+                        raise HTTPException(
+                            status_code=404,
+                            detail=f"指定されたuser_id: {filters['user_id']} の投稿が見つかりませんでした",
+                        )
 
                 elif user_type == "citizen":
                     now = datetime.now()
@@ -363,7 +376,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                 open_problem = [problem.id for problem in problems]
 
             response = []
-            for problem_id in open_problem:
+            for idx, problem_id in enumerate(open_problem):
                 dynamic_table = self.get_dynamic_table(db_session, problem_id)
 
                 query = db_session.query(dynamic_table)
@@ -375,8 +388,17 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
                     query = query.filter(
                         getattr(dynamic_table, "user_id") == filters["user_id"]
                     )
-
-                posts = query.offset(skip).limit(limit).all()
+                posts = (
+                    query.order_by(dynamic_table.created_at.desc())
+                    .offset(skip)
+                    .limit(limit)
+                    .all()
+                )
+                if "user_id" in filters and not posts and idx == len(open_problem) - 1:
+                    raise HTTPException(
+                        status_code=404,
+                        detail=f"指定されたuser_id: {filters['user_id']} の投稿が見つかりませんでした",
+                    )
                 for post in posts:
                     res = self._build_post_summary_response(
                         db_session, dynamic_table, post.id, user_type
@@ -529,6 +551,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
         problem_id: int,
         post_id: uuid.UUID,
         user_id: uuid.UUID,
+        user_type: str,
     ) -> PostResponse:
         """
         投稿を削除
@@ -537,10 +560,11 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
             dynamic_table = self.get_dynamic_table(db_session, problem_id)
             post = self._get_post(db_session, dynamic_table, post_id)
 
-            if post.user_id != user_id:
+            if user_type == "citizen" & post.user_id != user_id:
                 raise HTTPException(
                     status_code=403, detail="この投稿を削除する権限がありません"
                 )
+
             response = self._build_post_response(db_session, dynamic_table, post_id)
 
             db_session.delete(post)

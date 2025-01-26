@@ -10,6 +10,7 @@ import {
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+import { LoadingText } from '@/components/LoadingText';
 import { usePostContext } from '@/context/postProvider';
 import { useGetProblemById } from '@/features/problem/hooks/useGetProblemById';
 import { useGetProblems } from '@/features/problem/hooks/useGetProblems';
@@ -24,7 +25,7 @@ export const ProblemSelect = ({ onNext }: Props) => {
   const [problemId, setProblemId] = useState<number | null>(null);
   const { formData, setFormData } = usePostContext();
   const { refetch } = useGetProblemById(problemId ?? problemIdDefaultValue);
-  const { data } = useGetProblems({});
+  const { data, isLoading } = useGetProblems({});
   // NOTE: BackendがisOpenによらず全ての課題を返すため、isOpenでフィルタリングしている
   const problems = data ? data.filter((p) => p.isOpen) : [];
 
@@ -78,21 +79,27 @@ export const ProblemSelect = ({ onNext }: Props) => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <FormControl isInvalid={!!errors.problem}>
           <FormLabel>どのテーマに対してレポートしますか？</FormLabel>
-          <Select
-            placeholder="テーマを選択"
-            {...register('problem', {
-              required: 'テーマを選択してください',
-            })}
-            onChange={handleChange}
-          >
-            {problems &&
-              problems.length > 0 &&
-              problems.map((p) => (
-                <option key={p.id} value={p.name}>
-                  {p.name}
-                </option>
-              ))}
-          </Select>
+          {isLoading ? (
+            <LoadingText />
+          ) : (
+            <Select
+              placeholder="テーマを選択"
+              w="full"
+              {...register('problem', {
+                required: 'テーマを選択してください',
+              })}
+              onChange={handleChange}
+            >
+              {problems &&
+                problems.length > 0 &&
+                problems.map((p) => (
+                  <option key={p.id} value={p.name}>
+                    {p.name}
+                  </option>
+                ))}
+            </Select>
+          )}
+
           <FormErrorMessage>
             {errors.problem && errors.problem.message}
           </FormErrorMessage>

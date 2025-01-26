@@ -21,6 +21,7 @@ import { UserCreate } from '@/gen/api';
 
 type AdminAddModalProps = {
   isOpen: boolean;
+  isPending?: boolean;
   onClose: () => void;
   onSubmit: (data: UserCreate) => void;
 };
@@ -29,11 +30,12 @@ export const AdminAddModal = ({
   isOpen,
   onClose,
   onSubmit,
+  isPending,
 }: AdminAddModalProps) => {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     reset,
   } = useForm<UserCreate>();
 
@@ -114,7 +116,7 @@ export const AdminAddModal = ({
           <Button
             colorScheme="teal"
             form="admin-form"
-            isLoading={isSubmitting}
+            isLoading={isPending}
             mr={3}
             type="submit"
           >

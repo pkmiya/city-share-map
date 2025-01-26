@@ -21,6 +21,7 @@ import {
 import { useState } from 'react';
 import { MdEdit } from 'react-icons/md';
 
+import { LoadingScreen } from '@/components/LoadingScreen';
 import { DeleteUserRequest, User, UserCreate, UserUpdate } from '@/gen/api';
 
 import { AdminAddModal } from './components/AdminAddModal';
@@ -43,10 +44,10 @@ export const AdminList = () => {
   } = useDisclosure();
   const [selectedAdmin, setSelectedAdmin] = useState<User | null>(null);
 
-  const { data } = useGetAdmins();
-  const { mutate: addAdmin } = usePostAdmin();
-  const { mutate: editAdmin } = usePutAdminById();
-  const { mutate: deleteAdmin } = useDeleteAdmin();
+  const { data, isLoading } = useGetAdmins();
+  const { mutate: addAdmin, isPending: isPendingPost } = usePostAdmin();
+  const { mutate: editAdmin, isPending: isPendingPut } = usePutAdminById();
+  const { mutate: deleteAdmin, isPending: isPendingDelete } = useDeleteAdmin();
 
   const handleAddAdmin = (newAdmin: UserCreate) => {
     addAdmin({ userCreate: newAdmin });
@@ -90,12 +91,20 @@ export const AdminList = () => {
           <AdminEditModal
             defaultValues={selectedAdmin}
             isOpen={isEditOpen}
+            isPendingDelete={isPendingDelete}
+            isPendingPut={isPendingPut}
             onClose={onEditClose}
             onDelete={handleDeleteAdmin}
             onSubmit={handleEditAdmin}
           />
         )}
 
+        {isLoading && <LoadingScreen />}
+        {data?.length == 0 && (
+          <Text fontSize="large" textAlign="center">
+            管理者ユーザが見つかりませんでした
+          </Text>
+        )}
         {data && data.length > 0 && (
           <TableContainer>
             <Table variant="simple">

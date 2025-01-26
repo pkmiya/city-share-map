@@ -22,7 +22,7 @@ jobs:
       matrix:
         command:
           - lint
-          - build
+          - build:stg
 
     steps:
       - name: Checkout code
