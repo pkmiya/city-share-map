@@ -59,7 +59,7 @@ def read_item_type(
 
 @router.get("/data/{id}", response_model=ProblemReadByID)
 def read_problem_by_id(
-    *, db: SessionDep, current_user: CurrentStaffUser, id: int
+    *, db: SessionDep, current_user: CurrentAllUser, id: int
 ) -> ProblemReadByID:
     """
     Get problem by ID.
