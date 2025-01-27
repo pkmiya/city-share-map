@@ -550,7 +550,7 @@ class CRUDPost(CRUDBase[PostBase, PostCreate, PostUpdate]):
         *,
         problem_id: int,
         post_id: uuid.UUID,
-        user_id: uuid.UUID,
+        user_id: Union[uuid.UUID, int],
         user_type: str,
     ) -> PostResponse:
         """

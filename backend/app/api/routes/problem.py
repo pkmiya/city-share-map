@@ -1,6 +1,6 @@
 from typing import List
 
-from app.api.deps import CurrentAdminUser, CurrentStaffUser, SessionDep
+from app.api.deps import CurrentAdminUser, CurrentAllUser, CurrentStaffUser, SessionDep
 from app.crud.problem import crud_problem
 from app.models.problems import Problem as DBProblem
 from app.models.problems import Type as DBType
@@ -32,7 +32,7 @@ def create_problem(
 
 @router.get("/", response_model=List[ProblemRead])
 def read_problems(
-    *, db: SessionDep, current_user: CurrentStaffUser, skip: int = 0, limit: int = 100
+    *, db: SessionDep, current_user: CurrentAllUser, skip: int = 0, limit: int = 100
 ) -> List[ProblemRead]:
     """
     Retrieve problems.
@@ -46,7 +46,7 @@ def read_problems(
 def read_item_type(
     *,
     db: SessionDep,
-    current_user: CurrentStaffUser,
+    current_user: CurrentAllUser,
 ) -> List[Type]:
     """
     Retrieve problems.
