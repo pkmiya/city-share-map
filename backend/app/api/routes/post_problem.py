@@ -36,7 +36,7 @@ def create_post(
     if isinstance(current_user.id, int):
         user_id = mock_id
     else:
-        user_type = current_user.id
+        user_id = current_user.id
 
     return crud_post.create_post(
         db_session=db, problem_id=problem_id, user_id=user_id, post_in=post_in
