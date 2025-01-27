@@ -27,14 +27,19 @@ def create_post(
     *,
     db: SessionDep,
     problem_id: int,
-    current_user: CurrentCitizenUser,
+    current_user: CurrentAllUser,
     post_in: PostCreate
 ) -> PostResponse:
     """
     新しい投稿を作成
     """
+    if isinstance(current_user.id, int):
+        user_id = mock_id
+    else:
+        user_type = current_user.id
+
     return crud_post.create_post(
-        db_session=db, problem_id=problem_id, user_id=current_user.id, post_in=post_in
+        db_session=db, problem_id=problem_id, user_id=user_id, post_in=post_in
     )
 
 
@@ -142,7 +147,6 @@ def get_posts_summary_me(
         filters["problem_id"] = problem_id
 
     filters["user_id"] = current_user.id
-    # filters["user_id"] = mock_id
 
     return crud_post.get_post_summary(
         db_session=db,
