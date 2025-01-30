@@ -19,6 +19,7 @@ import { useMemo, useState } from 'react';
 import { IoMdClose } from 'react-icons/io';
 import Map, { Marker, NavigationControl, Popup } from 'react-map-gl';
 
+import { SurveyLink } from '@/components/SurveyLink';
 import { Env } from '@/config/env';
 import { pagesPath } from '@/gen/$path';
 import { GetPostsMapRequest, PostMapResponse } from '@/gen/api';
@@ -124,6 +125,7 @@ export const CitizenMap = () => {
         }}
         my={4}
       >
+        <SurveyLink />
         <HStack mb={2}>
           <Text fontSize="xl" fontWeight="bold" w="120px">
             可視化マップ
