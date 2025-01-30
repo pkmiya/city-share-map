@@ -30,3 +30,8 @@ export const isLiffDevice = (liff: Liff) => {
   const device = liff.getOS();
   return device !== 'web';
 };
+
+export const isAndroid = (liff: Liff) => {
+  const device = liff.getOS();
+  return device === 'android';
+};

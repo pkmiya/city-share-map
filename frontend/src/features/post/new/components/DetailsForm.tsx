@@ -37,6 +37,8 @@ export const DetailsForm = ({ onBack }: Props) => {
   const address = formData.location?.address;
   const fields = formData.selectedProblemDetail?.items ?? [];
 
+  const isAndroid = localStorage.getItem('device') === 'android';
+
   const {
     register,
     handleSubmit,
@@ -185,9 +187,10 @@ export const DetailsForm = ({ onBack }: Props) => {
                       <Input
                         // NOTE: Androidにおいて、カメラを起動できるようにする
                         // c.f. https://developer.mozilla.org/ja/docs/Web/HTML/Element/Input/file#capture
-                        // c.f. https://qiita.com/caslinden/items/dd6a920b1b9932f3fdcc
-                        accept="image/*"
-                        capture={true}
+                        accept={
+                          isAndroid ? 'image/*;capture=camera' : 'image/*'
+                        }
+                        capture={isAndroid ? true : undefined}
                         type="file"
                         onChange={(e) => handleFileChange(e, field.name)}
                       />
