@@ -1,5 +1,8 @@
 services:
   frontend:
+    restart: always
+    ports:
+      - "3000:3000"
     build:
       args:
         BUILD_ENV: "prd"
@@ -11,12 +14,12 @@ services:
       - ./frontend/.env.prd
 
   db:
-    restart: "no"
+    restart: always
     ports:
       - "5432:5432"
 
   backend:
-    restart: "no"
+    restart: always
     ports:
       - "8000:8000"
     build:
