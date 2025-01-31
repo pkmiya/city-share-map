@@ -1,0 +1,29 @@
+services:
+  frontend:
+    build:
+      args:
+        BUILD_ENV: "prd"
+    environment:
+      - NODE_ENV=production
+    command: >
+      sh -c "yarn build:prd && yarn start"
+    env_file:
+      - ./frontend/.env.prd
+
+  db:
+    restart: "no"
+    ports:
+      - "5432:5432"
+
+  backend:
+    restart: "no"
+    ports:
+      - "8000:8000"
+    build:
+      context: ./backend
+    # command: sleep infinity  # Infinite loop to keep container alive doing nothing
+    command:
+      - fastapi
+      - run
+      - --reload
+      - "app/main.py"

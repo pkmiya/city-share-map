@@ -45,9 +45,9 @@ export const AdminList = () => {
   const [selectedAdmin, setSelectedAdmin] = useState<User | null>(null);
 
   const { data, isLoading } = useGetAdmins();
-  const { mutate: addAdmin } = usePostAdmin();
-  const { mutate: editAdmin } = usePutAdminById();
-  const { mutate: deleteAdmin } = useDeleteAdmin();
+  const { mutate: addAdmin, isPending: isPendingPost } = usePostAdmin();
+  const { mutate: editAdmin, isPending: isPendingPut } = usePutAdminById();
+  const { mutate: deleteAdmin, isPending: isPendingDelete } = useDeleteAdmin();
 
   const handleAddAdmin = (newAdmin: UserCreate) => {
     addAdmin({ userCreate: newAdmin });
@@ -91,6 +91,8 @@ export const AdminList = () => {
           <AdminEditModal
             defaultValues={selectedAdmin}
             isOpen={isEditOpen}
+            isPendingDelete={isPendingDelete}
+            isPendingPut={isPendingPut}
             onClose={onEditClose}
             onDelete={handleDeleteAdmin}
             onSubmit={handleEditAdmin}

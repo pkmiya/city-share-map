@@ -1,6 +1,14 @@
-import { Box, Button, Center, HStack, Select, Text } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Center,
+  HStack,
+  Select,
+  Spinner,
+  Text,
+} from '@chakra-ui/react';
 import mapboxgl from 'mapbox-gl';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Map, { Marker } from 'react-map-gl';
 
 import { Env } from '@/config/env';
@@ -19,6 +27,9 @@ type Props = {
 export const LocationPick = ({ onNext, onBack }: Props) => {
   const { formData, setFormData } = usePostContext();
 
+  const [isLocating, setIsLocating] = useState(true);
+  const [viewState, setViewState] = useState(initialViewState);
+
   const coordinates = formData.location?.coordinates;
   const address = formData.location?.address;
 
@@ -26,6 +37,23 @@ export const LocationPick = ({ onNext, onBack }: Props) => {
   const [mapStyle, setMapStyle] = useState(MapboxStyles[3].value);
 
   const { error, isLoading: loading, fetchAddress } = useGetAddress();
+
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setViewState((prev) => ({
+          ...prev,
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        }));
+        setIsLocating(false);
+      },
+      (error) => {
+        console.error('Failed to get user location', error);
+        setIsLocating(false);
+      },
+    );
+  }, []);
 
   const handleMapClick = async (event: mapboxgl.MapMouseEvent) => {
     const { lng, lat } = event.lngLat;
@@ -81,13 +109,29 @@ export const LocationPick = ({ onNext, onBack }: Props) => {
         width="100%"
       >
         <Map
+          {...viewState}
           initialViewState={initialViewState}
           mapboxAccessToken={accessToken}
           mapLib={mapboxgl as any}
           mapStyle={mapStyle}
           style={{ height: '100%', width: '100%' }}
           onClick={handleMapClick}
+          onMove={(evt) => setViewState(evt.viewState)}
         >
+          {isLocating && (
+            <Center
+              bg="rgba(255, 255, 255, 0.7)"
+              bottom="0"
+              left="0"
+              position="absolute"
+              right="0"
+              top="0"
+              zIndex="10"
+            >
+              <Spinner size="lg" />
+              <Text ml="4">現在位置を取得中...</Text>
+            </Center>
+          )}
           {coordinates && (
             <Marker
               color="red"

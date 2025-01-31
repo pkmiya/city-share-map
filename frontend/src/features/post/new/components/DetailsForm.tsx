@@ -5,14 +5,17 @@ import {
   FormControl,
   FormErrorMessage,
   FormLabel,
+  Image,
   Input,
   Switch,
   Text,
 } from '@chakra-ui/react';
+import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 import { usePostContext } from '@/context/postProvider';
 import { ItemType, ItemTypeName } from '@/features/problem/new/data';
+import { resizeImage } from '@/utils/image';
 
 import { usePostPost } from '../../hooks/usePostPost';
 import { item } from '../types';
@@ -21,14 +24,20 @@ type Props = {
   onBack: () => void;
 };
 
+const imageResizeHeight = 500;
+const imageResizeWidth = 500;
+
 export const DetailsForm = ({ onBack }: Props) => {
   const { formData } = usePostContext();
-  const { mutate: createPost } = usePostPost();
+  const { mutate: createPost, isPending } = usePostPost();
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const problem = formData.selectedProblemDetail?.name;
   const description = formData.selectedProblemDetail?.description;
   const address = formData.location?.address;
   const fields = formData.selectedProblemDetail?.items ?? [];
+
+  const isAndroid = localStorage.getItem('device') === 'android';
 
   const {
     register,
@@ -36,7 +45,7 @@ export const DetailsForm = ({ onBack }: Props) => {
     setValue,
     getValues,
     control,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<{ [key: string]: string }>({
     defaultValues: formData.fieldValues,
   });
@@ -48,19 +57,24 @@ export const DetailsForm = ({ onBack }: Props) => {
   ) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64Result = reader.result as string;
-        console.log(base64Result);
-        setValue(fieldName, base64Result, { shouldValidate: true });
-      };
-      reader.onerror = () => {
-        console.error('Failed to read file:', reader.error);
+      try {
+        const resizedImage = await resizeImage({
+          file,
+          maxHeight: imageResizeHeight,
+          maxWidth: imageResizeWidth,
+        });
+        console.log('Resized Image:', resizedImage);
+        setPreviewImage(resizedImage);
+        setValue(fieldName, resizedImage, { shouldValidate: true });
+      } catch (error) {
+        console.error('Failed to process image:', error);
+        setPreviewImage(null);
         setValue(fieldName, '', { shouldValidate: true });
-      };
-      reader.readAsDataURL(file); // Base64エンコード
+      }
     } else {
-      setValue(fieldName, ''); // ファイルが選択されていない場合は空文字列を設定
+      // NOTE: ファイルが選択されていないとき
+      setPreviewImage(null);
+      setValue(fieldName, '');
     }
   };
 
@@ -165,22 +179,43 @@ export const DetailsForm = ({ onBack }: Props) => {
                 />
               )}
               {field.typeId === typeIdMap[ItemTypeName.Photo] && (
-                <Controller
-                  control={control}
-                  name={field.name}
-                  render={({ field }) => (
-                    <Input
-                      accept="image/*"
-                      type="file"
-                      onChange={(e) => handleFileChange(e, field.name)}
-                    />
+                <>
+                  <Controller
+                    control={control}
+                    name={field.name}
+                    render={({ field }) => (
+                      <Input
+                        // NOTE: Androidにおいて、カメラを起動できるようにする
+                        // c.f. https://developer.mozilla.org/ja/docs/Web/HTML/Element/Input/file#capture
+                        accept={
+                          isAndroid ? 'image/*;capture=camera' : 'image/*'
+                        }
+                        capture={isAndroid ? true : undefined}
+                        type="file"
+                        onChange={(e) => handleFileChange(e, field.name)}
+                      />
+                    )}
+                    rules={{
+                      required: isRequired
+                        ? `${field.name}をアップロードしてください`
+                        : false,
+                    }}
+                  />
+                  {previewImage && (
+                    <Box>
+                      <Text my={2}>{field.name}のプレビュー</Text>
+                      <Box w="full">
+                        <Image
+                          alt="preview image"
+                          aspectRatio={1}
+                          borderRadius="md"
+                          boxShadow="sm"
+                          src={previewImage}
+                        />
+                      </Box>
+                    </Box>
                   )}
-                  rules={{
-                    required: isRequired
-                      ? `${field.name}をアップロードしてください`
-                      : false,
-                  }}
-                />
+                </>
               )}
               {field.typeId === typeIdMap[ItemTypeName.DateTime] && (
                 <Input
@@ -228,12 +263,7 @@ export const DetailsForm = ({ onBack }: Props) => {
           <Button mt="4" onClick={onBack}>
             戻る
           </Button>
-          <Button
-            colorScheme="teal"
-            isLoading={isSubmitting}
-            mt="4"
-            type="submit"
-          >
+          <Button colorScheme="teal" isLoading={isPending} mt="4" type="submit">
             送信
           </Button>
         </Center>

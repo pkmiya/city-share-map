@@ -1,6 +1,6 @@
 from typing import List
 
-from app.api.deps import CurrentAdminUser, CurrentStaffUser, CurrentAllUser, SessionDep
+from app.api.deps import CurrentAdminUser, CurrentAllUser, CurrentStaffUser, SessionDep
 from app.crud.problem import crud_problem
 from app.models.problems import Problem as DBProblem
 from app.models.problems import Type as DBType

@@ -19,6 +19,7 @@ import { useMemo, useState } from 'react';
 import { IoMdClose } from 'react-icons/io';
 import Map, { Marker, NavigationControl, Popup } from 'react-map-gl';
 
+import { SurveyLink } from '@/components/SurveyLink';
 import { Env } from '@/config/env';
 import { pagesPath } from '@/gen/$path';
 import { GetPostsMapRequest, PostMapResponse } from '@/gen/api';
@@ -28,6 +29,8 @@ import { FilterOptionsForCitizen } from '../post/FilterOptionsForCitizen';
 import { useGetPostsForMap } from './hooks/useGetPostsForMap';
 import { MapboxStyle, MapboxStyles } from './theme';
 import { initialViewState } from './view';
+
+const OFFSET_BASE = 75;
 
 export const CitizenMap = () => {
   const accessToken = Env.mapboxAccessToken;
@@ -85,12 +88,16 @@ export const CitizenMap = () => {
             onClick={(e) => {
               e.originalEvent.stopPropagation();
               setPopupInfo(post);
-              setViewState((prevState) => ({
-                ...prevState,
-                latitude: Number(coodinate.latitude),
-                longitude: Number(coodinate.longitude),
-                transitionDuration: 500,
-              }));
+              setViewState((prevState) => {
+                const zoomFactor = Math.pow(2, -prevState.zoom);
+                const offset = OFFSET_BASE * zoomFactor;
+                return {
+                  ...prevState,
+                  latitude: Number(coodinate.latitude) - offset,
+                  longitude: Number(coodinate.longitude),
+                  transitionDuration: 500,
+                };
+              });
             }}
           ></Marker>
         );
@@ -118,6 +125,7 @@ export const CitizenMap = () => {
         }}
         my={4}
       >
+        <SurveyLink />
         <HStack mb={2}>
           <Text fontSize="xl" fontWeight="bold" w="120px">
             可視化マップ
@@ -167,7 +175,7 @@ export const CitizenMap = () => {
         mapboxAccessToken={accessToken}
         mapLib={mapboxgl as any}
         mapStyle={mapStyle}
-        style={{ height: '56vh', width: '100%' }}
+        style={{ height: '64vh', width: '100%' }}
         {...viewState}
         onMove={(evt) => setViewState(evt.viewState)}
       >
@@ -209,6 +217,7 @@ export const CitizenMap = () => {
                   {popupInfo.photoField && popupInfo.photoField.value && (
                     <Image
                       alt="image"
+                      aspectRatio={1}
                       borderRadius="md"
                       mt={2}
                       src={popupInfo.photoField.value}

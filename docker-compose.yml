@@ -1,7 +1,11 @@
 services:
   # ONLY FOR PRODUCTIONs
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        BUILD_ENV: "${BUILD_ENV:-stg}"
     container_name: frontend
     restart: always
     ports:

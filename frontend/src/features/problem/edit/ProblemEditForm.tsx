@@ -32,13 +32,14 @@ export const EditProblemForm = ({
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<ProblemReadByID>({
     defaultValues: initialData,
   });
 
-  const { mutate: putProblem } = usePutProblem();
-  const { mutate: deleteProblem } = useDeleteProblem();
+  const { mutate: putProblem, isPending: isPendingPut } = usePutProblem();
+  const { mutate: deleteProblem, isPending: isPendingDelete } =
+    useDeleteProblem();
   const { data: ItemType } = useGetItemType();
 
   const onSubmit = async (data: ProblemUpdate) => {
@@ -173,6 +174,7 @@ export const EditProblemForm = ({
             <HStack alignSelf="center" mt={8}>
               <Button
                 colorScheme="red"
+                isLoading={isPendingDelete}
                 variant="outline"
                 w="fit-content"
                 onClick={onDelete}
@@ -181,7 +183,7 @@ export const EditProblemForm = ({
               </Button>
               <Button
                 colorScheme="blue"
-                isLoading={isSubmitting}
+                isLoading={isPendingPut}
                 type="submit"
                 w="fit-content"
               >

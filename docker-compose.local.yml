@@ -1,4 +1,9 @@
 services:
+  # Do not deploy frontend service in local development
+  frontend:
+    deploy:
+      replicas: 0
+
   db:
     restart: "no"
     ports:

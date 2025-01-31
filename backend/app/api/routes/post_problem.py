@@ -33,6 +33,7 @@ def create_post(
     """
     新しい投稿を作成
     """
+
     return crud_post.create_post(
         db_session=db, problem_id=problem_id, user_id=current_user.id, post_in=post_in
     )
@@ -143,7 +144,6 @@ def get_posts_summary_me(
         filters["problem_id"] = problem_id
 
     filters["user_id"] = current_user.id
-    # filters["user_id"] = mock_id
 
     return crud_post.get_post_summary(
         db_session=db,
