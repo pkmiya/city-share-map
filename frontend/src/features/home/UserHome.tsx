@@ -6,6 +6,7 @@ import { FiMap } from 'react-icons/fi';
 import { LuClipboardList } from 'react-icons/lu';
 import { TbMessageReport } from 'react-icons/tb';
 
+import { SurveyLink } from '@/components/SurveyLink';
 import { pagesPath } from '@/gen/$path';
 
 export const UserHome = () => {
@@ -16,6 +17,7 @@ export const UserHome = () => {
       <Text fontSize="lg" fontWeight="bold" mb={4} textAlign="center">
         ホーム画面
       </Text>
+      <SurveyLink />
       <Box maxW="95%">
         <Box
           bg="blue.500"

@@ -15,7 +15,7 @@ import {
 
 import { UserRoleType } from '@/features/auth/constants/role';
 import { useLoginByUser } from '@/features/auth/hooks/useLoginByUser';
-import { generateLiffConfig, isLiffDevice } from '@/liff/liff';
+import { generateLiffConfig, isAndroid, isLiffDevice } from '@/liff/liff';
 
 import type { Liff } from '@line/liff';
 
@@ -42,6 +42,7 @@ export const LiffProvider = ({ children }: { children: ReactNode }) => {
   const { mutate: loginByUser } = useLoginByUser();
 
   const isLiffRef = useRef(true);
+  const isAndroidRef = useRef(false);
 
   useEffect(() => {
     import('@line/liff')
@@ -51,9 +52,14 @@ export const LiffProvider = ({ children }: { children: ReactNode }) => {
         isLiffRef.current = isLiffDevice(liff);
         if (!isLiffRef.current) {
           console.log('LIFF is not available in this device.');
+          localStorage.setItem('device', 'web');
           setLiffError('LIFF is not available.');
           return;
         }
+
+        isAndroidRef.current = isAndroid(liff);
+        if (isAndroidRef.current) localStorage.setItem('device', 'android');
+        else localStorage.setItem('device', 'ios');
 
         liff.use(new LIFFInspectorPlugin());
         const { liffId, mock } = generateLiffConfig();
